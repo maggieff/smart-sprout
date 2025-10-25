@@ -58,11 +58,12 @@ async function startServer() {
     await database.init();
     console.log('✅ Database initialized successfully');
     
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`🌱 Smart Plant Tracker API running on port ${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
       console.log(`🤖 AI Assistant: http://localhost:${PORT}/api/ask-ai`);
       console.log(`🔐 Authentication: http://localhost:${PORT}/api/auth`);
+      console.log(`🌐 Network access: http://0.0.0.0:${PORT}`);
     });
   } catch (error) {
     console.error('❌ Failed to initialize database:', error);
