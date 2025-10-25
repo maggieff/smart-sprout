@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
 import { 
   FiHome, 
   FiMessageCircle, 
   FiMenu, 
   FiX,
-  FiDroplet,
-  FiSun,
-  FiThermometer,
   FiGrid
 } from 'react-icons/fi';
 
@@ -84,66 +80,6 @@ const NavLink = styled(Link)`
   }
 `;
 
-const PlantSelector = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.5rem 1rem;
-  background: #f9fafb;
-  border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const PlantInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const PlantName = styled.span`
-  font-weight: 600;
-  color: #1f2937;
-`;
-
-const PlantStatus = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  color: ${props => {
-    switch (props.status) {
-      case 'excellent': return '#10B981';
-      case 'good': return '#34D399';
-      case 'fair': return '#FBBF24';
-      case 'poor': return '#F59E0B';
-      case 'critical': return '#EF4444';
-      default: return '#6b7280';
-    }
-  }};
-`;
-
-const SensorData = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const SensorItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-`;
-
 const MobileMenuButton = styled.button`
   display: none;
   background: none;
@@ -164,25 +100,6 @@ const Header = ({ plants, selectedPlant, onPlantSelect }) => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-  };
-
-  const getStatusColor = (healthScore) => {
-    if (healthScore >= 0.8) return 'excellent';
-    if (healthScore >= 0.6) return 'good';
-    if (healthScore >= 0.4) return 'fair';
-    if (healthScore >= 0.2) return 'poor';
-    return 'critical';
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'excellent': return '🌟';
-      case 'good': return '😊';
-      case 'fair': return '📝';
-      case 'poor': return '🆘';
-      case 'critical': return '🚨';
-      default: return '❓';
-    }
   };
 
   return (
@@ -216,34 +133,6 @@ const Header = ({ plants, selectedPlant, onPlantSelect }) => {
             <FiGrid />
             My Plants
           </NavLink>
-
-          {selectedPlant && (
-            <PlantSelector>
-              <PlantInfo>
-                <PlantName>{selectedPlant.name}</PlantName>
-                <PlantStatus status={getStatusColor(selectedPlant.healthScore)}>
-                  {getStatusIcon(getStatusColor(selectedPlant.healthScore))}
-                </PlantStatus>
-              </PlantInfo>
-              
-              {selectedPlant.sensorData && (
-                <SensorData>
-                  <SensorItem>
-                    <FiDroplet />
-                    {selectedPlant.sensorData.moisture}%
-                  </SensorItem>
-                  <SensorItem>
-                    <FiSun />
-                    {selectedPlant.sensorData.light}
-                  </SensorItem>
-                  <SensorItem>
-                    <FiThermometer />
-                    {selectedPlant.sensorData.temperature}°F
-                  </SensorItem>
-                </SensorData>
-              )}
-            </PlantSelector>
-          )}
         </Nav>
 
         <MobileMenuButton onClick={toggleMenu}>

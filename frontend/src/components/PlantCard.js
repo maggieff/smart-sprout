@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   FiDroplet, 
   FiSun, 
@@ -9,21 +9,24 @@ import {
   FiWind,
   FiTrendingUp,
   FiClock,
-  FiArrowRight
+  FiArrowRight,
+  FiEdit2
 } from 'react-icons/fi';
 
 const Card = styled(motion.div)`
-  background: white;
+  background: #6B8E6F;
   border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
   }
 `;
 
@@ -41,15 +44,21 @@ const PlantInfo = styled.div`
 `;
 
 const PlantImage = styled.div`
-  width: 4rem;
-  height: 4rem;
-  background: linear-gradient(135deg, #10B981, #34D399);
+  width: 100%;
+  height: 180px;
+  background: #D3D3D3;
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  color: white;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const PlantDetails = styled.div`
@@ -57,15 +66,18 @@ const PlantDetails = styled.div`
 `;
 
 const PlantName = styled.h3`
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 0.25rem;
+  color: white;
+  margin-bottom: 0.5rem;
+  text-align: left;
 `;
 
 const PlantSpecies = styled.p`
   font-size: 0.875rem;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 1rem;
+  text-align: left;
 `;
 
 const HealthScore = styled.div`
@@ -157,43 +169,82 @@ const StatusBadge = styled.div`
   }};
 `;
 
-const CardFooter = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+const ProgressBarContainer = styled.div`
+  width: 100%;
+  margin-top: auto;
 `;
 
-const LastWatered = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+const ProgressBarLabel = styled.div`
   font-size: 0.875rem;
-  color: #6b7280;
-`;
-
-const ViewButton = styled(Link)`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: #10B981;
-  color: white;
-  text-decoration: none;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 0.5rem;
   font-weight: 500;
+`;
+
+const ProgressBarTrack = styled.div`
+  width: 100%;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 999px;
+  overflow: hidden;
+`;
+
+const ProgressBarFill = styled.div`
+  height: 100%;
+  background: ${props => {
+    const score = props.value || 0;
+    if (score >= 0.8) return '#10B981';
+    if (score >= 0.6) return '#34D399';
+    if (score >= 0.4) return '#FBBF24';
+    if (score >= 0.2) return '#F59E0B';
+    return '#EF4444';
+  }};
+  width: ${props => (props.value || 0) * 100}%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+`;
+
+const EditButton = styled.button`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
   transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
   &:hover {
-    background: #059669;
-    transform: translateY(-1px);
+    background: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  svg {
+    color: #2D3E2D;
+    font-size: 16px;
   }
 `;
 
 const PlantCard = ({ plant, onClick }) => {
+  const navigate = useNavigate();
+
+  const handleEditClick = (e) => {
+    e.stopPropagation(); // Prevent card click event
+    navigate(`/edit-plant/${plant.id}`);
+  };
+
+  const handleCardClick = () => {
+    navigate(`/plant/${plant.id}`);
+  };
+
   const getStatusEmoji = (status) => {
     switch (status) {
       case 'excellent': return '🌟';
@@ -229,91 +280,33 @@ const PlantCard = ({ plant, onClick }) => {
     return `${Math.floor(diffDays / 30)} months ago`;
   };
 
-  const { sensorData, healthScore, status, lastWatered } = plant;
+  const { healthScore, image } = plant;
 
   return (
     <Card
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.02 }}
-      onClick={onClick}
+      onClick={handleCardClick}
     >
-      <CardHeader>
-        <PlantInfo>
-          <PlantImage>
-            🌱
-          </PlantImage>
-          <PlantDetails>
-            <PlantName>{plant.name}</PlantName>
-            <PlantSpecies>{plant.species}</PlantSpecies>
-          </PlantDetails>
-        </PlantInfo>
-        <HealthScore>
-          <ScoreValue score={healthScore}>
-            {Math.round(healthScore * 100)}%
-          </ScoreValue>
-          <ScoreLabel>Health</ScoreLabel>
-        </HealthScore>
-      </CardHeader>
-
-      <StatusBadge status={status}>
-        {getStatusEmoji(status)} {getStatusText(status)}
-      </StatusBadge>
-
-      {sensorData && (
-        <SensorGrid>
-          <SensorItem>
-            <SensorIcon color="#0ea5e9">
-              <FiDroplet />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Moisture</SensorLabel>
-              <SensorValue>{sensorData.moisture}%</SensorValue>
-            </SensorInfo>
-          </SensorItem>
-
-          <SensorItem>
-            <SensorIcon color="#f59e0b">
-              <FiSun />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Light</SensorLabel>
-              <SensorValue>{sensorData.light}</SensorValue>
-            </SensorInfo>
-          </SensorItem>
-
-          <SensorItem>
-            <SensorIcon color="#ef4444">
-              <FiThermometer />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Temperature</SensorLabel>
-              <SensorValue>{sensorData.temperature}°F</SensorValue>
-            </SensorInfo>
-          </SensorItem>
-
-          <SensorItem>
-            <SensorIcon color="#10b981">
-              <FiWind />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Humidity</SensorLabel>
-              <SensorValue>{sensorData.humidity}%</SensorValue>
-            </SensorInfo>
-          </SensorItem>
-        </SensorGrid>
-      )}
-
-      <CardFooter>
-        <LastWatered>
-          <FiClock />
-          Last watered: {formatLastWatered(lastWatered)}
-        </LastWatered>
-        <ViewButton to={`/plant/${plant.id}`}>
-          View Details
-          <FiArrowRight />
-        </ViewButton>
-      </CardFooter>
+      <EditButton onClick={handleEditClick} title="Edit plant">
+        <FiEdit2 />
+      </EditButton>
+      
+      <PlantImage>
+        {image && image !== '/images/plant-placeholder.jpg' ? (
+          <img src={image} alt={plant.name} />
+        ) : null}
+      </PlantImage>
+      
+      <PlantName>{plant.name}</PlantName>
+      
+      <ProgressBarContainer>
+        <ProgressBarLabel>Overall</ProgressBarLabel>
+        <ProgressBarTrack>
+          <ProgressBarFill value={healthScore} />
+        </ProgressBarTrack>
+      </ProgressBarContainer>
     </Card>
   );
 };

@@ -371,6 +371,7 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
+        style={{ marginBottom: '2rem' }}
       >
         <CardHeader>
           <CardTitle>Sensor Data</CardTitle>
@@ -395,7 +396,7 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
              </SensorIcon>
              <SensorInfo>
                <SensorLabel>Light</SensorLabel>
-               <SensorValue>{sensorData?.light || 0}</SensorValue>
+               <SensorValue>{sensorData?.light || 0} lux</SensorValue>
                <SensorStatus status={getSensorStatus(sensorData?.light, 'light')}>
                  {getStatusText(getSensorStatus(sensorData?.light, 'light'))}
                </SensorStatus>
