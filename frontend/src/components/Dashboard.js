@@ -11,9 +11,12 @@ import {
   FiClock,
   FiMessageCircle,
   FiPlus,
-  FiRefreshCw
+  FiRefreshCw,
+  FiUser,
+  FiLogIn
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
 
 // Components
 import PlantCard from './PlantCard';
@@ -22,6 +25,7 @@ import SensorChart from './SensorChart';
 import RecentLogs from './RecentLogs';
 import QuickActions from './QuickActions';
 import LoadingSpinner from './LoadingSpinner';
+import AuthModal from './AuthModal';
 
 // Services
 import { plantService } from '../services/plantService';
@@ -214,9 +218,101 @@ const StatLabel = styled.div`
   color: #666666;
 `;
 
+const SignUpContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 2rem;
+`;
+
+const SignUpCard = styled(motion.div)`
+  background: #E8EADF;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  max-width: 500px;
+  width: 100%;
+`;
+
+const SignUpTitle = styled.h2`
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+`;
+
+const SignUpDescription = styled.p`
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+`;
+
+const SignUpButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  background: #10B981;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 auto;
+
+  &:hover {
+    background: #059669;
+    transform: translateY(-1px);
+  }
+`;
+
+const FeaturesList = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+`;
+
+const FeatureItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+`;
+
+const FeatureIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: #10B981;
+  border-radius: 0.5rem;
+  color: white;
+  font-size: 1.25rem;
+`;
+
+const FeatureText = styled.div`
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+`;
+
 const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [sensorHistory, setSensorHistory] = useState([]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (selectedPlant) {
@@ -292,6 +388,50 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
       default: return 'Unknown';
     }
   };
+
+  // Show sign-up message if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <DashboardContainer>
+        <SignUpContainer>
+          <SignUpCard
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <SignUpTitle>Welcome to Smart Plant Tracker! 🌱</SignUpTitle>
+            <SignUpDescription>
+              Sign in to start tracking your plants and get personalized care recommendations. 
+              Monitor soil moisture, light levels, temperature, and more!
+            </SignUpDescription>
+            <SignUpButton onClick={() => setShowAuthModal(true)}>
+              <FiLogIn />
+              Sign In / Sign Up
+            </SignUpButton>
+            
+            <FeaturesList>
+              <FeatureItem>
+                <FeatureIcon>🌡️</FeatureIcon>
+                <FeatureText>Real-time sensor monitoring</FeatureText>
+              </FeatureItem>
+              <FeatureItem>
+                <FeatureIcon>🤖</FeatureIcon>
+                <FeatureText>AI-powered plant care advice</FeatureText>
+              </FeatureItem>
+              <FeatureItem>
+                <FeatureIcon>📊</FeatureIcon>
+                <FeatureText>Health tracking & analytics</FeatureText>
+              </FeatureItem>
+              <FeatureItem>
+                <FeatureIcon>📱</FeatureIcon>
+                <FeatureText>Mobile-friendly interface</FeatureText>
+              </FeatureItem>
+            </FeaturesList>
+          </SignUpCard>
+        </SignUpContainer>
+      </DashboardContainer>
+    );
+  }
 
   if (!selectedPlant) {
     return (
@@ -453,6 +593,11 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
           <RecentLogs plantId={selectedPlant.id} />
         </Card>
       </FullWidthGrid>
+
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+      />
     </DashboardContainer>
   );
 };
