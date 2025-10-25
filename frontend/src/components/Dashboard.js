@@ -30,6 +30,8 @@ const DashboardContainer = styled.div`
   padding: 2rem 1rem;
   max-width: 1200px;
   margin: 0 auto;
+  background: #97AC83;
+  min-height: 100vh;
 `;
 
 const DashboardHeader = styled.div`
@@ -48,7 +50,7 @@ const DashboardHeader = styled.div`
 const Title = styled.h1`
   font-size: 2.5rem;
   font-weight: 700;
-  color: white;
+  color: #333333;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   @media (max-width: 768px) {
@@ -62,17 +64,16 @@ const RefreshButton = styled.button`
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: rgba(255, 255, 255, 0.2);
+  background: #6B8E23;
   color: white;
   border: none;
   border-radius: 0.75rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: #5A7A1F;
     transform: translateY(-1px);
   }
 
@@ -107,7 +108,7 @@ const FullWidthGrid = styled.div`
 `;
 
 const Card = styled(motion.div)`
-  background: white;
+  background: #E8EADF;
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -124,7 +125,7 @@ const CardHeader = styled.div`
 const CardTitle = styled.h3`
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #333333;
 `;
 
 const SensorGrid = styled.div`
@@ -138,9 +139,9 @@ const SensorCard = styled.div`
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background: ${props => props.bgColor || '#f9fafb'};
+  background: #F0F0F0;
   border-radius: 0.75rem;
-  border: 1px solid ${props => props.borderColor || '#e5e7eb'};
+  border: 1px solid #D9D9D9;
 `;
 
 const SensorIcon = styled.div`
@@ -149,9 +150,9 @@ const SensorIcon = styled.div`
   justify-content: center;
   width: 3rem;
   height: 3rem;
-  background: ${props => props.bgColor || '#f3f4f6'};
+  background: #6B8E23;
   border-radius: 0.75rem;
-  color: ${props => props.color || '#6b7280'};
+  color: white;
   font-size: 1.5rem;
 `;
 
@@ -161,14 +162,14 @@ const SensorInfo = styled.div`
 
 const SensorLabel = styled.div`
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #666666;
   margin-bottom: 0.25rem;
 `;
 
 const SensorValue = styled.div`
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #333333;
 `;
 
 const SensorStatus = styled.div`
@@ -194,7 +195,7 @@ const QuickStats = styled.div`
 `;
 
 const StatCard = styled.div`
-  background: white;
+  background: #E8EADF;
   border-radius: 0.75rem;
   padding: 1rem;
   text-align: center;
@@ -204,13 +205,13 @@ const StatCard = styled.div`
 const StatValue = styled.div`
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #333333;
   margin-bottom: 0.25rem;
 `;
 
 const StatLabel = styled.div`
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #666666;
 `;
 
 const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
@@ -374,71 +375,59 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
         <CardHeader>
           <CardTitle>Sensor Data</CardTitle>
         </CardHeader>
-        <SensorGrid>
-          <SensorCard
-            bgColor="#f0f9ff"
-            borderColor="#0ea5e9"
-          >
-            <SensorIcon bgColor="#0ea5e9" color="white">
-              <FiDroplet />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Moisture</SensorLabel>
-              <SensorValue>{sensorData?.moisture || 0}%</SensorValue>
-              <SensorStatus status={getSensorStatus(sensorData?.moisture, 'moisture')}>
-                {getStatusText(getSensorStatus(sensorData?.moisture, 'moisture'))}
-              </SensorStatus>
-            </SensorInfo>
-          </SensorCard>
+         <SensorGrid>
+           <SensorCard>
+             <SensorIcon>
+               <FiDroplet />
+             </SensorIcon>
+             <SensorInfo>
+               <SensorLabel>Moisture</SensorLabel>
+               <SensorValue>{sensorData?.moisture || 0}%</SensorValue>
+               <SensorStatus status={getSensorStatus(sensorData?.moisture, 'moisture')}>
+                 {getStatusText(getSensorStatus(sensorData?.moisture, 'moisture'))}
+               </SensorStatus>
+             </SensorInfo>
+           </SensorCard>
 
-          <SensorCard
-            bgColor="#fffbeb"
-            borderColor="#f59e0b"
-          >
-            <SensorIcon bgColor="#f59e0b" color="white">
-              <FiSun />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Light</SensorLabel>
-              <SensorValue>{sensorData?.light || 0}</SensorValue>
-              <SensorStatus status={getSensorStatus(sensorData?.light, 'light')}>
-                {getStatusText(getSensorStatus(sensorData?.light, 'light'))}
-              </SensorStatus>
-            </SensorInfo>
-          </SensorCard>
+           <SensorCard>
+             <SensorIcon>
+               <FiSun />
+             </SensorIcon>
+             <SensorInfo>
+               <SensorLabel>Light</SensorLabel>
+               <SensorValue>{sensorData?.light || 0}</SensorValue>
+               <SensorStatus status={getSensorStatus(sensorData?.light, 'light')}>
+                 {getStatusText(getSensorStatus(sensorData?.light, 'light'))}
+               </SensorStatus>
+             </SensorInfo>
+           </SensorCard>
 
-          <SensorCard
-            bgColor="#fef2f2"
-            borderColor="#ef4444"
-          >
-            <SensorIcon bgColor="#ef4444" color="white">
-              <FiThermometer />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Temperature</SensorLabel>
-              <SensorValue>{sensorData?.temperature || 0}°F</SensorValue>
-              <SensorStatus status={getSensorStatus(sensorData?.temperature, 'temperature')}>
-                {getStatusText(getSensorStatus(sensorData?.temperature, 'temperature'))}
-              </SensorStatus>
-            </SensorInfo>
-          </SensorCard>
+           <SensorCard>
+             <SensorIcon>
+               <FiThermometer />
+             </SensorIcon>
+             <SensorInfo>
+               <SensorLabel>Temperature</SensorLabel>
+               <SensorValue>{sensorData?.temperature || 0}°F</SensorValue>
+               <SensorStatus status={getSensorStatus(sensorData?.temperature, 'temperature')}>
+                 {getStatusText(getSensorStatus(sensorData?.temperature, 'temperature'))}
+               </SensorStatus>
+             </SensorInfo>
+           </SensorCard>
 
-          <SensorCard
-            bgColor="#f0fdf4"
-            borderColor="#10b981"
-          >
-            <SensorIcon bgColor="#10b981" color="white">
-              <FiWind />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Humidity</SensorLabel>
-              <SensorValue>{sensorData?.humidity || 0}%</SensorValue>
-              <SensorStatus status={getSensorStatus(sensorData?.humidity, 'humidity')}>
-                {getStatusText(getSensorStatus(sensorData?.humidity, 'humidity'))}
-              </SensorStatus>
-            </SensorInfo>
-          </SensorCard>
-        </SensorGrid>
+           <SensorCard>
+             <SensorIcon>
+               <FiWind />
+             </SensorIcon>
+             <SensorInfo>
+               <SensorLabel>Humidity</SensorLabel>
+               <SensorValue>{sensorData?.humidity || 0}%</SensorValue>
+               <SensorStatus status={getSensorStatus(sensorData?.humidity, 'humidity')}>
+                 {getStatusText(getSensorStatus(sensorData?.humidity, 'humidity'))}
+               </SensorStatus>
+             </SensorInfo>
+           </SensorCard>
+         </SensorGrid>
       </Card>
 
       <FullWidthGrid>

@@ -19,8 +19,7 @@ const HeaderContainer = styled.header`
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: #DCDFC4;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding: 1rem 0;
 `;
