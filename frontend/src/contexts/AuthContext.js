@@ -20,7 +20,8 @@ export const AuthProvider = ({ children }) => {
       try {
         const storedUser = localStorage.getItem('smart-sprout-user');
         if (storedUser) {
-          setUser(JSON.parse(storedUser));
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
         }
       } catch (error) {
         console.error('Error checking auth status:', error);
