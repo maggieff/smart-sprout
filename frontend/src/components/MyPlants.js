@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import PlantCard from './PlantCard';
+import AuthModal from './AuthModal';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   FiPlus,
   FiSearch,
-  FiFilter
+  FiFilter,
+  FiLock
 } from 'react-icons/fi';
 
 const Container = styled.div`
@@ -202,9 +205,77 @@ const EmptyDescription = styled.p`
   margin-bottom: 2rem;
 `;
 
+const UnauthenticatedContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+`;
+
+const UnauthenticatedCard = styled(motion.div)`
+  background: white;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+`;
+
+const LockIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  background: linear-gradient(135deg, #6B8E6F 0%, #97AC83 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+`;
+
+const UnauthenticatedTitle = styled.h2`
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+`;
+
+const UnauthenticatedMessage = styled.p`
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+`;
+
+const SignInButton = styled.button`
+  background: linear-gradient(135deg, #6B8E6F 0%, #97AC83 100%);
+  color: white;
+  padding: 0.875rem 2rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(107, 142, 111, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(107, 142, 111, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [filterStatus, setFilterStatus] = React.useState('all');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { isAuthenticated, loading } = useAuth();
 
   const filteredPlants = plants.filter(plant => {
     const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -255,6 +326,59 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
       default: return '#6b7280';
     }
   };
+
+  // Show loading state
+  if (loading) {
+    return (
+      <Container>
+        <UnauthenticatedContainer>
+          <UnauthenticatedCard
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <LockIcon>
+              <FiLock />
+            </LockIcon>
+            <UnauthenticatedTitle>Loading...</UnauthenticatedTitle>
+          </UnauthenticatedCard>
+        </UnauthenticatedContainer>
+      </Container>
+    );
+  }
+
+  // Show sign-in prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <>
+        <Container>
+          <UnauthenticatedContainer>
+            <UnauthenticatedCard
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <LockIcon>
+                <FiLock />
+              </LockIcon>
+              <UnauthenticatedTitle>Sign In Required</UnauthenticatedTitle>
+              <UnauthenticatedMessage>
+                You need to be signed in to view and manage your plant collection. 
+                Sign in or create an account to get started!
+              </UnauthenticatedMessage>
+              <SignInButton onClick={() => setShowAuthModal(true)}>
+                Sign In to Continue
+              </SignInButton>
+            </UnauthenticatedCard>
+          </UnauthenticatedContainer>
+        </Container>
+        <AuthModal 
+          isOpen={showAuthModal} 
+          onClose={() => setShowAuthModal(false)} 
+        />
+      </>
+    );
+  }
 
   return (
     <Container>

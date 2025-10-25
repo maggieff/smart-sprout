@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { FiArrowLeft, FiCheck, FiX, FiUpload, FiImage, FiTrash2 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
 
 // Reuse styled components from AddPlant
 const Container = styled.div`
@@ -306,6 +307,7 @@ const getSpeciesValue = (speciesName) => {
 const EditPlant = ({ onPlantUpdate }) => {
   const navigate = useNavigate();
   const { plantId } = useParams();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -317,6 +319,14 @@ const EditPlant = ({ onPlantUpdate }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [existingImage, setExistingImage] = useState(null);
   const fileInputRef = React.useRef(null);
+
+  // Redirect to My Plants if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      toast.error('Please sign in to edit plants');
+      navigate('/my-plants');
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   // Load plant data
   useEffect(() => {

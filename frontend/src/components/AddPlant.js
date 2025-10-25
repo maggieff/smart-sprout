@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { FiArrowLeft, FiCheck, FiX, FiUpload, FiImage } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
   max-width: 800px;
@@ -339,6 +340,7 @@ const PLANT_SPECIES = [
 
 const AddPlant = ({ onPlantAdd }) => {
   const navigate = useNavigate();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -348,6 +350,14 @@ const AddPlant = ({ onPlantAdd }) => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = React.useRef(null);
+
+  // Redirect to My Plants if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      toast.error('Please sign in to add plants');
+      navigate('/my-plants');
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
