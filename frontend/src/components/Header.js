@@ -6,8 +6,12 @@ import {
   FiMessageCircle, 
   FiMenu, 
   FiX,
-  FiGrid
+  FiGrid,
+  FiUser,
+  FiLogOut
 } from 'react-icons/fi';
+import { useAuth } from '../contexts/AuthContext';
+import AuthModal from './AuthModal';
 
 const HeaderContainer = styled.header`
   position: fixed;
@@ -94,9 +98,87 @@ const MobileMenuButton = styled.button`
   }
 `;
 
+const AuthSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const AuthButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: ${props => props.isAuthenticated ? '#10B981' : 'transparent'};
+  color: ${props => props.isAuthenticated ? 'white' : '#6b7280'};
+  border: ${props => props.isAuthenticated ? 'none' : '1px solid #d1d5db'};
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.isAuthenticated ? '#059669' : '#f3f4f6'};
+    color: ${props => props.isAuthenticated ? 'white' : '#374151'};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+`;
+
+const UserMenu = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 0.5rem;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const UserName = styled.span`
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.875rem;
+`;
+
+const UserEmail = styled.span`
+  font-size: 0.75rem;
+  color: #6b7280;
+`;
+
+const LogoutButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #dc2626;
+  }
+`;
+
 const Header = ({ plants, selectedPlant, onPlantSelect }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const location = useLocation();
+  const { user, isAuthenticated, signOut } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -135,10 +217,38 @@ const Header = ({ plants, selectedPlant, onPlantSelect }) => {
           </NavLink>
         </Nav>
 
+        <AuthSection>
+          {isAuthenticated ? (
+            <UserMenu>
+              <UserInfo>
+                <UserName>{user.name}</UserName>
+                <UserEmail>{user.email}</UserEmail>
+              </UserInfo>
+              <LogoutButton onClick={signOut} title="Sign Out">
+                <FiLogOut size={16} />
+                <span>Sign Out</span>
+              </LogoutButton>
+            </UserMenu>
+          ) : (
+            <AuthButton 
+              onClick={() => setShowAuthModal(true)}
+              isAuthenticated={false}
+            >
+              <FiUser size={16} />
+              Sign In
+            </AuthButton>
+          )}
+        </AuthSection>
+
         <MobileMenuButton onClick={toggleMenu}>
           {isMenuOpen ? <FiX /> : <FiMenu />}
         </MobileMenuButton>
       </HeaderContent>
+
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+      />
     </HeaderContainer>
   );
 };
