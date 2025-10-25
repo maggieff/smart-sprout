@@ -8,6 +8,7 @@ import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import PlantDetail from './components/PlantDetail';
 import AIChat from './components/AIChat';
+import MyPlants from './components/MyPlants';
 import LoadingSpinner from './components/LoadingSpinner';
 
 // Services
@@ -111,6 +112,16 @@ function App() {
             element={
               <AIChat 
                 selectedPlant={selectedPlant}
+              />
+            } 
+          />
+          <Route 
+            path="/my-plants" 
+            element={
+              <MyPlants 
+                plants={plants}
+                onPlantSelect={handlePlantSelect}
+                onPlantUpdate={handlePlantUpdate}
               />
             } 
           />
