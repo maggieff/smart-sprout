@@ -16,7 +16,7 @@ import { plantService } from './services/plantService';
 
 const AppContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #97AC83;
 `;
 
 const MainContent = styled.main`
