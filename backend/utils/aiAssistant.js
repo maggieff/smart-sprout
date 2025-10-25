@@ -3,6 +3,7 @@
  */
 
 const OpenAI = require('openai');
+const { searchPlantKnowledge } = require('./plantKnowledgeSearch');
 
 let openai = null;
 
@@ -43,10 +44,24 @@ async function getAIResponse(params) {
       return getFallbackResponse(params);
     }
 
-    const { question, species, sensorData, knowledgeContext, context } = params;
+    const { question, species, sensorData, context } = params;
+
+    // Search plant care knowledge base
+    const knowledgeResults = searchPlantKnowledge(question, species);
+    const enhancedKnowledgeContext = {
+      relevantTips: knowledgeResults.map(result => ({
+        text: result.text,
+        confidence: result.relevanceScore / 5,
+        species: result.species,
+        category: result.category,
+        source: 'plant_knowledge_base'
+      })),
+      sources: ['plant_knowledge_base'],
+      confidence: knowledgeResults.length > 0 ? 0.8 : 0.3
+    };
 
     // Build context for the AI
-    const systemPrompt = buildSystemPrompt(species, sensorData, knowledgeContext);
+    const systemPrompt = buildSystemPrompt(species, sensorData, enhancedKnowledgeContext);
     const userPrompt = buildUserPrompt(question, context);
 
     const completion = await openai.chat.completions.create({
@@ -72,7 +87,7 @@ async function getAIResponse(params) {
     return {
       answer: aiResponse,
       confidence: 0.9,
-      sources: knowledgeContext?.sources || [],
+      sources: enhancedKnowledgeContext?.sources || [],
       recommendations: extractRecommendations(aiResponse),
       model: "gpt-3.5-turbo",
       timestamp: new Date().toISOString()

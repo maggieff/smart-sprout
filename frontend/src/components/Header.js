@@ -9,7 +9,8 @@ import {
   FiX,
   FiDroplet,
   FiSun,
-  FiThermometer
+  FiThermometer,
+  FiGrid
 } from 'react-icons/fi';
 
 const HeaderContainer = styled.header`
@@ -207,6 +208,14 @@ const Header = ({ plants, selectedPlant, onPlantSelect }) => {
           >
             <FiMessageCircle />
             AI Assistant
+          </NavLink>
+          
+          <NavLink 
+            to="/my-plants" 
+            active={location.pathname === '/my-plants'}
+          >
+            <FiGrid />
+            My Plants
           </NavLink>
 
           {selectedPlant && (
