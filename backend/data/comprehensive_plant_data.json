@@ -1,0 +1,1454 @@
+[
+  {
+    "id": "plantcare-001",
+    "species": "Snake Plant",
+    "category": "watering",
+    "text": "Water Snake Plants every 2-3 weeks. Allow soil to dry completely between waterings. Overwatering is the most common cause of death.",
+    "embedding": [
+      0.023,
+      -0.11,
+      0.45,
+      0.67,
+      -0.23,
+      0.89,
+      -0.12,
+      0.34,
+      0.56,
+      -0.78
+    ]
+  },
+  {
+    "id": "plantcare-002",
+    "species": "Snake Plant",
+    "category": "light",
+    "text": "Snake Plants thrive in low to bright indirect light. They can tolerate low light conditions but grow faster with more light.",
+    "embedding": [
+      0.12,
+      -0.04,
+      0.33,
+      0.78,
+      -0.45,
+      0.23,
+      -0.67,
+      0.89,
+      0.12,
+      -0.34
+    ]
+  },
+  {
+    "id": "plantcare-003",
+    "species": "Snake Plant",
+    "category": "troubleshooting",
+    "text": "Yellow leaves on Snake Plants usually indicate overwatering. Check soil moisture and reduce watering frequency.",
+    "embedding": [
+      0.45,
+      -0.23,
+      0.67,
+      0.12,
+      -0.89,
+      0.34,
+      -0.56,
+      0.78,
+      0.23,
+      -0.45
+    ]
+  },
+  {
+    "id": "plantcare-004",
+    "species": "Fiddle Leaf Fig",
+    "category": "watering",
+    "text": "Water Fiddle Leaf Figs when the top 2 inches of soil are dry. Water thoroughly until water drains from the bottom.",
+    "embedding": [
+      0.67,
+      -0.12,
+      0.89,
+      0.34,
+      -0.56,
+      0.78,
+      -0.23,
+      0.45,
+      0.12,
+      -0.67
+    ]
+  },
+  {
+    "id": "plantcare-005",
+    "species": "Fiddle Leaf Fig",
+    "category": "light",
+    "text": "Fiddle Leaf Figs need bright, indirect light. Place near a bright window but avoid direct sunlight which can burn leaves.",
+    "embedding": [
+      0.89,
+      -0.34,
+      0.56,
+      0.78,
+      -0.12,
+      0.45,
+      -0.67,
+      0.23,
+      0.34,
+      -0.89
+    ]
+  },
+  {
+    "id": "plantcare-006",
+    "species": "Fiddle Leaf Fig",
+    "category": "troubleshooting",
+    "text": "Brown spots on Fiddle Leaf Fig leaves often indicate inconsistent watering. Maintain a regular watering schedule.",
+    "embedding": [
+      0.34,
+      -0.67,
+      0.78,
+      0.45,
+      -0.23,
+      0.12,
+      -0.89,
+      0.56,
+      0.67,
+      -0.34
+    ]
+  },
+  {
+    "id": "plantcare-007",
+    "species": "Fiddle Leaf Fig",
+    "category": "troubleshooting",
+    "text": "Dropping leaves on Fiddle Leaf Figs can be caused by overwatering, underwatering, or sudden environmental changes.",
+    "embedding": [
+      0.56,
+      -0.78,
+      0.12,
+      0.67,
+      -0.34,
+      0.89,
+      -0.45,
+      0.23,
+      0.78,
+      -0.56
+    ]
+  },
+  {
+    "id": "plantcare-008",
+    "species": "Monstera",
+    "category": "watering",
+    "text": "Water Monsteras when the top inch of soil is dry. They prefer consistently moist but not soggy soil.",
+    "embedding": [
+      0.78,
+      -0.45,
+      0.23,
+      0.89,
+      -0.56,
+      0.12,
+      -0.34,
+      0.67,
+      0.45,
+      -0.78
+    ]
+  },
+  {
+    "id": "plantcare-009",
+    "species": "Monstera",
+    "category": "light",
+    "text": "Monsteras need bright, indirect light to develop their characteristic split leaves. Too little light results in solid leaves.",
+    "embedding": [
+      0.23,
+      -0.89,
+      0.67,
+      0.34,
+      -0.78,
+      0.56,
+      -0.12,
+      0.45,
+      0.89,
+      -0.23
+    ]
+  },
+  {
+    "id": "plantcare-010",
+    "species": "Monstera",
+    "category": "support",
+    "text": "Monsteras are climbing plants that benefit from moss poles or trellises for support as they grow taller.",
+    "embedding": [
+      0.67,
+      -0.23,
+      0.89,
+      0.56,
+      -0.34,
+      0.78,
+      -0.45,
+      0.12,
+      0.34,
+      -0.67
+    ]
+  },
+  {
+    "id": "plantcare-011",
+    "species": "Pothos",
+    "category": "watering",
+    "text": "Water Pothos when the top inch of soil feels dry. They're forgiving plants that can tolerate some neglect.",
+    "embedding": [
+      0.45,
+      -0.56,
+      0.34,
+      0.78,
+      -0.12,
+      0.67,
+      -0.89,
+      0.23,
+      0.56,
+      -0.45
+    ]
+  },
+  {
+    "id": "plantcare-012",
+    "species": "Pothos",
+    "category": "light",
+    "text": "Pothos can grow in low to bright indirect light. Variegated varieties need more light to maintain their patterns.",
+    "embedding": [
+      0.12,
+      -0.67,
+      0.45,
+      0.89,
+      -0.23,
+      0.34,
+      -0.78,
+      0.56,
+      0.23,
+      -0.89
+    ]
+  },
+  {
+    "id": "plantcare-013",
+    "species": "Pothos",
+    "category": "propagation",
+    "text": "Pothos are easy to propagate. Cut a stem with 4-6 leaves and place in water or moist soil to root.",
+    "embedding": [
+      0.89,
+      -0.12,
+      0.67,
+      0.45,
+      -0.78,
+      0.23,
+      -0.56,
+      0.34,
+      0.12,
+      -0.67
+    ]
+  },
+  {
+    "id": "plantcare-014",
+    "species": "Succulent",
+    "category": "watering",
+    "text": "Water succulents deeply but infrequently. Allow soil to dry completely between waterings to prevent root rot.",
+    "embedding": [
+      0.34,
+      -0.78,
+      0.56,
+      0.23,
+      -0.89,
+      0.45,
+      -0.12,
+      0.67,
+      0.78,
+      -0.34
+    ]
+  },
+  {
+    "id": "plantcare-015",
+    "species": "Succulent",
+    "category": "light",
+    "text": "Succulents need bright, direct light for at least 6 hours daily. Insufficient light causes stretching and weak growth.",
+    "embedding": [
+      0.56,
+      -0.34,
+      0.78,
+      0.12,
+      -0.67,
+      0.89,
+      -0.45,
+      0.23,
+      0.34,
+      -0.56
+    ]
+  },
+  {
+    "id": "plantcare-016",
+    "species": "Succulent",
+    "category": "soil",
+    "text": "Use well-draining cactus or succulent soil mix. Regular potting soil retains too much moisture for succulents.",
+    "embedding": [
+      0.78,
+      -0.56,
+      0.12,
+      0.89,
+      -0.34,
+      0.23,
+      -0.67,
+      0.45,
+      0.56,
+      -0.78
+    ]
+  },
+  {
+    "id": "plantcare-017",
+    "species": "Peace Lily",
+    "category": "watering",
+    "text": "Peace Lilies prefer consistently moist soil. Water when the top inch feels dry and mist leaves regularly.",
+    "embedding": [
+      0.23,
+      -0.45,
+      0.67,
+      0.34,
+      -0.78,
+      0.12,
+      -0.89,
+      0.56,
+      0.45,
+      -0.23
+    ]
+  },
+  {
+    "id": "plantcare-018",
+    "species": "Peace Lily",
+    "category": "light",
+    "text": "Peace Lilies thrive in low to medium indirect light. Avoid direct sunlight which can scorch their leaves.",
+    "embedding": [
+      0.67,
+      -0.23,
+      0.89,
+      0.56,
+      -0.34,
+      0.78,
+      -0.12,
+      0.45,
+      0.23,
+      -0.67
+    ]
+  },
+  {
+    "id": "plantcare-019",
+    "species": "Peace Lily",
+    "category": "troubleshooting",
+    "text": "Drooping Peace Lily leaves usually indicate the plant needs water. They're excellent at communicating their needs.",
+    "embedding": [
+      0.45,
+      -0.67,
+      0.34,
+      0.78,
+      -0.12,
+      0.56,
+      -0.23,
+      0.89,
+      0.67,
+      -0.45
+    ]
+  },
+  {
+    "id": "plantcare-020",
+    "species": "Spider Plant",
+    "category": "watering",
+    "text": "Water Spider Plants when the top inch of soil is dry. They prefer slightly moist soil but can tolerate some drying.",
+    "embedding": [
+      0.12,
+      -0.89,
+      0.56,
+      0.23,
+      -0.67,
+      0.34,
+      -0.78,
+      0.45,
+      0.89,
+      -0.12
+    ]
+  },
+  {
+    "id": "plantcare-021",
+    "species": "Spider Plant",
+    "category": "light",
+    "text": "Spider Plants thrive in bright, indirect light but can tolerate lower light conditions. Avoid direct sun.",
+    "embedding": [
+      0.89,
+      -0.34,
+      0.12,
+      0.67,
+      -0.56,
+      0.23,
+      -0.45,
+      0.78,
+      0.34,
+      -0.89
+    ]
+  },
+  {
+    "id": "plantcare-022",
+    "species": "Spider Plant",
+    "category": "propagation",
+    "text": "Spider Plants produce baby plants (spiderettes) that can be easily propagated by placing in water or soil.",
+    "embedding": [
+      0.56,
+      -0.12,
+      0.78,
+      0.45,
+      -0.23,
+      0.67,
+      -0.34,
+      0.89,
+      0.12,
+      -0.56
+    ]
+  },
+  {
+    "id": "plantcare-023",
+    "species": "Aloe Vera",
+    "category": "watering",
+    "text": "Water Aloe Vera deeply but infrequently. Allow soil to dry completely between waterings to prevent root rot.",
+    "embedding": [
+      0.34,
+      -0.78,
+      0.45,
+      0.12,
+      -0.67,
+      0.89,
+      -0.23,
+      0.56,
+      0.78,
+      -0.34
+    ]
+  },
+  {
+    "id": "plantcare-024",
+    "species": "Aloe Vera",
+    "category": "light",
+    "text": "Aloe Vera needs bright, direct light for at least 6 hours daily. Insufficient light causes weak, stretched growth.",
+    "embedding": [
+      0.78,
+      -0.45,
+      0.23,
+      0.89,
+      -0.56,
+      0.12,
+      -0.34,
+      0.67,
+      0.45,
+      -0.78
+    ]
+  },
+  {
+    "id": "plantcare-025",
+    "species": "Aloe Vera",
+    "category": "troubleshooting",
+    "text": "Brown tips on Aloe Vera leaves often indicate overwatering or mineral buildup in soil. Flush soil occasionally.",
+    "embedding": [
+      0.23,
+      -0.67,
+      0.89,
+      0.34,
+      -0.12,
+      0.56,
+      -0.78,
+      0.45,
+      0.67,
+      -0.23
+    ]
+  },
+  {
+    "id": "plantcare-026",
+    "species": "Rubber Plant",
+    "category": "watering",
+    "text": "Water Rubber Plants when the top 2 inches of soil are dry. They prefer slightly moist but well-draining soil.",
+    "embedding": [
+      0.67,
+      -0.23,
+      0.45,
+      0.78,
+      -0.34,
+      0.12,
+      -0.89,
+      0.56,
+      0.23,
+      -0.67
+    ]
+  },
+  {
+    "id": "plantcare-027",
+    "species": "Rubber Plant",
+    "category": "light",
+    "text": "Rubber Plants need bright, indirect light. Too little light causes leggy growth and leaf drop.",
+    "embedding": [
+      0.45,
+      -0.56,
+      0.78,
+      0.12,
+      -0.89,
+      0.34,
+      -0.23,
+      0.67,
+      0.56,
+      -0.45
+    ]
+  },
+  {
+    "id": "plantcare-028",
+    "species": "Rubber Plant",
+    "category": "troubleshooting",
+    "text": "Yellow leaves on Rubber Plants often indicate overwatering. Check soil moisture and drainage.",
+    "embedding": [
+      0.89,
+      -0.12,
+      0.34,
+      0.67,
+      -0.45,
+      0.78,
+      -0.56,
+      0.23,
+      0.12,
+      -0.89
+    ]
+  },
+  {
+    "id": "plantcare-029",
+    "species": "ZZ Plant",
+    "category": "watering",
+    "text": "Water ZZ Plants every 2-3 weeks. They store water in their rhizomes and prefer to dry out between waterings.",
+    "embedding": [
+      0.12,
+      -0.78,
+      0.56,
+      0.34,
+      -0.23,
+      0.67,
+      -0.45,
+      0.89,
+      0.78,
+      -0.12
+    ]
+  },
+  {
+    "id": "plantcare-030",
+    "species": "ZZ Plant",
+    "category": "light",
+    "text": "ZZ Plants can tolerate low light conditions but grow best in bright, indirect light. Avoid direct sunlight.",
+    "embedding": [
+      0.56,
+      -0.34,
+      0.12,
+      0.89,
+      -0.67,
+      0.23,
+      -0.78,
+      0.45,
+      0.34,
+      -0.56
+    ]
+  },
+  {
+    "id": "plantcare-031",
+    "species": "general",
+    "category": "fertilizing",
+    "text": "Fertilize houseplants during growing season (spring and summer) with balanced liquid fertilizer diluted to half strength.",
+    "embedding": [
+      0.78,
+      -0.56,
+      0.23,
+      0.12,
+      -0.89,
+      0.45,
+      -0.34,
+      0.67,
+      0.56,
+      -0.78
+    ]
+  },
+  {
+    "id": "plantcare-032",
+    "species": "general",
+    "category": "repotting",
+    "text": "Repot plants when roots are visible at drainage holes or plant becomes root-bound. Use pot one size larger.",
+    "embedding": [
+      0.34,
+      -0.89,
+      0.67,
+      0.45,
+      -0.12,
+      0.78,
+      -0.56,
+      0.23,
+      0.89,
+      -0.34
+    ]
+  },
+  {
+    "id": "plantcare-033",
+    "species": "general",
+    "category": "humidity",
+    "text": "Most houseplants prefer 40-60% humidity. Use humidifiers, pebble trays, or misting to increase humidity.",
+    "embedding": [
+      0.67,
+      -0.23,
+      0.89,
+      0.56,
+      -0.34,
+      0.12,
+      -0.78,
+      0.45,
+      0.23,
+      -0.67
+    ]
+  },
+  {
+    "id": "plantcare-034",
+    "species": "general",
+    "category": "temperature",
+    "text": "Most houseplants prefer temperatures between 65-75°F (18-24°C). Avoid drafts and sudden temperature changes.",
+    "embedding": [
+      0.45,
+      -0.67,
+      0.34,
+      0.78,
+      -0.89,
+      0.23,
+      -0.56,
+      0.12,
+      0.67,
+      -0.45
+    ]
+  },
+  {
+    "id": "plantcare-035",
+    "species": "general",
+    "category": "troubleshooting",
+    "text": "Brown leaf tips often indicate low humidity, over-fertilization, or water quality issues. Check all care factors.",
+    "embedding": [
+      0.23,
+      -0.45,
+      0.78,
+      0.12,
+      -0.67,
+      0.89,
+      -0.34,
+      0.56,
+      0.45,
+      -0.23
+    ]
+  },
+  {
+    "id": "real-001",
+    "species": "Snake Plant",
+    "category": "watering",
+    "text": "Water Snake Plants every 2-3 weeks during growing season, less in winter. Allow soil to dry completely between waterings. Overwatering causes root rot.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-002",
+    "species": "Snake Plant",
+    "category": "light",
+    "text": "Snake Plants thrive in low to bright indirect light. They can survive in very low light but grow faster with more light. Avoid direct sun.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-003",
+    "species": "Snake Plant",
+    "category": "troubleshooting",
+    "text": "Yellow leaves indicate overwatering. Brown tips suggest underwatering. Drooping leaves mean too much water. Check soil moisture.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-004",
+    "species": "Fiddle Leaf Fig",
+    "category": "watering",
+    "text": "Water Fiddle Leaf Figs when top 2 inches of soil are dry. Water thoroughly until it drains from bottom. Inconsistent watering causes leaf drop.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-005",
+    "species": "Fiddle Leaf Fig",
+    "category": "light",
+    "text": "Fiddle Leaf Figs need bright, indirect light. Place near east or west-facing window. Rotate plant weekly for even growth.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-006",
+    "species": "Fiddle Leaf Fig",
+    "category": "troubleshooting",
+    "text": "Brown spots on leaves indicate inconsistent watering. Dropping leaves mean overwatering, underwatering, or sudden changes. Maintain consistent care.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-007",
+    "species": "Monstera",
+    "category": "watering",
+    "text": "Water Monstera when top inch of soil is dry. Water thoroughly and allow excess to drain. Overwatering causes yellow leaves.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-008",
+    "species": "Monstera",
+    "category": "light",
+    "text": "Monsteras prefer bright, indirect light. Too much direct sun burns leaves. Too little light reduces leaf fenestrations.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-009",
+    "species": "Monstera",
+    "category": "humidity",
+    "text": "Monsteras love high humidity (60-80%). Use humidifier, pebble tray, or mist regularly. Low humidity causes brown leaf edges.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-010",
+    "species": "Pothos",
+    "category": "watering",
+    "text": "Water Pothos when soil feels dry to touch. These plants are drought-tolerant and prefer to dry out between waterings.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-011",
+    "species": "Pothos",
+    "category": "light",
+    "text": "Pothos adapts to various light conditions from low to bright indirect light. Variegated varieties need more light to maintain patterns.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-012",
+    "species": "Pothos",
+    "category": "propagation",
+    "text": "Pothos propagates easily in water or soil. Cut below a node and place in water. Roots develop in 1-2 weeks.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-013",
+    "species": "Succulents",
+    "category": "watering",
+    "text": "Water succulents deeply but infrequently. Soak soil completely, then let dry out completely. Water every 1-2 weeks in growing season.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-014",
+    "species": "Succulents",
+    "category": "light",
+    "text": "Succulents need bright, direct light for 6+ hours daily. Insufficient light causes stretching and loss of color.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-015",
+    "species": "Succulents",
+    "category": "soil",
+    "text": "Use well-draining soil mix for succulents. Add perlite or sand to regular potting soil. Ensure pots have drainage holes.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-016",
+    "species": "Peace Lily",
+    "category": "watering",
+    "text": "Water Peace Lily when soil surface feels dry. These plants droop dramatically when thirsty, making watering needs obvious.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-017",
+    "species": "Peace Lily",
+    "category": "light",
+    "text": "Peace Lilies prefer low to medium indirect light. Too much direct sun burns leaves. They can survive in low light but may not flower.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-018",
+    "species": "Peace Lily",
+    "category": "troubleshooting",
+    "text": "Brown leaf tips indicate overwatering or water quality issues. Yellow leaves mean overwatering. Drooping means underwatering.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-001",
+    "species": "Snake Plant",
+    "category": "watering",
+    "text": "Water Snake Plants every 2-3 weeks during growing season, less in winter. Allow soil to dry completely between waterings. Overwatering causes root rot.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-002",
+    "species": "Snake Plant",
+    "category": "light",
+    "text": "Snake Plants thrive in low to bright indirect light. They can survive in very low light but grow faster with more light. Avoid direct sun.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-003",
+    "species": "Snake Plant",
+    "category": "troubleshooting",
+    "text": "Yellow leaves indicate overwatering. Brown tips suggest underwatering. Drooping leaves mean too much water. Check soil moisture.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-004",
+    "species": "Fiddle Leaf Fig",
+    "category": "watering",
+    "text": "Water Fiddle Leaf Figs when top 2 inches of soil are dry. Water thoroughly until it drains from bottom. Inconsistent watering causes leaf drop.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-005",
+    "species": "Fiddle Leaf Fig",
+    "category": "light",
+    "text": "Fiddle Leaf Figs need bright, indirect light. Place near east or west-facing window. Rotate plant weekly for even growth.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-006",
+    "species": "Fiddle Leaf Fig",
+    "category": "troubleshooting",
+    "text": "Brown spots on leaves indicate inconsistent watering. Dropping leaves mean overwatering, underwatering, or sudden changes. Maintain consistent care.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-007",
+    "species": "Monstera",
+    "category": "watering",
+    "text": "Water Monstera when top inch of soil is dry. Water thoroughly and allow excess to drain. Overwatering causes yellow leaves.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-008",
+    "species": "Monstera",
+    "category": "light",
+    "text": "Monsteras prefer bright, indirect light. Too much direct sun burns leaves. Too little light reduces leaf fenestrations.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-009",
+    "species": "Monstera",
+    "category": "humidity",
+    "text": "Monsteras love high humidity (60-80%). Use humidifier, pebble tray, or mist regularly. Low humidity causes brown leaf edges.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-010",
+    "species": "Pothos",
+    "category": "watering",
+    "text": "Water Pothos when soil feels dry to touch. These plants are drought-tolerant and prefer to dry out between waterings.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-011",
+    "species": "Pothos",
+    "category": "light",
+    "text": "Pothos adapts to various light conditions from low to bright indirect light. Variegated varieties need more light to maintain patterns.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-012",
+    "species": "Pothos",
+    "category": "propagation",
+    "text": "Pothos propagates easily in water or soil. Cut below a node and place in water. Roots develop in 1-2 weeks.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-013",
+    "species": "Succulents",
+    "category": "watering",
+    "text": "Water succulents deeply but infrequently. Soak soil completely, then let dry out completely. Water every 1-2 weeks in growing season.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-014",
+    "species": "Succulents",
+    "category": "light",
+    "text": "Succulents need bright, direct light for 6+ hours daily. Insufficient light causes stretching and loss of color.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-015",
+    "species": "Succulents",
+    "category": "soil",
+    "text": "Use well-draining soil mix for succulents. Add perlite or sand to regular potting soil. Ensure pots have drainage holes.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-016",
+    "species": "Peace Lily",
+    "category": "watering",
+    "text": "Water Peace Lily when soil surface feels dry. These plants droop dramatically when thirsty, making watering needs obvious.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-017",
+    "species": "Peace Lily",
+    "category": "light",
+    "text": "Peace Lilies prefer low to medium indirect light. Too much direct sun burns leaves. They can survive in low light but may not flower.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-018",
+    "species": "Peace Lily",
+    "category": "troubleshooting",
+    "text": "Brown leaf tips indicate overwatering or water quality issues. Yellow leaves mean overwatering. Drooping means underwatering.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-019",
+    "species": "Spider Plant",
+    "category": "watering",
+    "text": "Water Spider Plants when soil feels dry to touch. These plants are forgiving and can handle occasional overwatering.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-020",
+    "species": "Spider Plant",
+    "category": "light",
+    "text": "Spider Plants thrive in bright, indirect light but can adapt to lower light. Avoid direct sun which can burn leaves.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-021",
+    "species": "Spider Plant",
+    "category": "propagation",
+    "text": "Spider Plants produce baby plants on long stems. Cut babies and root in water or soil. Very easy to propagate.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-022",
+    "species": "Aloe Vera",
+    "category": "watering",
+    "text": "Water Aloe Vera deeply but infrequently. Let soil dry completely between waterings. Overwatering causes root rot.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-023",
+    "species": "Aloe Vera",
+    "category": "light",
+    "text": "Aloe Vera needs bright, direct sunlight for 6+ hours daily. Insufficient light causes stretching and weak growth.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-024",
+    "species": "Aloe Vera",
+    "category": "medicinal",
+    "text": "Aloe Vera gel has healing properties for burns and cuts. Use fresh gel from inner leaf. Store unused gel in refrigerator.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-025",
+    "species": "Rubber Plant",
+    "category": "watering",
+    "text": "Water Rubber Plant when top inch of soil is dry. These plants prefer consistent moisture but not soggy soil.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-026",
+    "species": "Rubber Plant",
+    "category": "light",
+    "text": "Rubber Plants need bright, indirect light. Too little light causes leaf drop. Rotate plant for even growth.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-027",
+    "species": "Rubber Plant",
+    "category": "troubleshooting",
+    "text": "Yellow leaves indicate overwatering. Brown leaf edges suggest low humidity. Clean leaves regularly for better photosynthesis.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-028",
+    "species": "ZZ Plant",
+    "category": "watering",
+    "text": "Water ZZ Plant every 2-3 weeks. These plants store water in rhizomes and can survive long periods without water.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-029",
+    "species": "ZZ Plant",
+    "category": "light",
+    "text": "ZZ Plants tolerate low light but grow faster in bright, indirect light. They can survive in very low light conditions.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-030",
+    "species": "ZZ Plant",
+    "category": "troubleshooting",
+    "text": "Yellow leaves usually indicate overwatering. ZZ Plants are very drought-tolerant and prefer to be underwatered.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-031",
+    "species": "Philodendron",
+    "category": "watering",
+    "text": "Water Philodendron when top inch of soil is dry. These plants prefer consistent moisture but not waterlogged soil.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-032",
+    "species": "Philodendron",
+    "category": "light",
+    "text": "Philodendrons prefer bright, indirect light but can tolerate lower light. Avoid direct sun which burns leaves.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-033",
+    "species": "Philodendron",
+    "category": "climbing",
+    "text": "Philodendrons are natural climbers. Provide moss pole or trellis for support. Climbing varieties grow larger leaves.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-034",
+    "species": "Chinese Money Plant",
+    "category": "watering",
+    "text": "Water Chinese Money Plant when soil feels dry. These plants prefer to dry out between waterings to prevent root rot.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-035",
+    "species": "Chinese Money Plant",
+    "category": "light",
+    "text": "Chinese Money Plants need bright, indirect light. Too little light causes leggy growth. Rotate plant for even growth.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-036",
+    "species": "Chinese Money Plant",
+    "category": "propagation",
+    "text": "Chinese Money Plants produce baby plants at base. Separate babies when they have 3-4 leaves and root in water or soil.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-037",
+    "species": "Jade Plant",
+    "category": "watering",
+    "text": "Water Jade Plant when soil is completely dry. These succulents store water in leaves and prefer infrequent watering.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-038",
+    "species": "Jade Plant",
+    "category": "light",
+    "text": "Jade Plants need bright, direct light for 4+ hours daily. Insufficient light causes stretching and weak stems.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-039",
+    "species": "Jade Plant",
+    "category": "troubleshooting",
+    "text": "Wrinkled leaves indicate underwatering. Yellow leaves suggest overwatering. Dropping leaves mean inconsistent watering.",
+    "source": "real_data",
+    "difficulty": "easy"
+  },
+  {
+    "id": "real-040",
+    "species": "String of Pearls",
+    "category": "watering",
+    "text": "Water String of Pearls when pearls start to shrivel slightly. These succulents prefer to dry out between waterings.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-041",
+    "species": "String of Pearls",
+    "category": "light",
+    "text": "String of Pearls needs bright, indirect light. Too little light causes stretching and weak pearls. Avoid direct sun.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-042",
+    "species": "String of Pearls",
+    "category": "troubleshooting",
+    "text": "Shriveled pearls indicate underwatering. Yellow pearls suggest overwatering. Ensure good drainage to prevent root rot.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-043",
+    "species": "Calathea",
+    "category": "watering",
+    "text": "Water Calathea when top inch of soil is dry. These plants prefer consistently moist soil but not waterlogged.",
+    "source": "real_data",
+    "difficulty": "hard"
+  },
+  {
+    "id": "real-044",
+    "species": "Calathea",
+    "category": "humidity",
+    "text": "Calathea needs high humidity (60-80%). Use humidifier or pebble tray. Low humidity causes brown, crispy leaf edges.",
+    "source": "real_data",
+    "difficulty": "hard"
+  },
+  {
+    "id": "real-045",
+    "species": "Calathea",
+    "category": "light",
+    "text": "Calathea prefers bright, indirect light. Too much direct sun fades leaf patterns. Too little light reduces variegation.",
+    "source": "real_data",
+    "difficulty": "hard"
+  },
+  {
+    "id": "real-046",
+    "species": "Bird of Paradise",
+    "category": "watering",
+    "text": "Water Bird of Paradise when top 2 inches of soil are dry. These plants prefer deep, infrequent watering.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-047",
+    "species": "Bird of Paradise",
+    "category": "light",
+    "text": "Bird of Paradise needs bright, indirect light. Some direct morning sun is beneficial. Too little light prevents flowering.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-048",
+    "species": "Bird of Paradise",
+    "category": "troubleshooting",
+    "text": "Split leaves are normal for Bird of Paradise. Brown leaf tips indicate low humidity. Clean leaves regularly.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-049",
+    "species": "Lavender",
+    "category": "watering",
+    "text": "Water Lavender sparingly. These plants prefer to dry out between waterings. Overwatering causes root rot.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-050",
+    "species": "Lavender",
+    "category": "light",
+    "text": "Lavender needs full sun for 6+ hours daily. Insufficient light causes leggy growth and poor flowering.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "real-051",
+    "species": "Lavender",
+    "category": "soil",
+    "text": "Lavender needs well-draining soil. Add sand or perlite to improve drainage. Avoid rich, water-retentive soils.",
+    "source": "real_data",
+    "difficulty": "medium"
+  },
+  {
+    "id": "tropical-001",
+    "species": "Monstera Deliciosa",
+    "category": "watering",
+    "text": "Water Monstera when top 2 inches of soil are dry. These tropical plants prefer consistent moisture but not waterlogged soil.",
+    "source": "comprehensive_dataset",
+    "difficulty": "medium",
+    "family": "Araceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "tropical-002",
+    "species": "Monstera Deliciosa",
+    "category": "light",
+    "text": "Monstera needs bright, indirect light. Too much direct sun burns leaves. Can tolerate lower light but grows slower.",
+    "source": "comprehensive_dataset",
+    "difficulty": "medium",
+    "family": "Araceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "tropical-003",
+    "species": "Monstera Deliciosa",
+    "category": "humidity",
+    "text": "Monstera prefers 60-80% humidity. Use humidifier or pebble tray. Low humidity causes brown leaf edges.",
+    "source": "comprehensive_dataset",
+    "difficulty": "medium",
+    "family": "Araceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "succulent-001",
+    "species": "Echeveria",
+    "category": "watering",
+    "text": "Water Echeveria when soil is completely dry. These succulents store water in leaves and prefer infrequent watering.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Crassulaceae",
+    "origin": "desert"
+  },
+  {
+    "id": "succulent-002",
+    "species": "Echeveria",
+    "category": "light",
+    "text": "Echeveria needs bright, direct light for 6+ hours daily. Insufficient light causes stretching and weak growth.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Crassulaceae",
+    "origin": "desert"
+  },
+  {
+    "id": "succulent-003",
+    "species": "Echeveria",
+    "category": "propagation",
+    "text": "Echeveria can be propagated from leaves or offsets. Let cuttings callus before planting in well-draining soil.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Crassulaceae",
+    "origin": "desert"
+  },
+  {
+    "id": "herb-001",
+    "species": "Rosemary",
+    "category": "watering",
+    "text": "Water Rosemary when soil feels dry. These Mediterranean herbs prefer to dry out between waterings.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Lamiaceae",
+    "origin": "mediterranean"
+  },
+  {
+    "id": "herb-002",
+    "species": "Rosemary",
+    "category": "light",
+    "text": "Rosemary needs full sun for 6+ hours daily. Insufficient light causes leggy growth and poor flavor.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Lamiaceae",
+    "origin": "mediterranean"
+  },
+  {
+    "id": "herb-003",
+    "species": "Rosemary",
+    "category": "harvesting",
+    "text": "Harvest Rosemary by cutting stems above a node. Regular harvesting encourages bushier growth.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Lamiaceae",
+    "origin": "mediterranean"
+  },
+  {
+    "id": "flower-001",
+    "species": "Geranium",
+    "category": "watering",
+    "text": "Water Geraniums when soil feels dry. These plants prefer to dry out between waterings to prevent root rot.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Geraniaceae",
+    "origin": "temperate"
+  },
+  {
+    "id": "flower-002",
+    "species": "Geranium",
+    "category": "light",
+    "text": "Geraniums need bright, indirect light. Some direct morning sun is beneficial for flowering.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Geraniaceae",
+    "origin": "temperate"
+  },
+  {
+    "id": "flower-003",
+    "species": "Geranium",
+    "category": "deadheading",
+    "text": "Deadhead Geraniums regularly to encourage continuous blooming. Remove spent flowers and stems.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Geraniaceae",
+    "origin": "temperate"
+  },
+  {
+    "id": "tree-001",
+    "species": "Ficus Lyrata",
+    "category": "watering",
+    "text": "Water Fiddle Leaf Fig when top 2 inches of soil are dry. These trees prefer to dry out between waterings.",
+    "source": "comprehensive_dataset",
+    "difficulty": "medium",
+    "family": "Moraceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "tree-002",
+    "species": "Ficus Lyrata",
+    "category": "light",
+    "text": "Fiddle Leaf Fig needs bright, indirect light. Rotate plant weekly for even growth. Too little light causes leaf drop.",
+    "source": "comprehensive_dataset",
+    "difficulty": "medium",
+    "family": "Moraceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "tree-003",
+    "species": "Ficus Lyrata",
+    "category": "troubleshooting",
+    "text": "Brown leaf edges indicate low humidity. Yellow leaves suggest overwatering. Clean leaves regularly for better photosynthesis.",
+    "source": "comprehensive_dataset",
+    "difficulty": "medium",
+    "family": "Moraceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "aquatic-001",
+    "species": "Peace Lily",
+    "category": "watering",
+    "text": "Water Peace Lily when soil surface feels dry. These plants droop dramatically when thirsty, making watering needs obvious.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Araceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "aquatic-002",
+    "species": "Peace Lily",
+    "category": "light",
+    "text": "Peace Lilies prefer low to medium indirect light. Too much direct sun burns leaves. They can survive in low light but may not flower.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Araceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "aquatic-003",
+    "species": "Peace Lily",
+    "category": "troubleshooting",
+    "text": "Brown leaf tips indicate overwatering or water quality issues. Yellow leaves mean overwatering. Drooping means underwatering.",
+    "source": "comprehensive_dataset",
+    "difficulty": "easy",
+    "family": "Araceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "air-001",
+    "species": "Tillandsia",
+    "category": "watering",
+    "text": "Mist Tillandsia 2-3 times per week or soak for 20-30 minutes weekly. These air plants absorb water through their leaves.",
+    "source": "comprehensive_dataset",
+    "difficulty": "medium",
+    "family": "Bromeliaceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "air-002",
+    "species": "Tillandsia",
+    "category": "light",
+    "text": "Tillandsia needs bright, indirect light. Avoid direct sun which can burn leaves. Can tolerate lower light.",
+    "source": "comprehensive_dataset",
+    "difficulty": "medium",
+    "family": "Bromeliaceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "air-003",
+    "species": "Tillandsia",
+    "category": "air_circulation",
+    "text": "Tillandsia needs good air circulation to prevent rot. Place in well-ventilated area, not in enclosed terrariums.",
+    "source": "comprehensive_dataset",
+    "difficulty": "medium",
+    "family": "Bromeliaceae",
+    "origin": "tropical"
+  },
+  {
+    "id": "carnivorous-001",
+    "species": "Venus Flytrap",
+    "category": "watering",
+    "text": "Water Venus Flytrap with distilled or rainwater only. Keep soil consistently moist but not waterlogged.",
+    "source": "comprehensive_dataset",
+    "difficulty": "hard",
+    "family": "Droseraceae",
+    "origin": "temperate"
+  },
+  {
+    "id": "carnivorous-002",
+    "species": "Venus Flytrap",
+    "category": "light",
+    "text": "Venus Flytrap needs bright, direct light for 6+ hours daily. Insufficient light causes weak traps and poor growth.",
+    "source": "comprehensive_dataset",
+    "difficulty": "hard",
+    "family": "Droseraceae",
+    "origin": "temperate"
+  },
+  {
+    "id": "carnivorous-003",
+    "species": "Venus Flytrap",
+    "category": "feeding",
+    "text": "Venus Flytrap catches its own food. Do not feed manually as this can damage traps. Let it catch insects naturally.",
+    "source": "comprehensive_dataset",
+    "difficulty": "hard",
+    "family": "Droseraceae",
+    "origin": "temperate"
+  },
+  {
+    "id": "bonsai-001",
+    "species": "Juniper Bonsai",
+    "category": "watering",
+    "text": "Water Juniper Bonsai when soil surface feels dry. These trees prefer to dry out slightly between waterings.",
+    "source": "comprehensive_dataset",
+    "difficulty": "hard",
+    "family": "Cupressaceae",
+    "origin": "temperate"
+  },
+  {
+    "id": "bonsai-002",
+    "species": "Juniper Bonsai",
+    "category": "light",
+    "text": "Juniper Bonsai needs bright, indirect light. Some direct morning sun is beneficial. Rotate regularly for even growth.",
+    "source": "comprehensive_dataset",
+    "difficulty": "hard",
+    "family": "Cupressaceae",
+    "origin": "temperate"
+  },
+  {
+    "id": "bonsai-003",
+    "species": "Juniper Bonsai",
+    "category": "pruning",
+    "text": "Prune Juniper Bonsai regularly to maintain shape. Use sharp, clean tools. Prune in spring and summer only.",
+    "source": "comprehensive_dataset",
+    "difficulty": "hard",
+    "family": "Cupressaceae",
+    "origin": "temperate"
+  }
+]
