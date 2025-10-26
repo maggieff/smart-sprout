@@ -38,14 +38,15 @@ const Logo = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.5rem;
-  font-weight: 700;
-  color: #10B981;
+  font-weight: normal;
+  color: #1f2937;
   text-decoration: none;
   transition: color 0.2s ease;
 
   &:hover {
-    color: #059669;
+    color: #374151;
   }
 `;
 

@@ -64,8 +64,9 @@ const SignInCard = styled(motion.div)`
 `;
 
 const SignInTitle = styled.h1`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 2.5rem;
-  font-weight: 700;
+  font-weight: normal;
   color: #1f2937;
   text-align: center;
   margin-bottom: 0.5rem;
@@ -217,8 +218,9 @@ const WelcomeSection = styled.div`
 `;
 
 const WelcomeTitle = styled.h1`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 2.5rem;
-  font-weight: 700;
+  font-weight: normal;
   color: #1f2937;
   margin-bottom: 1rem;
 `;
@@ -240,8 +242,9 @@ const WeatherWidget = styled.div`
 `;
 
 const WeatherTitle = styled.h3`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: normal;
   color: #1f2937;
   margin-bottom: 0.5rem;
 `;
@@ -322,8 +325,9 @@ const SectionHeader = styled.div`
 `;
 
 const SectionTitle = styled.h2`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: normal;
   color: #1f2937;
   margin: 0;
 `;
