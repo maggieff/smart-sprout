@@ -4,39 +4,17 @@ const { getSimulatedSensorData } = require('../utils/simulateSensors');
 const { calculateHealthScore } = require('../utils/healthCalculator');
 
 // In-memory storage for demo purposes
-let plantStorage = {
-  'plant-001': {
-    id: 'plant-001',
-    name: 'Snake Plant',
-    species: 'Sansevieria trifasciata',
-    image: '/images/snake-plant.jpg',
-    lastWatered: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-    careInstructions: {
-      watering: 'Every 2-3 weeks',
-      light: 'Low to bright indirect light',
-      temperature: '60-85°F',
-      humidity: '40-50%'
-    }
-  },
-  'plant-002': {
-    id: 'plant-002',
-    name: 'Fiddle Leaf Fig',
-    species: 'Ficus lyrata',
-    image: '/images/fiddle-leaf.jpg',
-    lastWatered: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-    careInstructions: {
-      watering: 'Weekly',
-      light: 'Bright indirect light',
-      temperature: '65-75°F',
-      humidity: '50-60%'
-    }
-  }
-};
+let plantStorage = {};
 
 // GET /api/plant-data - Get current plant data with simulated sensors
 router.get('/', async (req, res) => {
   try {
-    const plantId = req.query.plantId || 'plant-001';
+    const plantId = req.query.plantId;
+    
+    if (!plantId) {
+      return res.status(400).json({ error: 'Plant ID is required' });
+    }
+    
     const plant = plantStorage[plantId];
     
     if (!plant) {
