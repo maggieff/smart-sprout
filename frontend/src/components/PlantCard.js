@@ -88,7 +88,7 @@ const ScoreValue = styled.div`
 
 const ScoreLabel = styled.div`
   font-size: 0.75rem;
-  color: #6b7280;
+  color: white;
   margin-top: 0.25rem;
 `;
 
@@ -173,7 +173,7 @@ const LastWatered = styled.div`
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: white;
 `;
 
 const ViewButton = styled(Link)`
