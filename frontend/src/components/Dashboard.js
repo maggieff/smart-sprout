@@ -722,9 +722,6 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
     // Determine if it's day (6 AM to 6 PM) or night
     const isDay = hours >= 6 && hours < 18;
     
-    // Debug logging
-    console.log('Time check:', { hours, minutes, timeString, isDay });
-    
     return {
       timeString,
       isDay,
@@ -1133,11 +1130,6 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
             <FiRefreshCcw className={weatherLoading ? 'animate-spin' : ''} />
           </RefreshButton>
           
-          {/* Debug info - remove this after testing */}
-          <div style={{ fontSize: '0.75rem', color: '#9CA3AF', marginBottom: '1rem', textAlign: 'center' }}>
-            Debug: {getTimeOfDay().timeString} - {getTimeOfDay().isDay ? 'DAY' : 'NIGHT'} - Hour: {getTimeOfDay().hours}
-          </div>
-          
           {weatherLoading ? (
             <div style={{ textAlign: 'center', padding: '2rem 0' }}>
               <TimeDisplay>
@@ -1145,11 +1137,7 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
                 {getTimeOfDay().timeString}
               </TimeDisplay>
               <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
-                {(() => {
-                  const { isDay } = getTimeOfDay();
-                  console.log('Loading weather icon:', { isDay });
-                  return isDay ? '☀️' : '🌙';
-                })()}
+                {getTimeOfDay().isDay ? '☀️' : '🌙'}
               </div>
               <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>Loading weather...</div>
             </div>
@@ -1170,37 +1158,25 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
                   const { isDay } = getTimeOfDay();
                   const weatherType = weather.weather[0].main;
                   
-                  console.log('Weather icon logic:', { isDay, weatherType });
-                  
                   // Use sun/moon based on time of day for clear weather
                   if (weatherType === 'Clear') {
-                    const icon = isDay ? '☀️' : '🌙';
-                    console.log('Clear weather icon:', icon);
-                    return icon;
+                    return isDay ? '☀️' : '🌙';
                   }
                   
                   // For other weather types, use sun/moon with weather overlay
                   if (weatherType === 'Clouds') {
-                    const icon = isDay ? '⛅' : '☁️';
-                    console.log('Cloudy weather icon:', icon);
-                    return icon;
+                    return isDay ? '⛅' : '☁️';
                   }
                   
                   if (weatherType === 'Rain') {
-                    const icon = isDay ? '🌦️' : '🌧️';
-                    console.log('Rain weather icon:', icon);
-                    return icon;
+                    return isDay ? '🌦️' : '🌧️';
                   }
                   
                   if (weatherType === 'Snow') {
-                    const icon = isDay ? '🌨️' : '❄️';
-                    console.log('Snow weather icon:', icon);
-                    return icon;
+                    return isDay ? '🌨️' : '❄️';
                   }
                   
-                  const icon = isDay ? '🌤️' : '🌙';
-                  console.log('Default weather icon:', icon);
-                  return icon;
+                  return isDay ? '🌤️' : '🌙';
                 })()}
               </WeatherIcon>
               
@@ -1233,11 +1209,7 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
                 {getTimeOfDay().timeString}
               </TimeDisplay>
               <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
-                {(() => {
-                  const { isDay } = getTimeOfDay();
-                  console.log('Fallback weather icon:', { isDay });
-                  return isDay ? '☀️' : '🌙';
-                })()}
+                {getTimeOfDay().isDay ? '☀️' : '🌙'}
               </div>
               <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>Unable to load weather</div>
             </div>
