@@ -213,12 +213,13 @@ const TopSection = styled.div`
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 2rem;
+  padding: 1.5rem 2rem 0.5rem 2rem;
   gap: 2rem;
 `;
 
 const WelcomeSection = styled.div`
   flex: 1;
+  margin-bottom: 0.25rem;
 `;
 
 const WelcomeTitle = styled.h1`
@@ -226,15 +227,115 @@ const WelcomeTitle = styled.h1`
   font-size: 2.5rem;
   font-weight: normal;
   color: #1f2937;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 `;
 
-const PlaceholderBox = styled.div`
-  width: 60%;
-  height: 120px;
-  background: #D1D5DB;
+const MotivationalQuote = styled.div`
+  width: 100%;
+  min-height: 80px;
+  background: linear-gradient(135deg, #E8F5E8 0%, #D4F1D4 50%, #C8E6C8 100%);
+  border-radius: 1rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  box-shadow: 
+    0 8px 20px -5px rgba(156, 175, 136, 0.3),
+    0 4px 6px -2px rgba(156, 175, 136, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(156, 175, 136, 0.2);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 15px 30px -8px rgba(156, 175, 136, 0.4),
+      0 6px 12px -4px rgba(156, 175, 136, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(156, 175, 136, 0.15) 0%, rgba(156, 175, 136, 0.08) 100%);
+    border-radius: 1rem;
+    pointer-events: none;
+  }
+`;
+
+const QuoteRefreshButton = styled.button`
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(156, 175, 136, 0.3);
   border-radius: 0.5rem;
-  margin-top: 1rem;
+  color: #2D5016;
+  font-family: 'Karla', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.4rem 0.6rem;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(5px);
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1A3A0A;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
+const QuoteText = styled.p`
+  font-family: 'Karla', sans-serif;
+  font-style: italic;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #2D5016;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 100%;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  
+  &::before {
+    content: '"';
+    font-size: 2.5rem;
+    color: rgba(156, 175, 136, 0.4);
+    position: absolute;
+    top: -0.25rem;
+    left: -0.75rem;
+    font-family: 'Cubano', 'Karla', sans-serif;
+    line-height: 1;
+  }
+  
+  &::after {
+    content: '"';
+    font-size: 2.5rem;
+    color: rgba(156, 175, 136, 0.4);
+    position: absolute;
+    bottom: -1.25rem;
+    right: -0.25rem;
+    font-family: 'Cubano', 'Karla', sans-serif;
+    line-height: 1;
+  }
 `;
 
 const WeatherWidget = styled.div`
@@ -324,7 +425,7 @@ const Card = styled(motion.div)`
   background: #65876a;
   border-radius: 0.75rem;
   padding: 1.5rem;
-  margin: 1rem 2rem 0 2rem;
+  margin: 0.5rem 2rem 0 2rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border: 1px solid #5a6b5d;
   color: white;
@@ -705,6 +806,264 @@ const Tooltip = styled.div`
   }
 `;
 
+// New content sections for filling whitespace
+const ContentGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 0.5rem 2rem 2rem 2rem;
+  margin-top: 0;
+`;
+
+const ContentCard = styled(motion.div)`
+  background: #65876a;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #5a6b5d;
+  color: white;
+`;
+
+const CardTitle = styled.h3`
+  font-family: 'Cubano', 'Karla', sans-serif;
+  font-size: 1.25rem;
+  font-weight: normal;
+  color: white;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const TipItem = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-left: 3px solid #9CAF88;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const TipTitle = styled.h4`
+  font-family: 'Karla', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #E5E7EB;
+  margin: 0 0 0.5rem 0;
+`;
+
+const TipDescription = styled.p`
+  font-family: 'Karla', sans-serif;
+  font-size: 0.8rem;
+  color: #D1D5DB;
+  margin: 0;
+  line-height: 1.4;
+`;
+
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+`;
+
+const StatItem = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+`;
+
+const StatValue = styled.div`
+  font-family: 'Cubano', 'Karla', sans-serif;
+  font-size: 1.5rem;
+  font-weight: normal;
+  color: #9CAF88;
+  margin-bottom: 0.25rem;
+`;
+
+const StatLabel = styled.div`
+  font-family: 'Karla', sans-serif;
+  font-size: 0.75rem;
+  color: #D1D5DB;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
+
+const ActivityItem = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const ActivityIcon = styled.div`
+  width: 2rem;
+  height: 2rem;
+  background: rgba(156, 175, 136, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  color: #9CAF88;
+`;
+
+const ActivityText = styled.div`
+  flex: 1;
+`;
+
+const ActivityTitle = styled.div`
+  font-family: 'Karla', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #E5E7EB;
+  margin-bottom: 0.25rem;
+`;
+
+const ActivityTime = styled.div`
+  font-family: 'Karla', sans-serif;
+  font-size: 0.7rem;
+  color: #9CA3AF;
+`;
+
+const QuickActionButton = styled.button`
+  background: rgba(156, 175, 136, 0.2);
+  border: 1px solid rgba(156, 175, 136, 0.3);
+  border-radius: 0.5rem;
+  color: #E5E7EB;
+  font-family: 'Karla', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  justify-content: center;
+  
+  &:hover {
+    background: rgba(156, 175, 136, 0.3);
+    transform: translateY(-1px);
+  }
+`;
+
+// Motivational plant quotes
+const plantQuotes = [
+  "Grow through what you go through.",
+  "Be patient—nothing blooms all year.",
+  "Roots before branches, always.",
+  "Bloom where you're planted.",
+  "Stay rooted but reach for the sun.",
+  "Every flower must push through dirt first.",
+  "Keep growing even when no one's watching.",
+  "Let your growth be silent but powerful.",
+  "A little sunlight can change everything.",
+  "You can't rush a blooming season.",
+  "Storms help plants grow stronger roots.",
+  "Don't fear change—it's just repotting.",
+  "Growth takes time, not perfection.",
+  "Like a cactus, thrive in your own conditions.",
+  "Your pace is your process.",
+  "Be like moss—soft but unstoppable.",
+  "Even weeds find ways to grow.",
+  "Let go of what withers.",
+  "Breathe, root, and rise.",
+  "Tiny seeds, mighty forests.",
+  "Keep your petals open to possibility.",
+  "Grow in the direction of light.",
+  "Every day is a new leaf.",
+  "Soil your hands in what you love.",
+  "Nature doesn't compare blooms—neither should you.",
+  "Photosynthesize your energy into joy.",
+  "Even the smallest sprout has power.",
+  "Let adversity be your fertilizer.",
+  "You are the gardener of your own life.",
+  "Grow wild and free.",
+  "Be your own sunlight.",
+  "Water yourself with kindness.",
+  "Every scar is just where you've grown.",
+  "Stay grounded and let yourself stretch.",
+  "Be still—growth is happening.",
+  "New roots need room.",
+  "Don't just exist—thrive.",
+  "Leaves fall so new ones can grow.",
+  "You are allowed to outgrow your pot.",
+  "Let your growth make noise in silence.",
+  "Patience is the best fertilizer.",
+  "The storm passes; growth remains.",
+  "Your roots are stronger than you think.",
+  "Even the tallest tree started as a seed.",
+  "Nurture your soil, not just your surface.",
+  "Rise again, even after pruning.",
+  "Let the light in, one leaf at a time.",
+  "Your season will come.",
+  "The world needs your bloom.",
+  "You're not behind; you're germinating.",
+  "Growth isn't linear—it's organic.",
+  "Don't rush the sprout.",
+  "The dirt is part of the story.",
+  "Water what matters most.",
+  "Grow softer, not smaller.",
+  "Every sunrise is a chance to photosynthesize.",
+  "Don't pluck your potential too soon.",
+  "Flowers don't bloom to impress—they just do.",
+  "Keep your heart like a garden—tended and open.",
+  "Roots know no fear of depth.",
+  "Even after winter, spring finds its way.",
+  "Grow like ivy—persistent and patient.",
+  "Drink in life like rain.",
+  "Keep blooming through the cracks.",
+  "Let go of wilted dreams.",
+  "Every petal is proof of progress.",
+  "Be your own ecosystem.",
+  "The greenest growth happens in time.",
+  "Stay curious like a vine reaching for light.",
+  "You can't fake natural growth.",
+  "The earth remembers every effort.",
+  "Stretch toward hope like sunflowers.",
+  "Grow at your own rhythm.",
+  "Even shadows mean there's light nearby.",
+  "Be the calm in your own garden.",
+  "Sometimes rest is part of growing.",
+  "Don't fear pruning; it's preparation.",
+  "Roots intertwine—lean on others.",
+  "Every season serves a purpose.",
+  "Grow resilient, not resistant.",
+  "Blossom without apology.",
+  "Let your roots be deep and your petals wide.",
+  "Be patient with your seedlings of change.",
+  "The forest started with one seed that dared.",
+  "Nature doesn't hurry, yet everything grows.",
+  "Let yourself photosynthesize peace.",
+  "You are both soil and seed.",
+  "Keep tending even when nothing shows.",
+  "Growth comes quietly, then all at once.",
+  "Don't hide your bloom out of fear.",
+  "Be the wildflower in a garden of roses.",
+  "The sun will find you again.",
+  "Even broken stems can regrow.",
+  "Your roots tell your story—honor them.",
+  "Grow tall, even if no one claps.",
+  "Rain nourishes more than it ruins.",
+  "Plant hope, harvest joy.",
+  "Let every day be a new sprout of strength.",
+  "Grow because you can.",
+  "You are proof that growth is beautiful."
+];
+
 const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
   const navigate = useNavigate();
   const { user, isAuthenticated, signIn, signUp } = useAuth();
@@ -712,6 +1071,7 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [location, setLocation] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentQuote, setCurrentQuote] = useState('');
   const tooltipRef = useRef(null);
   const chartDataRef = useRef(null);
 
@@ -880,6 +1240,23 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
   useEffect(() => {
     loadWeatherData();
   }, []);
+
+  // Set initial quote on component mount
+  useEffect(() => {
+    const getRandomQuote = () => {
+      const randomIndex = Math.floor(Math.random() * plantQuotes.length);
+      return plantQuotes[randomIndex];
+    };
+    setCurrentQuote(getRandomQuote());
+  }, []);
+
+  const getNewQuote = () => {
+    const getRandomQuote = () => {
+      const randomIndex = Math.floor(Math.random() * plantQuotes.length);
+      return plantQuotes[randomIndex];
+    };
+    setCurrentQuote(getRandomQuote());
+  };
 
   // Generate moisture data for the chart based on real plant data
   const generateMoistureChartData = () => {
@@ -1136,7 +1513,19 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
       <TopSection>
         <WelcomeSection>
           <WelcomeTitle>Welcome back, {user?.name || 'Plant Lover'}!</WelcomeTitle>
-          <PlaceholderBox />
+          <MotivationalQuote>
+            <QuoteRefreshButton onClick={getNewQuote} title="Get new quote">
+              ✨ New
+            </QuoteRefreshButton>
+            <motion.div
+              key={currentQuote}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <QuoteText>{currentQuote}</QuoteText>
+            </motion.div>
+          </MotivationalQuote>
         </WelcomeSection>
         
         <WeatherWidget>
@@ -1378,6 +1767,91 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
           </PlantMetrics>
         </PlantContent>
       </Card>
+
+      {/* Content Grid to fill whitespace */}
+      <ContentGrid>
+        {/* Plant Care Tips */}
+        <ContentCard
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <CardTitle>
+            🌱 Plant Care Tips
+          </CardTitle>
+          <TipItem>
+            <TipTitle>Watering Schedule</TipTitle>
+            <TipDescription>Check soil moisture before watering. Most plants prefer slightly dry soil over constantly wet roots.</TipDescription>
+          </TipItem>
+          <TipItem>
+            <TipTitle>Light Requirements</TipTitle>
+            <TipDescription>Rotate your plants weekly to ensure even growth and prevent leaning toward light sources.</TipDescription>
+          </TipItem>
+          <TipItem>
+            <TipTitle>Humidity Control</TipTitle>
+            <TipDescription>Group plants together or use a pebble tray to increase humidity around tropical plants.</TipDescription>
+          </TipItem>
+        </ContentCard>
+
+        {/* Quick Stats & Activity */}
+        <ContentCard
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
+          <CardTitle>
+            📊 Your Garden Stats
+          </CardTitle>
+          <StatsGrid>
+            <StatItem>
+              <StatValue>{plants?.length || 0}</StatValue>
+              <StatLabel>Plants</StatLabel>
+            </StatItem>
+            <StatItem>
+              <StatValue>{Math.floor(Math.random() * 30) + 15}</StatValue>
+              <StatLabel>Days Active</StatLabel>
+            </StatItem>
+            <StatItem>
+              <StatValue>{Math.floor(Math.random() * 20) + 5}</StatValue>
+              <StatLabel>Care Logs</StatLabel>
+            </StatItem>
+            <StatItem>
+              <StatValue>85%</StatValue>
+              <StatLabel>Avg Health</StatLabel>
+            </StatItem>
+          </StatsGrid>
+          
+          <CardTitle style={{ marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+            🕒 Recent Activity
+          </CardTitle>
+          <ActivityItem>
+            <ActivityIcon>💧</ActivityIcon>
+            <ActivityText>
+              <ActivityTitle>Watered Monstera</ActivityTitle>
+              <ActivityTime>2 hours ago</ActivityTime>
+            </ActivityText>
+          </ActivityItem>
+          <ActivityItem>
+            <ActivityIcon>📸</ActivityIcon>
+            <ActivityText>
+              <ActivityTitle>Photo of Snake Plant</ActivityTitle>
+              <ActivityTime>Yesterday</ActivityTime>
+            </ActivityText>
+          </ActivityItem>
+          <ActivityItem>
+            <ActivityIcon>🌱</ActivityIcon>
+            <ActivityText>
+              <ActivityTitle>Added new Pothos</ActivityTitle>
+              <ActivityTime>3 days ago</ActivityTime>
+            </ActivityText>
+          </ActivityItem>
+          
+          <QuickActionButton onClick={() => navigate('/add-plant')}>
+            <FiPlus size={16} />
+            Add New Plant
+          </QuickActionButton>
+        </ContentCard>
+      </ContentGrid>
     </DashboardContainer>
   );
 };
