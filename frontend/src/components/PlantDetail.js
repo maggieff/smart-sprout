@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { 
@@ -8,24 +8,44 @@ import {
   FiSun, 
   FiThermometer, 
   FiWind,
-  FiClock,
-  FiMessageCircle,
-  FiCamera,
-  FiPlus,
-  FiEdit3
+  FiEdit3,
+  FiTrash2
 } from 'react-icons/fi';
 import { plantService } from '../services/plantService';
 import { logService } from '../services/logService';
-import ProgressBar from './ProgressBar';
-import SensorChart from './SensorChart';
-import RecentLogs from './RecentLogs';
 import LoadingSpinner from './LoadingSpinner';
+import QuickActions from './QuickActions';
 import toast from 'react-hot-toast';
 
-const DetailContainer = styled.div`
+const Container = styled.div`
+  min-height: 100vh;
+  background: #94A88B;
+  display: flex;
+  flex-direction: column;
+`;
+
+const MainContent = styled.div`
+  display: flex;
+  flex: 1;
+  gap: 2rem;
+  padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  width: 100%;
+`;
+
+const LeftContent = styled.div`
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+`;
+
+const RightSidebar = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 `;
 
 const BackButton = styled(Link)`
@@ -35,7 +55,7 @@ const BackButton = styled(Link)`
   color: white;
   text-decoration: none;
   font-weight: 500;
-  margin-bottom: 2rem;
+  font-size: 1.1rem;
   transition: all 0.2s ease;
 
   &:hover {
@@ -44,229 +64,233 @@ const BackButton = styled(Link)`
   }
 `;
 
-const PlantHeader = styled.div`
-  background: white;
-  border-radius: 1rem;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 2rem;
-  align-items: center;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
+const PlantName = styled.h1`
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  font-family: 'Fredoka One', cursive;
 `;
 
-const PlantImage = styled.div`
-  width: 6rem;
-  height: 6rem;
-  background: linear-gradient(135deg, #10B981, #34D399);
+const PlantImagePlaceholder = styled.div`
+  width: 100%;
+  height: 400px;
+  background: #E5E7EB;
   border-radius: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.5rem;
-  color: white;
+  color: #6B7280;
+  font-size: 1.2rem;
+  font-weight: 500;
 `;
 
-const PlantInfo = styled.div`
-  flex: 1;
-`;
-
-const PlantName = styled.h1`
-  font-family: 'Cubano', 'Karla', sans-serif;
-  font-size: 2rem;
-  font-weight: normal;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
-`;
-
-const PlantSpecies = styled.p`
-  font-size: 1.125rem;
-  color: #6b7280;
-  margin-bottom: 1rem;
-`;
-
-const PlantStatus = styled.div`
+const ActionButtons = styled.div`
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-`;
-
-const HealthSection = styled.div`
-  text-align: center;
-`;
-
-const HealthScore = styled.div`
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #10B981;
-  margin-bottom: 0.5rem;
-`;
-
-const HealthLabel = styled.div`
-  font-size: 0.875rem;
-  color: #6b7280;
-`;
-
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin-bottom: 2rem;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-`;
-
-const Card = styled(motion.div)`
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-`;
-
-const CardHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-`;
-
-const CardTitle = styled.h3`
-  font-family: 'Cubano', 'Karla', sans-serif;
-  font-size: 1.25rem;
-  font-weight: normal;
-  color: #1f2937;
+  gap: 1rem;
 `;
 
 const ActionButton = styled.button`
+  flex: 1;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: #10b981;
+
+  background: ${props => props.primary ? '#065f46' : '#EF4444'};
   color: white;
-  border: none;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const Section = styled.div`
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+`;
+
+const SectionTitle = styled.h2`
+  color: #1F2937;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  font-family: 'Karla', sans-serif;
+`;
+
+const SectionContent = styled.div`
+  color: #6B7280;
+  line-height: 1.6;
+`;
+
+const SensorHistoryPlaceholder = styled.div`
+  width: 100%;
+  height: 200px;
+  background: #E5E7EB;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B7280;
+  font-size: 1rem;
+  font-weight: 500;
+`;
+
+// Sidebar Components
+const SidebarSection = styled.div`
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+`;
+
+const SidebarTitle = styled.h3`
+  color: #1F2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  font-family: 'Karla', sans-serif;
+`;
+
+const HealthBar = styled.div`
+  width: 100%;
+  height: 1rem;
+  background: #E5E7EB;
   border-radius: 0.5rem;
-  font-size: 0.875rem;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+`;
+
+const HealthFill = styled.div`
+  height: 100%;
+  background: #065f46;
+  border-radius: 0.5rem;
+  width: ${props => props.percentage}%;
+  transition: width 0.3s ease;
+`;
+
+const MoistureChart = styled.div`
+  width: 100%;
+  height: 80px;
+  background: #F3F4F6;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B7280;
+  font-size: 0.9rem;
+  position: relative;
+  overflow: hidden;
+`;
+
+const ChartLine = styled.svg`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+`;
+
+const TemperatureBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const TemperatureBarContainer = styled.div`
+  width: 20px;
+  height: 100px;
+  background: #E5E7EB;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+`;
+
+const TemperatureFill = styled.div`
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: #065f46;
+  border-radius: 10px;
+  height: ${props => props.percentage}%;
+  transition: height 0.3s ease;
+`;
+
+const TemperatureValue = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+`;
+
+const TemperatureNumber = styled.span`
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1F2937;
+`;
+
+const TemperatureLabel = styled.span`
+  font-size: 0.9rem;
+  color: #6B7280;
+`;
+
+const OtherPlants = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const OtherPlantCard = styled.div`
+  background: #F3F4F6;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+  color: #6B7280;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background: #059669;
-    transform: translateY(-1px);
+    background: #E5E7EB;
+    transform: translateY(-2px);
   }
 `;
 
-const SensorGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-`;
-
-const SensorCard = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: #f9fafb;
-  border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
-`;
-
-const SensorIcon = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  background: ${props => props.bgColor || '#f3f4f6'};
-  border-radius: 0.75rem;
-  color: ${props => props.color || '#6b7280'};
-  font-size: 1.5rem;
-`;
-
-const SensorInfo = styled.div`
-  flex: 1;
-`;
-
-const SensorLabel = styled.div`
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
-`;
-
-const SensorValue = styled.div`
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-`;
-
-const CareInstructions = styled.div`
-  background: #f0fdf4;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-top: 1rem;
-`;
-
-const InstructionsTitle = styled.h4`
-  font-family: 'Cubano', 'Karla', sans-serif;
-  font-size: 0.875rem;
-  font-weight: normal;
-  color: #065f46;
-  margin-bottom: 0.75rem;
-`;
-
-const InstructionItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #d1fae5;
-  font-size: 0.875rem;
-
-  &:last-child {
-    border-bottom: none;
-  }
-`;
-
-const InstructionLabel = styled.span`
-  color: #374151;
-  font-weight: 500;
-`;
-
-const InstructionValue = styled.span`
-  color: #6b7280;
-`;
-
-const PlantDetail = ({ plants, onPlantUpdate }) => {
+const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
   const { plantId } = useParams();
+  const navigate = useNavigate();
   const [plant, setPlant] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [logs, setLogs] = useState([]);
 
   useEffect(() => {
     loadPlantData();
-  }, [plantId]);
+  }, [plantId, plants]);
 
   const loadPlantData = async () => {
     try {
       setLoading(true);
-      const plantData = await plantService.getPlantData(plantId);
-      setPlant(plantData);
       
-      const logsData = await logService.getLogs(plantId, 10);
-      setLogs(logsData.logs || []);
+      // Find the plant in the plants array
+      const foundPlant = plants.find(p => p.id === plantId);
+      if (foundPlant) {
+        setPlant(foundPlant);
+      } else {
+        // If not found in local state, try API call as fallback
+        const plantData = await plantService.getPlantData(plantId);
+        setPlant(plantData);
+      }
     } catch (error) {
       console.error('Error loading plant data:', error);
       toast.error('Failed to load plant data');
@@ -275,235 +299,200 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
     }
   };
 
-  const handleAddLog = async (logData) => {
-    try {
-      await logService.createLog({
-        plantId,
-        ...logData
-      });
-      
-      // Reload logs
-      const logsData = await logService.getLogs(plantId, 10);
-      setLogs(logsData.logs || []);
-      
-      toast.success('Log added successfully!');
-    } catch (error) {
-      console.error('Error adding log:', error);
-      toast.error('Failed to add log');
-    }
-  };
+  const handleRemovePlant = async () => {
+    if (window.confirm('Are you sure you want to remove this plant?')) {
+      try {
+        // For plants added through the frontend (with IDs like plant-${timestamp}-${id}),
+        // we only need to update the frontend state
+        if (plantId.startsWith('plant-') && plantId.includes('-')) {
+          // This is a frontend-added plant, just update the state
+          if (onPlantRemove) {
+            onPlantRemove(plantId);
+          }
+          toast.success('Plant removed successfully!');
+          navigate('/my-plants');
+        } else {
+          // This is a backend plant, try to delete from backend
+          const response = await fetch(`http://localhost:5001/api/plant-data/${plantId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
 
-  const getStatusEmoji = (status) => {
-    switch (status) {
-      case 'excellent': return '🌟';
-      case 'good': return '😊';
-      case 'fair': return '📝';
-      case 'poor': return '🆘';
-      case 'critical': return '🚨';
-      default: return '❓';
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'excellent': return 'Excellent';
-      case 'good': return 'Good';
-      case 'fair': return 'Fair';
-      case 'poor': return 'Poor';
-      case 'critical': return 'Critical';
-      default: return 'Unknown';
+          if (response.ok) {
+            // Update the parent component's plants list
+            if (onPlantRemove) {
+              onPlantRemove(plantId);
+            }
+            toast.success('Plant removed successfully!');
+            navigate('/my-plants');
+          } else {
+            // If backend deletion fails, still remove from frontend state
+            if (onPlantRemove) {
+              onPlantRemove(plantId);
+            }
+            toast.success('Plant removed from your collection!');
+            navigate('/my-plants');
+          }
+        }
+      } catch (error) {
+        console.error('Error removing plant:', error);
+        // Even if there's an error, try to remove from frontend state
+        if (onPlantRemove) {
+          onPlantRemove(plantId);
+        }
+        toast.success('Plant removed from your collection!');
+        navigate('/my-plants');
+      }
     }
   };
 
   if (loading) {
-    return <LoadingSpinner message="Loading plant details..." />;
+    return (
+      <Container>
+        <LoadingSpinner />
+      </Container>
+    );
   }
 
   if (!plant) {
     return (
-      <DetailContainer>
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold text-white mb-4">
-            Plant Not Found
-          </h2>
-          <p className="text-white/80 mb-6">
-            The plant you're looking for doesn't exist.
-          </p>
-          <Link to="/" className="btn btn-primary">
-            <FiArrowLeft />
-            Back to Dashboard
+      <Container>
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'white' }}>
+          <h2>Plant not found</h2>
+          <p>The plant you're looking for doesn't exist.</p>
+          <Link to="/my-plants" style={{ color: 'white', textDecoration: 'underline' }}>
+            Back to My Plants
           </Link>
         </div>
-      </DetailContainer>
+      </Container>
     );
   }
 
-  const { sensorData, healthScore, status, careInstructions } = plant;
+  const healthPercentage = Math.round((plant.healthScore || 0.8) * 100);
+  const moisturePercentage = plant.sensorData?.moisture || 65;
+  const temperature = plant.sensorData?.temperature || 22;
 
   return (
-    <DetailContainer>
-      <BackButton to="/">
-        <FiArrowLeft />
-        Back to Dashboard
-      </BackButton>
+    <Container>
+      <MainContent>
+        <LeftContent>
+          <BackButton to="/my-plants">
+            <FiArrowLeft />
+            Back
+          </BackButton>
 
-      <PlantHeader>
-        <PlantImage>
-          🌱
-        </PlantImage>
-        <PlantInfo>
           <PlantName>{plant.name}</PlantName>
-          <PlantSpecies>{plant.species}</PlantSpecies>
-          <PlantStatus>
-            {getStatusEmoji(status)} {getStatusText(status)} Health
-          </PlantStatus>
-        </PlantInfo>
-        <HealthSection>
-          <HealthScore>{Math.round(healthScore * 100)}%</HealthScore>
-          <HealthLabel>Health Score</HealthLabel>
-        </HealthSection>
-      </PlantHeader>
 
-      <Grid>
-        <Card
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <CardHeader>
-            <CardTitle>Health Progress</CardTitle>
-          </CardHeader>
-          <ProgressBar 
-            value={healthScore} 
-            status={status}
-            showLabel={true}
-            height="1rem"
-          />
-        </Card>
+          <PlantImagePlaceholder>
+            Plant Image
+          </PlantImagePlaceholder>
 
-        <Card
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <ActionButton>
-              <FiPlus />
-              Add Log
+          <ActionButtons>
+            <ActionButton primary>
+              <FiEdit3 />
+              Edit Plant
             </ActionButton>
-          </CardHeader>
-          <div className="grid grid-cols-2 gap-2">
-            <ActionButton>
-              <FiDroplet />
-              Water
+            <ActionButton onClick={handleRemovePlant}>
+              <FiTrash2 />
+              Remove Plant
             </ActionButton>
-            <ActionButton>
-              <FiCamera />
-              Photo
-            </ActionButton>
-          </div>
-        </Card>
-      </Grid>
+          </ActionButtons>
 
-      <Card
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <CardHeader>
-          <CardTitle>Current Sensor Data</CardTitle>
-        </CardHeader>
-        <SensorGrid>
-          <SensorCard>
-            <SensorIcon bgColor="#0ea5e9" color="white">
-              <FiDroplet />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Moisture</SensorLabel>
-              <SensorValue>{sensorData?.moisture || 0}%</SensorValue>
-            </SensorInfo>
-          </SensorCard>
+          <Section>
+            <SectionTitle>About Plant</SectionTitle>
+            <SectionContent>
+              <p><strong>Species:</strong> {plant.species}</p>
+              <p><strong>Last Watered:</strong> {plant.lastWatered ? new Date(plant.lastWatered).toLocaleDateString() : 'Never'}</p>
+              <p><strong>Status:</strong> {plant.status || 'Good'}</p>
+              <p>This is a beautiful {plant.species} that requires regular care and attention. Make sure to water it regularly and provide adequate sunlight for optimal growth.</p>
+            </SectionContent>
+          </Section>
 
-          <SensorCard>
-            <SensorIcon bgColor="#f59e0b" color="white">
-              <FiSun />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Light</SensorLabel>
-              <SensorValue>{sensorData?.light || 0}</SensorValue>
-            </SensorInfo>
-          </SensorCard>
+          <Section>
+            <SectionTitle>Care Tips</SectionTitle>
+            <SectionContent>
+              <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+                <li>Water when soil feels dry to touch</li>
+                <li>Place in bright, indirect sunlight</li>
+                <li>Fertilize monthly during growing season</li>
+                <li>Check for pests regularly</li>
+                <li>Rotate plant weekly for even growth</li>
+              </ul>
+            </SectionContent>
+          </Section>
 
-          <SensorCard>
-            <SensorIcon bgColor="#ef4444" color="white">
-              <FiThermometer />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Temperature</SensorLabel>
-              <SensorValue>{sensorData?.temperature || 0}°F</SensorValue>
-            </SensorInfo>
-          </SensorCard>
+          <Section>
+            <SectionTitle>Quick Actions</SectionTitle>
+            <QuickActions 
+              plant={plant}
+              onActionComplete={() => {
+                // Refresh plant data after action
+                loadPlantData();
+              }}
+            />
+          </Section>
 
-          <SensorCard>
-            <SensorIcon bgColor="#10b981" color="white">
-              <FiWind />
-            </SensorIcon>
-            <SensorInfo>
-              <SensorLabel>Humidity</SensorLabel>
-              <SensorValue>{sensorData?.humidity || 0}%</SensorValue>
-            </SensorInfo>
-          </SensorCard>
-        </SensorGrid>
-      </Card>
+          <Section>
+            <SectionTitle>Sensor History</SectionTitle>
+            <SensorHistoryPlaceholder>
+              Sensor Data Chart
+            </SensorHistoryPlaceholder>
+          </Section>
+        </LeftContent>
 
-      <Grid>
-        <Card
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <CardHeader>
-            <CardTitle>Care Instructions</CardTitle>
-          </CardHeader>
-          <CareInstructions>
-            <InstructionsTitle>Care Guidelines</InstructionsTitle>
-            {careInstructions && Object.entries(careInstructions).map(([key, value]) => (
-              <InstructionItem key={key}>
-                <InstructionLabel>{key.charAt(0).toUpperCase() + key.slice(1)}</InstructionLabel>
-                <InstructionValue>{value}</InstructionValue>
-              </InstructionItem>
-            ))}
-          </CareInstructions>
-        </Card>
+        <RightSidebar>
+          <SidebarSection>
+            <SidebarTitle>Overall Health</SidebarTitle>
+            <HealthBar>
+              <HealthFill percentage={healthPercentage} />
+            </HealthBar>
+            <div style={{ color: '#6B7280', fontSize: '0.9rem' }}>
+              {healthPercentage}% Healthy
+            </div>
+          </SidebarSection>
 
-        <Card
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <ActionButton>
-              <FiMessageCircle />
-              View All
-            </ActionButton>
-          </CardHeader>
-          <RecentLogs plantId={plantId} />
-        </Card>
-      </Grid>
+          <SidebarSection>
+            <SidebarTitle>Moisture Levels</SidebarTitle>
+            <MoistureChart>
+              <ChartLine viewBox="0 0 100 100" preserveAspectRatio="none">
+                <polyline
+                  points="0,80 20,60 40,70 60,40 80,50 100,30"
+                  fill="none"
+                  stroke="#065f46"
+                  strokeWidth="2"
+                />
+              </ChartLine>
+            </MoistureChart>
+            <div style={{ color: '#6B7280', fontSize: '0.9rem', textAlign: 'center', marginTop: '0.5rem' }}>
+              {moisturePercentage}% Moisture
+            </div>
+          </SidebarSection>
 
-      <Card
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-      >
-        <CardHeader>
-          <CardTitle>Sensor History</CardTitle>
-        </CardHeader>
-        <SensorChart data={[]} />
-      </Card>
-    </DetailContainer>
+          <SidebarSection>
+            <SidebarTitle>Soil Temperature</SidebarTitle>
+            <TemperatureBar>
+              <TemperatureBarContainer>
+                <TemperatureFill percentage={Math.min((temperature / 30) * 100, 100)} />
+              </TemperatureBarContainer>
+              <TemperatureValue>
+                <TemperatureNumber>{temperature}°</TemperatureNumber>
+                <TemperatureLabel>Temperature</TemperatureLabel>
+              </TemperatureValue>
+            </TemperatureBar>
+          </SidebarSection>
+
+          <SidebarSection>
+            <SidebarTitle style={{ textDecoration: 'underline' }}>Other Plants</SidebarTitle>
+            <OtherPlants>
+              <OtherPlantCard>Plant A</OtherPlantCard>
+              <OtherPlantCard>Plant B</OtherPlantCard>
+            </OtherPlants>
+          </SidebarSection>
+        </RightSidebar>
+      </MainContent>
+    </Container>
   );
 };
 
