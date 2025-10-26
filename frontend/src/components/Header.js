@@ -192,7 +192,7 @@ const Header = ({ plants, selectedPlant, onPlantSelect }) => {
     <HeaderContainer>
       <HeaderContent>
         <Logo to="/">
-          🌱 Smart Plant Tracker
+          🌱 smartsprout.ai
         </Logo>
 
         <Nav isOpen={isMenuOpen}>

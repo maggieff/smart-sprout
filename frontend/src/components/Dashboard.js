@@ -310,6 +310,13 @@ const WeatherIcon = styled.div`
   margin-bottom: 0.5rem;
 `;
 
+const TimeDisplay = styled.div`
+  font-size: 0.875rem;
+  color: #6B7280;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+`;
+
 const Card = styled(motion.div)`
   background: rgba(107, 124, 50, 0.3);
   border-radius: 0.75rem;
@@ -690,6 +697,7 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
   const [weather, setWeather] = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [location, setLocation] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const tooltipRef = useRef(null);
   const chartDataRef = useRef(null);
 
@@ -703,6 +711,23 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Time and day/night functions
+  const getTimeOfDay = () => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    
+    // Determine if it's day (6 AM to 6 PM) or night
+    const isDay = hours >= 6 && hours < 18;
+    
+    return {
+      timeString,
+      isDay,
+      hours
+    };
+  };
 
   // Weather API functions
   const getCurrentLocation = () => {
@@ -828,6 +853,15 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
       setWeatherLoading(false);
     }
   };
+
+  // Update time every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     loadWeatherData();
@@ -1098,7 +1132,13 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
           
           {weatherLoading ? (
             <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-              <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🌤️</div>
+              <TimeDisplay>
+                <FiClock style={{ marginRight: '0.25rem' }} />
+                {getTimeOfDay().timeString}
+              </TimeDisplay>
+              <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+                {getTimeOfDay().isDay ? '☀️' : '🌙'}
+              </div>
               <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>Loading weather...</div>
             </div>
           ) : weather ? (
@@ -1108,11 +1148,36 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
                 {weather.name}
               </WeatherLocation>
               
+              <TimeDisplay>
+                <FiClock style={{ marginRight: '0.25rem' }} />
+                {getTimeOfDay().timeString}
+              </TimeDisplay>
+              
               <WeatherIcon>
-                {weather.weather[0].main === 'Clear' ? '☀️' :
-                 weather.weather[0].main === 'Clouds' ? '☁️' :
-                 weather.weather[0].main === 'Rain' ? '🌧️' :
-                 weather.weather[0].main === 'Snow' ? '❄️' : '🌤️'}
+                {(() => {
+                  const { isDay } = getTimeOfDay();
+                  const weatherType = weather.weather[0].main;
+                  
+                  // Use sun/moon based on time of day for clear weather
+                  if (weatherType === 'Clear') {
+                    return isDay ? '☀️' : '🌙';
+                  }
+                  
+                  // For other weather types, use sun/moon with weather overlay
+                  if (weatherType === 'Clouds') {
+                    return isDay ? '⛅' : '☁️';
+                  }
+                  
+                  if (weatherType === 'Rain') {
+                    return isDay ? '🌦️' : '🌧️';
+                  }
+                  
+                  if (weatherType === 'Snow') {
+                    return isDay ? '🌨️' : '❄️';
+                  }
+                  
+                  return isDay ? '🌤️' : '🌙';
+                })()}
               </WeatherIcon>
               
               <WeatherTemp>{Math.round(weather.main.temp)}° C</WeatherTemp>
@@ -1139,7 +1204,13 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
             </>
           ) : (
             <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-              <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🌤️</div>
+              <TimeDisplay>
+                <FiClock style={{ marginRight: '0.25rem' }} />
+                {getTimeOfDay().timeString}
+              </TimeDisplay>
+              <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+                {getTimeOfDay().isDay ? '☀️' : '🌙'}
+              </div>
               <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>Unable to load weather</div>
             </div>
           )}
