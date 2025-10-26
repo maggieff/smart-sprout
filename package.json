@@ -1,26 +1,19 @@
 {
   "name": "smart-sprout",
   "version": "1.0.0",
-  "description": "- Node.js (v16+) - npm or yarn - Docker (for Chroma DB) - OpenAI API key (optional - has fallback responses)",
-  "main": "index.js",
+  "description": "Smart Plant Tracker with AI and IoT",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node scripts/startDemo.js",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && PORT=5001 node server.js",
+    "backend:https": "cd backend && PORT=5001 node server-https.js",
+    "frontend": "cd frontend && npm start",
+    "start:https": "concurrently \"npm run backend:https\" \"npm run frontend:https\"",
+    "frontend:https": "cd frontend && HTTPS=true npm start"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/maggieff/smart-sprout.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/maggieff/smart-sprout/issues"
-  },
-  "homepage": "https://github.com/maggieff/smart-sprout#readme",
-  "dependencies": {
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "openai": "^6.7.0"
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "https-localhost": "^4.7.1",
+    "selfsigned": "^3.0.1"
   }
 }

@@ -32,9 +32,18 @@ const upload = multer({
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
     
+    console.log('📁 File upload:', {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      extname: path.extname(file.originalname),
+      extnameValid: extname,
+      mimetypeValid: mimetype
+    });
+    
     if (mimetype && extname) {
       return cb(null, true);
     } else {
+      console.log('❌ File rejected:', file.originalname, file.mimetype);
       cb(new Error('Only image files are allowed!'));
     }
   }

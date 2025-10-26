@@ -1,11 +1,16 @@
 /**
  * Plant image analysis utilities
- * Simulated image analysis for demo purposes
- * In a real implementation, this would use computer vision APIs
+ * Real OpenAI Vision API integration for plant identification and health analysis
  */
 
 const fs = require('fs');
 const path = require('path');
+const OpenAI = require('openai');
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || 'your_openai_api_key_here'
+});
 
 /**
  * Analyze plant image for health issues and growth stage
@@ -15,32 +20,157 @@ const path = require('path');
  */
 async function analyzePlantImage(imagePath, plantId) {
   try {
-    console.log(`🔍 Analyzing plant image: ${imagePath}`);
+    console.log(`🔍 Analyzing plant image with OpenAI Vision: ${imagePath}`);
     
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Read the image file
+    const imageBuffer = fs.readFileSync(imagePath);
+    const base64Image = imageBuffer.toString('base64');
     
-    // Simulated analysis results
-    const analysis = {
-      healthScore: Math.random() * 0.4 + 0.6, // 0.6-1.0
-      growthStage: getRandomGrowthStage(),
-      issues: detectSimulatedIssues(),
-      recommendations: [],
-      confidence: Math.random() * 0.3 + 0.7, // 0.7-1.0
+    // Create OpenAI Vision API request
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `Analyze this plant image and provide detailed information about:
+1. Plant species identification (if possible)
+2. Overall health assessment (score 0-1)
+3. Visible issues or problems
+4. Growth stage (seedling, young, mature, flowering, etc.)
+5. Specific care recommendations
+6. Confidence level in the analysis
+
+Please respond in JSON format with this structure:
+{
+  "species": "plant name or 'unknown'",
+  "healthScore": 0.0-1.0,
+  "growthStage": "stage",
+  "issues": [{"type": "issue_type", "severity": "low/medium/high", "description": "details"}],
+  "recommendations": [{"type": "care_type", "priority": "low/medium/high", "message": "advice", "action": "specific action"}],
+  "confidence": 0.0-1.0,
+  "analysisNotes": "additional observations"
+}`
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:image/jpeg;base64,${base64Image}`
+              }
+            }
+          ]
+        }
+      ],
+      max_tokens: 1000,
+      temperature: 0.3
+    });
+    
+    // Parse the AI response
+    const aiResponse = response.choices[0].message.content;
+    console.log('🤖 OpenAI Vision Response:', aiResponse);
+    
+    let analysis;
+    try {
+      // Try to parse JSON response - handle markdown code blocks
+      let jsonString = aiResponse;
+      if (aiResponse.includes('```json')) {
+        jsonString = aiResponse.match(/```json\s*([\s\S]*?)\s*```/)?.[1] || aiResponse;
+      }
+      analysis = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.log('⚠️ Could not parse JSON, extracting structured data...');
+      console.log('Raw response:', aiResponse);
+      // Fallback: extract information from text response
+      analysis = extractAnalysisFromText(aiResponse);
+    }
+    
+    // Ensure required fields exist
+    analysis = {
+      species: analysis.species || 'Unknown Plant',
+      healthScore: parseFloat(analysis.healthScore) || 0.7,
+      growthStage: analysis.growthStage || 'mature',
+      issues: analysis.issues || [],
+      recommendations: analysis.recommendations || [],
+      confidence: parseFloat(analysis.confidence) || 0.8,
+      analysisNotes: analysis.analysisNotes || '',
       analysisDate: new Date().toISOString(),
-      plantId: plantId
+      plantId: plantId,
+      aiModel: 'gpt-4o'
     };
     
-    // Generate recommendations based on detected issues
-    analysis.recommendations = generateRecommendations(analysis.issues);
-    
-    console.log(`✅ Image analysis complete - Health Score: ${analysis.healthScore.toFixed(2)}`);
+    console.log(`✅ OpenAI Vision analysis complete - Species: ${analysis.species}, Health Score: ${analysis.healthScore.toFixed(2)}`);
     return analysis;
     
   } catch (error) {
-    console.error('Error analyzing plant image:', error);
-    return getFallbackAnalysis();
+    console.error('Error analyzing plant image with OpenAI Vision:', error);
+    
+    // If OpenAI fails, fall back to simulated analysis
+    console.log('🔄 Falling back to simulated analysis...');
+    return getFallbackAnalysis(plantId);
   }
+}
+
+/**
+ * Extract analysis data from text response when JSON parsing fails
+ * @param {string} textResponse - Raw text response from OpenAI
+ * @returns {Object} Structured analysis data
+ */
+function extractAnalysisFromText(textResponse) {
+  const analysis = {
+    species: 'Unknown Plant',
+    healthScore: 0.7,
+    growthStage: 'mature',
+    issues: [],
+    recommendations: [],
+    confidence: 0.8,
+    analysisNotes: textResponse
+  };
+  
+  // Try to extract species from JSON-like structure
+  const speciesMatch = textResponse.match(/"species":\s*"([^"]+)"/i);
+  if (speciesMatch) {
+    analysis.species = speciesMatch[1].trim();
+  } else {
+    // Fallback: try to extract species from text
+    const speciesMatch2 = textResponse.match(/(?:species|plant|type)[:\s]+([^,\n]+)/i);
+    if (speciesMatch2) {
+      analysis.species = speciesMatch2[1].trim();
+    }
+  }
+  
+  // Try to extract health score from JSON-like structure
+  const healthMatch = textResponse.match(/"healthScore":\s*([0-9.]+)/i);
+  if (healthMatch) {
+    analysis.healthScore = parseFloat(healthMatch[1]);
+  } else {
+    // Fallback: try to extract health score from text
+    const healthMatch2 = textResponse.match(/health[^0-9]*([0-9.]+)/i);
+    if (healthMatch2) {
+      analysis.healthScore = parseFloat(healthMatch2[1]);
+    }
+  }
+  
+  // Try to extract growth stage from JSON-like structure
+  const stageMatch = textResponse.match(/"growthStage":\s*"([^"]+)"/i);
+  if (stageMatch) {
+    analysis.growthStage = stageMatch[1].trim().toLowerCase();
+  } else {
+    // Fallback: try to extract growth stage from text
+    const stageMatch2 = textResponse.match(/(?:stage|growth)[:\s]+([^,\n]+)/i);
+    if (stageMatch2) {
+      analysis.growthStage = stageMatch2[1].trim().toLowerCase();
+    }
+  }
+  
+  // Try to extract confidence from JSON-like structure
+  const confidenceMatch = textResponse.match(/"confidence":\s*([0-9.]+)/i);
+  if (confidenceMatch) {
+    analysis.confidence = parseFloat(confidenceMatch[1]);
+  }
+  
+  return analysis;
 }
 
 /**
@@ -183,10 +313,12 @@ function generateRecommendations(issues) {
 
 /**
  * Get fallback analysis when image processing fails
+ * @param {string} plantId - Plant ID
  * @returns {Object} Fallback analysis
  */
-function getFallbackAnalysis() {
+function getFallbackAnalysis(plantId) {
   return {
+    species: 'Unknown Plant',
     healthScore: 0.7,
     growthStage: 'mature',
     issues: [],
@@ -194,13 +326,15 @@ function getFallbackAnalysis() {
       {
         type: 'general',
         priority: 'low',
-        message: 'Unable to analyze image',
-        action: 'Please try uploading a clearer photo',
+        message: 'Unable to analyze image with AI',
+        action: 'Please try uploading a clearer photo or check your OpenAI API key',
         emoji: '📷'
       }
     ],
     confidence: 0.3,
     analysisDate: new Date().toISOString(),
+    plantId: plantId,
+    aiModel: 'fallback',
     note: 'Analysis failed - using fallback data'
   };
 }
