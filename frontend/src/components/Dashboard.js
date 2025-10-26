@@ -1135,7 +1135,17 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
           
           {weatherLoading ? (
             <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-              <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🌤️</div>
+              <TimeDisplay>
+                <FiClock style={{ marginRight: '0.25rem' }} />
+                {getTimeOfDay().timeString}
+              </TimeDisplay>
+              <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+                {(() => {
+                  const { isDay } = getTimeOfDay();
+                  console.log('Loading weather icon:', { isDay });
+                  return isDay ? '☀️' : '🌙';
+                })()}
+              </div>
               <div style={{ fontSize: '0.875rem', color: '#6B7280' }}>Loading weather...</div>
             </div>
           ) : weather ? (
