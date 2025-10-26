@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { analyzePlantImage } = require('../utils/imageAnalysis');
+const { queryPlantKnowledge } = require('../utils/chromaClient');
+const { getAIResponse } = require('../utils/aiAssistant');
 
 const router = express.Router();
 
@@ -110,6 +112,112 @@ router.post('/', upload.single('photo'), async (req, res) => {
     
     res.status(500).json({ 
       error: 'Failed to upload photo',
+      details: error.message 
+    });
+  }
+});
+
+// POST /api/upload/identify - Identify plant from image and get care info
+router.post('/identify', upload.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ 
+        error: 'No photo uploaded' 
+      });
+    }
+
+    const filePath = req.file.path;
+    const fileName = req.file.filename;
+    
+    console.log('🔍 Identifying plant from image:', fileName);
+
+    // Analyze the plant image
+    const analysis = await analyzePlantImage(filePath, 'identification');
+    
+    console.log('🤖 AI Analysis:', {
+      species: analysis.species,
+      confidence: analysis.confidence,
+      healthScore: analysis.healthScore
+    });
+
+    // Search for plant care information using Chroma DB
+    let careKnowledge = null;
+    try {
+      careKnowledge = await queryPlantKnowledge(
+        `care requirements for ${analysis.species}`,
+        analysis.species
+      );
+      console.log('📚 Found care knowledge:', careKnowledge.relevantTips.length, 'tips');
+    } catch (chromaError) {
+      console.log('⚠️ Chroma search failed, using fallback:', chromaError.message);
+    }
+
+    // Get AI response for care recommendations
+    let aiCareResponse = null;
+    try {
+      aiCareResponse = await getAIResponse({
+        question: `What are the specific care requirements for ${analysis.species}?`,
+        species: analysis.species,
+        sensorData: {}
+      });
+      console.log('🤖 AI Care Response generated');
+    } catch (aiError) {
+      console.log('⚠️ AI care response failed:', aiError.message);
+    }
+
+    // Create comprehensive plant identification result
+    const identificationResult = {
+      species: analysis.species,
+      confidence: analysis.confidence,
+      healthScore: analysis.healthScore,
+      growthStage: analysis.growthStage,
+      issues: analysis.issues || [],
+      recommendations: analysis.recommendations || [],
+      careKnowledge: careKnowledge,
+      aiCareAdvice: aiCareResponse?.answer || 'Care information not available',
+      analysisNotes: analysis.analysisNotes,
+      identifiedAt: new Date().toISOString(),
+      photoUrl: `/uploads/${fileName}`
+    };
+
+    // Store the photo record
+    const photoRecord = {
+      id: uuidv4(),
+      plantId: 'identification',
+      fileName: fileName,
+      originalName: req.file.originalname,
+      filePath: filePath,
+      url: `/uploads/${fileName}`,
+      analysis: analysis,
+      uploadedAt: new Date().toISOString(),
+      fileSize: req.file.size,
+      mimeType: req.file.mimetype,
+      identificationResult: identificationResult
+    };
+
+    photoStorage.push(photoRecord);
+
+    res.json({
+      success: true,
+      identification: identificationResult,
+      photo: photoRecord,
+      message: `Plant identified as ${analysis.species} with ${Math.round(analysis.confidence * 100)}% confidence`
+    });
+
+  } catch (error) {
+    console.error('Error identifying plant:', error);
+    
+    // Clean up file if identification failed
+    if (req.file && req.file.path) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (cleanupError) {
+        console.error('Error cleaning up file:', cleanupError);
+      }
+    }
+    
+    res.status(500).json({ 
+      error: 'Failed to identify plant',
       details: error.message 
     });
   }
