@@ -9,6 +9,7 @@ import Dashboard from './components/Dashboard';
 import PlantDetail from './components/PlantDetail';
 import AIChat from './components/AIChat';
 import MyPlants from './components/MyPlants';
+import AddPlant from './components/AddPlant';
 import LoadingSpinner from './components/LoadingSpinner';
 
 // Context
@@ -72,6 +73,20 @@ function App() {
     }
   };
 
+  const handlePlantRemove = (removedPlantId) => {
+    setPlants(prevPlants => 
+      prevPlants.filter(plant => plant.id !== removedPlantId)
+    );
+    
+    if (selectedPlant && selectedPlant.id === removedPlantId) {
+      setSelectedPlant(null);
+    }
+  };
+
+  const handlePlantAdd = (newPlant) => {
+    setPlants(prevPlants => [...prevPlants, newPlant]);
+  };
+
   if (loading) {
     return (
       <AppContainer>
@@ -108,6 +123,7 @@ function App() {
                 <PlantDetail 
                   plants={plants}
                   onPlantUpdate={handlePlantUpdate}
+                  onPlantRemove={handlePlantRemove}
                 />
               } 
             />
@@ -126,6 +142,20 @@ function App() {
                   plants={plants}
                   onPlantSelect={handlePlantSelect}
                   onPlantUpdate={handlePlantUpdate}
+                />
+              } 
+            />
+            <Route 
+              path="/add-plant" 
+              element={<AddPlant onPlantAdd={handlePlantAdd} />} 
+            />
+            <Route 
+              path="/plant/:plantId" 
+              element={
+                <PlantDetail 
+                  plants={plants}
+                  onPlantUpdate={handlePlantUpdate}
+                  onPlantRemove={handlePlantRemove}
                 />
               } 
             />

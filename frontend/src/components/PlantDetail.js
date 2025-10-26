@@ -230,7 +230,7 @@ const OtherPlantsLabel = styled.div`
   margin-bottom: 0.5rem;
 `;
 
-const PlantDetail = ({ plants, onPlantUpdate }) => {
+const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
   const { plantId } = useParams();
   const navigate = useNavigate();
   const [plant, setPlant] = useState(null);
@@ -239,14 +239,23 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
 
   useEffect(() => {
     loadPlantData();
-  }, [plantId]);
+  }, [plantId, plants]);
 
   const loadPlantData = async () => {
     try {
       setLoading(true);
-      const plantData = await plantService.getPlantData(plantId);
-      setPlant(plantData);
       
+      // Find the plant in the plants array
+      const foundPlant = plants.find(p => p.id === plantId);
+      if (foundPlant) {
+        setPlant(foundPlant);
+      } else {
+        // If not found in local state, try API call as fallback
+        const plantData = await plantService.getPlantData(plantId);
+        setPlant(plantData);
+      }
+      
+      // Load logs
       const logsData = await logService.getLogs(plantId, 10);
       setLogs(logsData.logs || []);
     } catch (error) {
@@ -262,10 +271,52 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
     toast.success('Edit functionality coming soon!');
   };
 
-  const handleRemovePlant = () => {
+  const handleRemovePlant = async () => {
     if (window.confirm('Are you sure you want to remove this plant?')) {
-      // TODO: Implement remove functionality
-      toast.success('Remove functionality coming soon!');
+      try {
+        // For plants added through the frontend (with IDs like plant-${timestamp}-${id}),
+        // we only need to update the frontend state
+        if (plantId.startsWith('plant-') && plantId.includes('-')) {
+          // This is a frontend-added plant, just update the state
+          if (onPlantRemove) {
+            onPlantRemove(plantId);
+          }
+          toast.success('Plant removed successfully!');
+          navigate('/my-plants');
+        } else {
+          // This is a backend plant, try to delete from backend
+          const response = await fetch(`http://localhost:5001/api/plant-data/${plantId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            // Update the parent component's plants list
+            if (onPlantRemove) {
+              onPlantRemove(plantId);
+            }
+            toast.success('Plant removed successfully!');
+            navigate('/my-plants');
+          } else {
+            // If backend deletion fails, still remove from frontend state
+            if (onPlantRemove) {
+              onPlantRemove(plantId);
+            }
+            toast.success('Plant removed from your collection!');
+            navigate('/my-plants');
+          }
+        }
+      } catch (error) {
+        console.error('Error removing plant:', error);
+        // Even if there's an error, try to remove from frontend state
+        if (onPlantRemove) {
+          onPlantRemove(plantId);
+        }
+        toast.success('Plant removed from your collection!');
+        navigate('/my-plants');
+      }
     }
   };
 
@@ -381,7 +432,7 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
         </SidebarCard>
 
         <SidebarCard>
-          <SidebarTitle>Temperature</SidebarTitle>
+          <SidebarTitle>Soil Temperature</SidebarTitle>
           <TemperatureContainer>
             <TemperatureBar>
               <TemperatureFill percentage={temperaturePercentage} />
