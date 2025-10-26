@@ -63,7 +63,7 @@ const ActionStatus = styled.div`
   margin-top: 0.25rem;
 `;
 
-const QuickActions = ({ plant }) => {
+const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
   const [actions, setActions] = useState({
     watered: false,
     fertilized: false,
@@ -202,14 +202,19 @@ const QuickActions = ({ plant }) => {
         if (blob) {
           await processCapturedPhoto(blob);
         }
+        // Safely stop stream and remove modal
         stream.getTracks().forEach(track => track.stop());
-        document.body.removeChild(modal);
+        if (modal && modal.parentNode) {
+          document.body.removeChild(modal);
+        }
       }, 'image/jpeg', 0.8);
     };
     
     cancelButton.onclick = () => {
       stream.getTracks().forEach(track => track.stop());
-      document.body.removeChild(modal);
+      if (modal && modal.parentNode) {
+        document.body.removeChild(modal);
+      }
     };
     
     buttonContainer.appendChild(captureButton);
@@ -258,6 +263,11 @@ const QuickActions = ({ plant }) => {
       
       // You can add logic here to save the photo to your backend
       console.log('Photo captured:', photoData);
+      
+      // Call the callback to update the plant image
+      if (onPhotoCaptured) {
+        onPhotoCaptured(photoData);
+      }
       
       toast.success('Photo captured successfully! 📸');
       

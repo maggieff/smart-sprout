@@ -302,6 +302,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
   const navigate = useNavigate();
   const [plant, setPlant] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [plantPhoto, setPlantPhoto] = useState(null);
 
   useEffect(() => {
     loadPlantData();
@@ -325,6 +326,18 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
       toast.error('Failed to load plant data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePhotoCaptured = (photoData) => {
+    setPlantPhoto(photoData);
+    // You can also update the plant object to include the photo
+    if (plant) {
+      const updatedPlant = { ...plant, image: photoData.url, photoData: photoData };
+      setPlant(updatedPlant);
+      if (onPlantUpdate) {
+        onPlantUpdate(updatedPlant);
+      }
     }
   };
 
@@ -415,7 +428,40 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
           <PlantName>{plant.name}</PlantName>
 
           <PlantImagePlaceholder>
-            Plant Image
+            {plantPhoto ? (
+              <img 
+                src={plantPhoto.url} 
+                alt={plant.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: '1rem'
+                }}
+              />
+            ) : plant?.image ? (
+              <img 
+                src={plant.image} 
+                alt={plant.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: '1rem'
+                }}
+              />
+            ) : (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                fontSize: '4rem',
+                color: '#9CA3AF'
+              }}>
+                🌱
+              </div>
+            )}
           </PlantImagePlaceholder>
 
           <ActionButtons>
@@ -460,6 +506,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
                 // Refresh plant data after action
                 loadPlantData();
               }}
+              onPhotoCaptured={handlePhotoCaptured}
             />
           </Section>
 
