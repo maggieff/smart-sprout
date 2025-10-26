@@ -330,14 +330,27 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
     }
   };
 
-  const handlePhotoCaptured = (photoData) => {
-    setPlantPhoto(photoData);
-    // You can also update the plant object to include the photo
-    if (plant) {
-      const updatedPlant = { ...plant, image: photoData.url, photoData: photoData };
-      setPlant(updatedPlant);
-      if (onPlantUpdate) {
-        onPlantUpdate(updatedPlant);
+  const handleDeletePhoto = () => {
+    if (window.confirm('Are you sure you want to delete this plant\'s photo?')) {
+      try {
+        // Clear the plant photo state
+        setPlantPhoto(null);
+        
+        // Update the plant object to remove the image
+        if (plant) {
+          const updatedPlant = { ...plant, image: null, photoData: null };
+          setPlant(updatedPlant);
+          
+          // Update the parent component
+          if (onPlantUpdate) {
+            onPlantUpdate(updatedPlant);
+          }
+        }
+        
+        toast.success('Plant photo deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting photo:', error);
+        toast.error('Failed to delete photo');
       }
     }
   };
@@ -466,9 +479,9 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
           </PlantImagePlaceholder>
 
           <ActionButtons>
-            <ActionButton primary>
+            <ActionButton primary onClick={handleDeletePhoto}>
               <FiEdit3 />
-              Edit Plant
+              Delete Photo
             </ActionButton>
             <ActionButton onClick={handleRemovePlant}>
               <FiTrash2 />
