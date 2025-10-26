@@ -1,5 +1,8 @@
 # Smart Plant Tracker 🌱
 
+A hackathon-ready web application for tracking plant health with AI-powered recommendations, simulated sensors, and gamified progress tracking.
+
+## 🚀 Quick Start (36-Hour Hackathon Setup)
 ### Prerequisites
 - Node.js (v16+)
 - npm or yarn
