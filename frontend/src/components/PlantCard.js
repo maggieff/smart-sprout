@@ -44,13 +44,14 @@ const PlantInfo = styled.div`
 const PlantImage = styled.div`
   width: 4rem;
   height: 4rem;
-  background: linear-gradient(135deg, #10B981, #34D399);
+  background: ${props => props.hasImage ? 'transparent' : 'linear-gradient(135deg, #10B981, #34D399)'};
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
   color: white;
+  overflow: hidden;
 `;
 
 const PlantDetails = styled.div`
@@ -242,8 +243,21 @@ const PlantCard = ({ plant, onClick }) => {
     >
       <CardHeader>
         <PlantInfo>
-          <PlantImage>
-            🌱
+          <PlantImage hasImage={!!plant.image}>
+            {plant.image ? (
+              <img 
+                src={plant.image} 
+                alt={plant.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: '0.75rem'
+                }}
+              />
+            ) : (
+              '🌱'
+            )}
           </PlantImage>
           <PlantDetails>
             <PlantName>{plant.name}</PlantName>
