@@ -402,6 +402,13 @@ const PlantName = styled.h3`
   font-weight: normal;
   color: white;
   margin: 0 0 0.5rem 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: #E5E7EB;
+    text-decoration: underline;
+  }
 `;
 
 const PlantSpecies = styled.p`
@@ -1250,7 +1257,9 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
               ) : null}
             </PlantImage>
             <PlantDetails>
-              <PlantName>{selectedPlant ? selectedPlant.name : 'No plants yet'}</PlantName>
+              <PlantName onClick={() => selectedPlant && navigate(`/plant/${selectedPlant.id}`)}>
+                {selectedPlant ? selectedPlant.name : 'No plants yet'}
+              </PlantName>
               <PlantSpecies>{selectedPlant ? selectedPlant.species : 'Add your first plant to get started'}</PlantSpecies>
             </PlantDetails>
             <CareTips>

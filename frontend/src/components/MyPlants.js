@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PlantCard from './PlantCard';
 import { 
   FiPlus,
@@ -273,6 +273,7 @@ const EmptyDescription = styled.p`
 `;
 
 const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = React.useState('');
   const [viewMode, setViewMode] = React.useState('grid');
   const [filterStatus, setFilterStatus] = React.useState('all');
@@ -293,6 +294,11 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Handle plant navigation
+  const handlePlantClick = (plant) => {
+    navigate(`/plant/${plant.id}`);
+  };
 
   // Plant categories
   const plantCategories = [
@@ -683,7 +689,7 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
               >
                 <PlantCard 
                   plant={plant} 
-                  onClick={() => onPlantSelect(plant)}
+                  onClick={() => handlePlantClick(plant)}
                 />
               </motion.div>
             ))}
@@ -699,7 +705,7 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
               >
                 <PlantCard 
                   plant={plant} 
-                  onClick={() => onPlantSelect(plant)}
+                  onClick={() => handlePlantClick(plant)}
                 />
               </motion.div>
             ))}
