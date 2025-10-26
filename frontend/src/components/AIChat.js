@@ -9,6 +9,7 @@ import {
   FiHelpCircle
 } from 'react-icons/fi';
 import { aiService } from '../services/aiService';
+import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const ChatContainer = styled.div`
@@ -199,6 +200,7 @@ const LoadingMessage = styled.div`
 `;
 
 const AIChat = ({ selectedPlant }) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -252,6 +254,7 @@ const AIChat = ({ selectedPlant }) => {
       const response = await aiService.askQuestion({
         question: userMessage.text,
         plantId: selectedPlant?.id,
+        userId: user?.id,
         species: selectedPlant?.species,
         sensorData: selectedPlant?.sensorData
       });
