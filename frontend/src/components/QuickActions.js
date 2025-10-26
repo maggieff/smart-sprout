@@ -134,7 +134,7 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
       } 
     });
     
-    // Create camera modal
+    // Create camera modal with template design
     const modal = document.createElement('div');
     modal.style.cssText = `
       position: fixed;
@@ -142,55 +142,140 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.8);
       z-index: 10000;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      font-family: 'Karla', sans-serif;
+    `;
+    
+    // Modal content container
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    `;
+    
+    // Title
+    const title = document.createElement('h2');
+    title.textContent = 'TAKE A PHOTO';
+    title.style.cssText = `
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #374151;
+      margin: 0;
+      text-align: center;
+      letter-spacing: 0.05em;
+    `;
+    
+    // Camera feed container
+    const cameraContainer = document.createElement('div');
+    cameraContainer.style.cssText = `
+      width: 100%;
+      height: 400px;
+      background: #f3f4f6;
+      border-radius: 0.75rem;
+      border: 2px solid #e5e7eb;
+      overflow: hidden;
+      position: relative;
     `;
     
     const video = document.createElement('video');
     video.srcObject = stream;
     video.autoplay = true;
     video.style.cssText = `
-      width: 90%;
-      max-width: 500px;
-      height: auto;
-      border-radius: 1rem;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     `;
     
+    // Button container
     const buttonContainer = document.createElement('div');
     buttonContainer.style.cssText = `
-      margin-top: 2rem;
       display: flex;
       gap: 1rem;
+      width: 100%;
+      justify-content: space-between;
     `;
     
-    const captureButton = document.createElement('button');
-    captureButton.innerHTML = '📸 Capture';
-    captureButton.style.cssText = `
-      padding: 1rem 2rem;
-      background: #ef4444;
-      color: white;
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-    `;
-    
+    // Cancel button
     const cancelButton = document.createElement('button');
-    cancelButton.innerHTML = '❌ Cancel';
+    cancelButton.innerHTML = 'Cancel';
     cancelButton.style.cssText = `
-      padding: 1rem 2rem;
+      flex: 1;
+      padding: 0.75rem 1.5rem;
       background: #6b7280;
       color: white;
       border: none;
       border-radius: 0.5rem;
       font-size: 1rem;
+      font-weight: 500;
       cursor: pointer;
+      transition: all 0.2s ease;
     `;
     
+    // Upload File button
+    const uploadButton = document.createElement('button');
+    uploadButton.innerHTML = 'Upload File';
+    uploadButton.style.cssText = `
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      background: #6b7280;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    `;
+    
+    // Take Photo button (circular, green)
+    const captureButton = document.createElement('button');
+    captureButton.innerHTML = '📸';
+    captureButton.style.cssText = `
+      width: 60px;
+      height: 60px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    `;
+    
+    // Hover effects
+    cancelButton.onmouseover = () => cancelButton.style.background = '#4b5563';
+    cancelButton.onmouseout = () => cancelButton.style.background = '#6b7280';
+    
+    uploadButton.onmouseover = () => uploadButton.style.background = '#4b5563';
+    uploadButton.onmouseout = () => uploadButton.style.background = '#6b7280';
+    
+    captureButton.onmouseover = () => {
+      captureButton.style.background = '#059669';
+      captureButton.style.transform = 'scale(1.05)';
+    };
+    captureButton.onmouseout = () => {
+      captureButton.style.background = '#10b981';
+      captureButton.style.transform = 'scale(1)';
+    };
+    
+    // Event handlers
     captureButton.onclick = () => {
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
@@ -202,12 +287,19 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
         if (blob) {
           await processCapturedPhoto(blob);
         }
-        // Safely stop stream and remove modal
         stream.getTracks().forEach(track => track.stop());
         if (modal && modal.parentNode) {
           document.body.removeChild(modal);
         }
       }, 'image/jpeg', 0.8);
+    };
+    
+    uploadButton.onclick = () => {
+      stream.getTracks().forEach(track => track.stop());
+      if (modal && modal.parentNode) {
+        document.body.removeChild(modal);
+      }
+      openFileInput();
     };
     
     cancelButton.onclick = () => {
@@ -217,10 +309,16 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
       }
     };
     
-    buttonContainer.appendChild(captureButton);
+    // Assemble modal
+    cameraContainer.appendChild(video);
     buttonContainer.appendChild(cancelButton);
-    modal.appendChild(video);
-    modal.appendChild(buttonContainer);
+    buttonContainer.appendChild(uploadButton);
+    buttonContainer.appendChild(captureButton);
+    
+    modalContent.appendChild(title);
+    modalContent.appendChild(cameraContainer);
+    modalContent.appendChild(buttonContainer);
+    modal.appendChild(modalContent);
     document.body.appendChild(modal);
   };
 
