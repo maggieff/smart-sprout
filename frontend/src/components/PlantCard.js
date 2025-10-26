@@ -64,6 +64,13 @@ const PlantName = styled.h3`
   font-weight: normal;
   color: white;
   margin-bottom: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: #E5E7EB;
+    text-decoration: underline;
+  }
 `;
 
 const PlantSpecies = styled.p`
@@ -196,6 +203,7 @@ const ViewButton = styled(Link)`
   }
 `;
 
+
 const PlantCard = ({ plant, onClick }) => {
   const getStatusEmoji = (status) => {
     switch (status) {
@@ -260,7 +268,10 @@ const PlantCard = ({ plant, onClick }) => {
             )}
           </PlantImage>
           <PlantDetails>
-            <PlantName>{plant.name}</PlantName>
+            <PlantName onClick={(e) => {
+              e.stopPropagation();
+              if (onClick) onClick();
+            }}>{plant.name}</PlantName>
             <PlantSpecies>{plant.species}</PlantSpecies>
           </PlantDetails>
         </PlantInfo>
@@ -319,6 +330,7 @@ const PlantCard = ({ plant, onClick }) => {
           </SensorItem>
         </SensorGrid>
       )}
+
 
       <CardFooter>
         <LastWatered>

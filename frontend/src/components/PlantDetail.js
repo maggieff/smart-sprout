@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -9,12 +9,14 @@ import {
   FiThermometer, 
   FiWind,
   FiEdit3,
-  FiTrash2
+  FiTrash2,
+  FiEdit
 } from 'react-icons/fi';
 import { plantService } from '../services/plantService';
 import { logService } from '../services/logService';
 import LoadingSpinner from './LoadingSpinner';
 import QuickActions from './QuickActions';
+import PlantEditModal from './PlantEditModal';
 import toast from 'react-hot-toast';
 
 const Container = styled.div`
@@ -56,6 +58,7 @@ const BackButton = styled(Link)`
   text-decoration: none;
   font-weight: 500;
   font-size: 1.1rem;
+  font-family: 'Karla', sans-serif;
   transition: all 0.2s ease;
 
   &:hover {
@@ -69,7 +72,7 @@ const PlantName = styled.h1`
   font-size: 2.5rem;
   font-weight: 700;
   margin: 0;
-  font-family: 'Fredoka One', cursive;
+  font-family: 'Cubano', 'Karla', sans-serif;
 `;
 
 const PlantImagePlaceholder = styled.div`
@@ -98,6 +101,7 @@ const ActionButton = styled.button`
   border-radius: 0.75rem;
   font-weight: 600;
   font-size: 1rem;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -138,18 +142,6 @@ const SectionContent = styled.div`
   line-height: 1.6;
 `;
 
-const SensorHistoryPlaceholder = styled.div`
-  width: 100%;
-  height: 200px;
-  background: #E5E7EB;
-  border-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6B7280;
-  font-size: 1rem;
-  font-weight: 500;
-`;
 
 // Sidebar Components
 const SidebarSection = styled.div`
@@ -185,25 +177,136 @@ const HealthFill = styled.div`
 `;
 
 const MoistureChart = styled.div`
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 0.75rem;
+  padding: 1.5rem 1.5rem 2.5rem 3.5rem;
   width: 100%;
-  height: 80px;
-  background: #F3F4F6;
-  border-radius: 0.5rem;
+  height: 250px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6B7280;
-  font-size: 0.9rem;
+  flex-direction: column;
   position: relative;
-  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+`;
+
+const CurrentValue = styled.div`
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+`;
+
+const ChartContainer = styled.div`
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 150px;
+  margin-bottom: 1rem;
+`;
+
+const YAxisLabels = styled.div`
+  position: absolute;
+  left: -3rem;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: #6B7280;
+  width: 2.5rem;
+`;
+
+const YAxisLabel = styled.div`
+  text-align: right;
+  line-height: 1;
 `;
 
 const ChartLine = styled.svg`
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
+`;
+
+const ChartGrid = styled.line`
+  stroke: #E5E7EB;
+  stroke-width: 1;
+  stroke-dasharray: 2,2;
+`;
+
+const ChartArea = styled.path`
+  fill: url(#moistureGradient);
+  opacity: 0;
+  animation: fadeInArea 2s ease-in-out 0.5s forwards;
+  
+  @keyframes fadeInArea {
+    to {
+      opacity: 0.3;
+    }
+  }
+`;
+
+const InteractiveLine = styled.path`
+  stroke: #10B981;
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawLine 2s ease-in-out forwards;
+  cursor: pointer;
+  pointer-events: none;
+  
+  @keyframes drawLine {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+`;
+
+const InvisibleLine = styled.path`
+  stroke: transparent;
+  stroke-width: 12;
+  fill: none;
+  cursor: pointer;
+  pointer-events: all;
+`;
+
+const ChartLabels = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #6B7280;
+  margin-top: 0.5rem;
+`;
+
+const Tooltip = styled.div`
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  pointer-events: none;
+  z-index: 1000;
+  transform: translate(-50%, -100%);
+  margin-top: -0.5rem;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.8);
+  }
 `;
 
 const TemperatureBar = styled.div`
@@ -305,6 +408,107 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
   const [plant, setPlant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [plantPhoto, setPlantPhoto] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const tooltipRef = useRef(null);
+  const chartDataRef = useRef(null);
+
+  // Generate moisture data for the chart
+  const generateMoistureChartData = () => {
+    if (!plant?.sensorData?.moisture) {
+      // Generate sample data if no real data
+      const points = [];
+      for (let i = 0; i < 12; i++) {
+        const x = (i / 11) * 100;
+        const y = 50 + Math.sin(i * 0.5) * 20 + Math.random() * 10;
+        points.push({ x, y, time: new Date(Date.now() - (11 - i) * 2 * 60 * 60 * 1000) });
+      }
+      return points;
+    }
+
+    // Use real moisture data if available
+    const currentMoisture = plant.sensorData.moisture;
+    const points = [];
+    
+    // Generate historical data points (last 12 hours)
+    for (let i = 0; i < 12; i++) {
+      const hoursAgo = 11 - i;
+      const time = new Date(Date.now() - hoursAgo * 60 * 60 * 1000);
+      const variation = (Math.sin(i * 0.5) * 10) + (Math.random() * 5 - 2.5);
+      const moisture = Math.max(0, Math.min(100, currentMoisture + variation));
+      
+      points.push({
+        x: (i / 11) * 100,
+        y: 100 - moisture, // Invert Y for SVG coordinates
+        time,
+        moisture
+      });
+    }
+    
+    return points;
+  };
+
+  const createMoisturePath = (data) => {
+    if (!data || data.length === 0) return '';
+    
+    const pathData = data.map((point, index) => 
+      `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+    ).join(' ');
+    
+    return pathData;
+  };
+
+  const createMoistureArea = (data) => {
+    if (!data || data.length === 0) return '';
+    
+    const firstPoint = data[0];
+    const lastPoint = data[data.length - 1];
+    
+    const pathData = data.map((point, index) => 
+      `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
+    ).join(' ');
+    
+    return `${pathData} L ${lastPoint.x} 100 L ${firstPoint.x} 100 Z`;
+  };
+
+  const handleMouseMove = useCallback((event) => {
+    if (!chartDataRef.current) return;
+    
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const relativeX = (x / rect.width) * 100;
+    
+    // Find the closest data point
+    const closestPoint = chartDataRef.current.reduce((prev, curr) => 
+      Math.abs(curr.x - relativeX) < Math.abs(prev.x - relativeX) ? curr : prev
+    );
+    
+    // Update tooltip position directly without causing re-renders
+    if (tooltipRef.current) {
+      tooltipRef.current.style.left = `${x}px`;
+      tooltipRef.current.style.top = `${y}px`;
+      tooltipRef.current.style.display = 'block';
+      
+      // Update tooltip content
+      const moistureValue = Math.round(100 - closestPoint.y);
+      const timeValue = closestPoint.time ? closestPoint.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Time unknown';
+      
+      tooltipRef.current.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 0.25rem;">
+          ${moistureValue}% moisture
+        </div>
+        <div style="font-size: 0.7rem; opacity: 0.8;">
+          ${timeValue}
+        </div>
+      `;
+    }
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (tooltipRef.current) {
+      tooltipRef.current.style.display = 'none';
+    }
+  }, []);
 
   useEffect(() => {
     loadPlantData();
@@ -417,6 +621,19 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
     }
   };
 
+  const handleEditSave = (editedPlant) => {
+    if (onPlantUpdate) {
+      onPlantUpdate(editedPlant);
+    }
+    setPlant(editedPlant);
+    setShowEditModal(false);
+    toast.success('Plant updated successfully!');
+  };
+
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+  };
+
   if (loading) {
     return (
       <Container>
@@ -492,7 +709,11 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
           </PlantImagePlaceholder>
 
           <ActionButtons>
-            <ActionButton primary onClick={handleDeletePhoto}>
+            <ActionButton primary onClick={() => setShowEditModal(true)}>
+              <FiEdit />
+              Edit Plant
+            </ActionButton>
+            <ActionButton onClick={handleDeletePhoto}>
               <FiEdit3 />
               Delete Photo
             </ActionButton>
@@ -526,7 +747,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
           </Section>
 
           <Section>
-            <SectionTitle>Quick Actions</SectionTitle>
+            <SectionTitle>Quick Log!</SectionTitle>
             <QuickActions 
               plant={plant}
               onActionComplete={() => {
@@ -537,12 +758,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
             />
           </Section>
 
-          <Section>
-            <SectionTitle>Sensor History</SectionTitle>
-            <SensorHistoryPlaceholder>
-              Sensor Data Chart
-            </SensorHistoryPlaceholder>
-          </Section>
+
         </LeftContent>
 
         <RightSidebar>
@@ -558,15 +774,67 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
 
           <SidebarSection>
             <SidebarTitle>Moisture Levels</SidebarTitle>
+            <div style={{ fontSize: '0.875rem', color: '#6B7280', marginBottom: '0.5rem' }}>
+              Last 24 Hours
+            </div>
             <MoistureChart>
-              <ChartLine viewBox="0 0 100 100" preserveAspectRatio="none">
-                <polyline
-                  points="0,80 20,60 40,70 60,40 80,50 100,30"
-                  fill="none"
-                  stroke="#065f46"
-                  strokeWidth="2"
+              <CurrentValue>{moisturePercentage}%</CurrentValue>
+              <ChartContainer>
+                <YAxisLabels>
+                  <YAxisLabel>100%</YAxisLabel>
+                  <YAxisLabel>75%</YAxisLabel>
+                  <YAxisLabel>50%</YAxisLabel>
+                  <YAxisLabel>25%</YAxisLabel>
+                  <YAxisLabel>0%</YAxisLabel>
+                </YAxisLabels>
+                <ChartLine 
+                  viewBox="0 0 100 100" 
+                  preserveAspectRatio="none"
+                  onMouseMove={handleMouseMove}
+                  onMouseLeave={handleMouseLeave}
+                  onMouseEnter={() => {
+                    // Store chart data in ref to avoid re-calculations
+                    chartDataRef.current = generateMoistureChartData();
+                  }}
+                >
+                  <defs>
+                    <linearGradient id="moistureGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#10B981" stopOpacity="0.3"/>
+                      <stop offset="100%" stopColor="#10B981" stopOpacity="0.05"/>
+                    </linearGradient>
+                  </defs>
+                  
+                  {/* Grid lines */}
+                  <ChartGrid x1="0" y1="20" x2="100" y2="20" />
+                  <ChartGrid x1="0" y1="40" x2="100" y2="40" />
+                  <ChartGrid x1="0" y1="60" x2="100" y2="60" />
+                  <ChartGrid x1="0" y1="80" x2="100" y2="80" />
+                  
+                  {/* Area under the curve */}
+                  <ChartArea d={createMoistureArea(generateMoistureChartData())} />
+                  
+                  {/* Interactive line path */}
+                  <InteractiveLine d={createMoisturePath(generateMoistureChartData())} />
+                  
+                  {/* Invisible wider line for easier hovering */}
+                  <InvisibleLine d={createMoisturePath(generateMoistureChartData())} />
+                  
+                </ChartLine>
+                
+                {/* Tooltip */}
+                <Tooltip
+                  ref={tooltipRef}
+                  style={{
+                    display: 'none',
+                    position: 'absolute',
+                  }}
                 />
-              </ChartLine>
+              </ChartContainer>
+              <ChartLabels>
+                <span>12h ago</span>
+                <span>6h ago</span>
+                <span>Now</span>
+              </ChartLabels>
             </MoistureChart>
             <div style={{ color: '#1F2937', fontSize: '0.9rem', textAlign: 'center', marginTop: '0.5rem' }}>
               {moisturePercentage}% Moisture
@@ -574,7 +842,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
           </SidebarSection>
 
           <SidebarSection>
-            <SidebarTitle>Soil Temperature</SidebarTitle>
+            <SidebarTitle>Environment</SidebarTitle>
             <TemperatureBar>
               <TemperatureBarContainer>
                 <TemperatureFill percentage={Math.min((temperature / 30) * 100, 100)} />
@@ -584,6 +852,20 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
                 <TemperatureLabel>Temperature</TemperatureLabel>
               </TemperatureValue>
             </TemperatureBar>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', gap: '1rem' }}>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1F2937' }}>
+                  {plant.sensorData?.light || 400}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>Light (lumens)</div>
+              </div>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1F2937' }}>
+                  {plant.sensorData?.humidity || 50}%
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>Humidity</div>
+              </div>
+            </div>
           </SidebarSection>
 
           <SidebarSection>
@@ -629,6 +911,14 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
           </SidebarSection>
         </RightSidebar>
       </MainContent>
+
+      <PlantEditModal
+        isOpen={showEditModal}
+        onClose={handleEditCancel}
+        plantData={plant}
+        onSave={handleEditSave}
+        title="Edit Plant Details"
+      />
     </Container>
   );
 };

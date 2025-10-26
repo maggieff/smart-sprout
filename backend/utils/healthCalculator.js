@@ -1,355 +1,254 @@
 /**
- * Plant health calculation based on sensor data and care history
+ * Plant Health Score Calculator
+ * Calculates overall plant health (0-100%) from sensor readings
  */
 
 /**
- * Calculate overall plant health score (0-1)
- * @param {Object} sensorData - Current sensor readings
- * @param {Object} plant - Plant information and care history
- * @returns {number} Health score between 0 and 1
+ * Normalizes a sensor reading into a score between 0 and 1
+ * @param {number} value - The sensor reading
+ * @param {number} idealMin - Minimum of ideal range
+ * @param {number} idealMax - Maximum of ideal range
+ * @param {number} dangerMin - Minimum danger threshold
+ * @param {number} dangerMax - Maximum danger threshold
+ * @returns {number} Normalized score between 0 and 1
  */
-function calculateHealthScore(sensorData, plant) {
-  const weights = {
-    moisture: 0.3,
-    light: 0.25,
-    temperature: 0.2,
-    humidity: 0.15,
-    care: 0.1
+function normalizeSensorReading(value, idealMin, idealMax, dangerMin, dangerMax) {
+  // If value is in danger zone, return 0
+  if (value <= dangerMin || value >= dangerMax) {
+    return 0;
+  }
+  
+  // If value is in ideal range, return 1
+  if (value >= idealMin && value <= idealMax) {
+    return 1;
+  }
+  
+  // Linear scaling for values between ideal and danger ranges
+  if (value < idealMin) {
+    // Between dangerMin and idealMin
+    const range = idealMin - dangerMin;
+    const position = value - dangerMin;
+    return Math.max(0, position / range);
+  } else {
+    // Between idealMax and dangerMax
+    const range = dangerMax - idealMax;
+    const position = dangerMax - value;
+    return Math.max(0, position / range);
+  }
+}
+
+/**
+ * Calculates plant health score from sensor readings
+ * @param {Object} sensors - Sensor readings object
+ * @param {number} sensors.soil_temp - Soil temperature in °C
+ * @param {number} sensors.air_humidity - Air humidity percentage
+ * @param {number} sensors.soil_moisture - Soil moisture percentage
+ * @param {number} sensors.light_lumens - Light intensity in lumens
+ * @returns {Object} Health score and status
+ */
+function calculatePlantHealth(sensors) {
+  const {
+    soil_temp,
+    air_humidity,
+    soil_moisture,
+    light_lumens
+  } = sensors;
+
+  // Validate input parameters
+  if (typeof soil_temp !== 'number' || typeof air_humidity !== 'number' || 
+      typeof soil_moisture !== 'number' || typeof light_lumens !== 'number') {
+    throw new Error('All sensor readings must be numbers');
+  }
+
+  // Define ideal and danger ranges for each metric
+  const ranges = {
+    soil_temp: {
+      ideal: [18, 25],
+      danger: [10, 35]
+    },
+    air_humidity: {
+      ideal: [40, 70],
+      danger: [20, 90]
+    },
+    soil_moisture: {
+      ideal: [40, 60],
+      danger: [20, 90]
+    },
+    light_lumens: {
+      ideal: [10000, 40000],
+      danger: [5000, 80000]
+    }
   };
-  
-  // Calculate individual component scores
-  const moistureScore = calculateMoistureScore(sensorData.moisture, plant.species);
-  const lightScore = calculateLightScore(sensorData.light, plant.species);
-  const temperatureScore = calculateTemperatureScore(sensorData.temperature, plant.species);
-  const humidityScore = calculateHumidityScore(sensorData.humidity, plant.species);
-  const careScore = calculateCareScore(plant);
-  
-  // Weighted average
-  const healthScore = (
-    moistureScore * weights.moisture +
-    lightScore * weights.light +
-    temperatureScore * weights.temperature +
-    humidityScore * weights.humidity +
-    careScore * weights.care
+
+  // Calculate normalized scores for each sensor
+  const soilTempScore = normalizeSensorReading(
+    soil_temp,
+    ranges.soil_temp.ideal[0],
+    ranges.soil_temp.ideal[1],
+    ranges.soil_temp.danger[0],
+    ranges.soil_temp.danger[1]
   );
-  
-  return Math.max(0, Math.min(1, healthScore));
-}
 
-/**
- * Calculate moisture score based on plant species preferences
- * @param {number} moisture - Current moisture level (0-100)
- * @param {string} species - Plant species
- * @returns {number} Score between 0 and 1
- */
-function calculateMoistureScore(moisture, species) {
-  const preferences = getMoisturePreferences(species);
-  
-  if (moisture >= preferences.optimalMin && moisture <= preferences.optimalMax) {
-    return 1.0;
-  } else if (moisture >= preferences.acceptableMin && moisture <= preferences.acceptableMax) {
-    return 0.7;
-  } else if (moisture >= preferences.tolerableMin && moisture <= preferences.tolerableMax) {
-    return 0.4;
+  const humidityScore = normalizeSensorReading(
+    air_humidity,
+    ranges.air_humidity.ideal[0],
+    ranges.air_humidity.ideal[1],
+    ranges.air_humidity.danger[0],
+    ranges.air_humidity.danger[1]
+  );
+
+  const moistureScore = normalizeSensorReading(
+    soil_moisture,
+    ranges.soil_moisture.ideal[0],
+    ranges.soil_moisture.ideal[1],
+    ranges.soil_moisture.danger[0],
+    ranges.soil_moisture.danger[1]
+  );
+
+  const lightScore = normalizeSensorReading(
+    light_lumens,
+    ranges.light_lumens.ideal[0],
+    ranges.light_lumens.ideal[1],
+    ranges.light_lumens.danger[0],
+    ranges.light_lumens.danger[1]
+  );
+
+  // Define weights for each metric
+  const weights = {
+    soil_moisture: 0.35,
+    light: 0.25,
+    air_humidity: 0.20,
+    soil_temp: 0.20
+  };
+
+  // Calculate weighted overall score
+  const overallScore = (
+    moistureScore * weights.soil_moisture +
+    lightScore * weights.light +
+    humidityScore * weights.air_humidity +
+    soilTempScore * weights.soil_temp
+  ) * 100;
+
+  // Round to 1 decimal place
+  const healthScore = Math.round(overallScore * 10) / 10;
+
+  // Determine status based on score
+  let status;
+  if (healthScore >= 80) {
+    status = "Healthy 🌱";
+  } else if (healthScore >= 60) {
+    status = "Okay 🌤️";
+  } else if (healthScore >= 40) {
+    status = "Weak 🌧️";
   } else {
-    return 0.1;
+    status = "Unhealthy ☠️";
   }
+
+  return {
+    health_score: healthScore,
+    status: status,
+    breakdown: {
+      soil_temp: {
+        value: soil_temp,
+        score: Math.round(soilTempScore * 100) / 100,
+        weight: weights.soil_temp
+      },
+      air_humidity: {
+        value: air_humidity,
+        score: Math.round(humidityScore * 100) / 100,
+        weight: weights.air_humidity
+      },
+      soil_moisture: {
+        value: soil_moisture,
+        score: Math.round(moistureScore * 100) / 100,
+        weight: weights.soil_moisture
+      },
+      light_lumens: {
+        value: light_lumens,
+        score: Math.round(lightScore * 100) / 100,
+        weight: weights.light
+      }
+    }
+  };
 }
 
 /**
- * Calculate light score based on plant species preferences
- * @param {number} light - Current light level (0-1000)
- * @param {string} species - Plant species
- * @returns {number} Score between 0 and 1
+ * Express.js endpoint handler for health calculation
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
  */
-function calculateLightScore(light, species) {
-  const preferences = getLightPreferences(species);
-  
-  if (light >= preferences.optimalMin && light <= preferences.optimalMax) {
-    return 1.0;
-  } else if (light >= preferences.acceptableMin && light <= preferences.acceptableMax) {
-    return 0.7;
-  } else if (light >= preferences.tolerableMin && light <= preferences.tolerableMax) {
-    return 0.4;
-  } else {
-    return 0.1;
-  }
-}
-
-/**
- * Calculate temperature score
- * @param {number} temperature - Current temperature in Fahrenheit
- * @param {string} species - Plant species
- * @returns {number} Score between 0 and 1
- */
-function calculateTemperatureScore(temperature, species) {
-  const preferences = getTemperaturePreferences(species);
-  
-  if (temperature >= preferences.optimalMin && temperature <= preferences.optimalMax) {
-    return 1.0;
-  } else if (temperature >= preferences.acceptableMin && temperature <= preferences.acceptableMax) {
-    return 0.7;
-  } else if (temperature >= preferences.tolerableMin && temperature <= preferences.tolerableMax) {
-    return 0.4;
-  } else {
-    return 0.1;
-  }
-}
-
-/**
- * Calculate humidity score
- * @param {number} humidity - Current humidity percentage
- * @param {string} species - Plant species
- * @returns {number} Score between 0 and 1
- */
-function calculateHumidityScore(humidity, species) {
-  const preferences = getHumidityPreferences(species);
-  
-  if (humidity >= preferences.optimalMin && humidity <= preferences.optimalMax) {
-    return 1.0;
-  } else if (humidity >= preferences.acceptableMin && humidity <= preferences.acceptableMax) {
-    return 0.7;
-  } else if (humidity >= preferences.tolerableMin && humidity <= preferences.tolerableMax) {
-    return 0.4;
-  } else {
-    return 0.1;
-  }
-}
-
-/**
- * Calculate care score based on recent care activities
- * @param {Object} plant - Plant information with care history
- * @returns {number} Score between 0 and 1
- */
-function calculateCareScore(plant) {
-  let score = 0.5; // Base score
-  
-  // Check last watering
-  const daysSinceWatered = Math.floor((Date.now() - plant.lastWatered.getTime()) / (24 * 60 * 60 * 1000));
-  if (daysSinceWatered <= 3) {
-    score += 0.2;
-  } else if (daysSinceWatered <= 7) {
-    score += 0.1;
-  } else if (daysSinceWatered > 14) {
-    score -= 0.2;
-  }
-  
-  // Check for recent logs (engagement)
-  if (plant.recentLogs && plant.recentLogs.length > 0) {
-    const recentLogs = plant.recentLogs.filter(log => {
-      const logDate = new Date(log.timestamp);
-      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      return logDate >= weekAgo;
+function healthCalculationEndpoint(req, res) {
+  try {
+    const { soil_temp, air_humidity, soil_moisture, light_lumens } = req.body;
+    
+    const result = calculatePlantHealth({
+      soil_temp,
+      air_humidity,
+      soil_moisture,
+      light_lumens
     });
     
-    if (recentLogs.length >= 3) {
-      score += 0.2;
-    } else if (recentLogs.length >= 1) {
-      score += 0.1;
-    }
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      error: error.message
+    });
   }
-  
-  return Math.max(0, Math.min(1, score));
 }
 
-/**
- * Get moisture preferences for different plant species
- * @param {string} species - Plant species
- * @returns {Object} Moisture preference ranges
- */
-function getMoisturePreferences(species) {
-  const preferences = {
-    'snake plant': {
-      optimalMin: 20, optimalMax: 40,
-      acceptableMin: 15, acceptableMax: 50,
-      tolerableMin: 10, tolerableMax: 60
+// Test cases
+if (require.main === module) {
+  console.log('🧪 Testing Plant Health Calculator\n');
+  
+  const testCases = [
+    {
+      name: "Perfect Conditions",
+      input: { soil_temp: 23, air_humidity: 55, soil_moisture: 50, light_lumens: 20000 },
+      expected: "Should be very high score"
     },
-    'fiddle leaf fig': {
-      optimalMin: 40, optimalMax: 70,
-      acceptableMin: 30, acceptableMax: 80,
-      tolerableMin: 20, tolerableMax: 90
+    {
+      name: "Good Conditions",
+      input: { soil_temp: 22, air_humidity: 60, soil_moisture: 45, light_lumens: 25000 },
+      expected: "Should be high score"
     },
-    'monstera': {
-      optimalMin: 50, optimalMax: 80,
-      acceptableMin: 40, acceptableMax: 85,
-      tolerableMin: 30, tolerableMax: 90
+    {
+      name: "Poor Soil Moisture",
+      input: { soil_temp: 20, air_humidity: 50, soil_moisture: 15, light_lumens: 30000 },
+      expected: "Should be lower due to moisture"
     },
-    'pothos': {
-      optimalMin: 30, optimalMax: 60,
-      acceptableMin: 20, acceptableMax: 70,
-      tolerableMin: 15, tolerableMax: 80
+    {
+      name: "Dangerous Conditions",
+      input: { soil_temp: 5, air_humidity: 10, soil_moisture: 5, light_lumens: 1000 },
+      expected: "Should be very low"
     },
-    'succulent': {
-      optimalMin: 10, optimalMax: 30,
-      acceptableMin: 5, acceptableMax: 40,
-      tolerableMin: 0, tolerableMax: 50
+    {
+      name: "Edge Case - Just Outside Ideal",
+      input: { soil_temp: 17, air_humidity: 39, soil_moisture: 39, light_lumens: 9500 },
+      expected: "Should be moderate"
     }
-  };
-  
-  return preferences[species.toLowerCase()] || preferences['snake plant'];
-}
+  ];
 
-/**
- * Get light preferences for different plant species
- * @param {string} species - Plant species
- * @returns {Object} Light preference ranges
- */
-function getLightPreferences(species) {
-  const preferences = {
-    'snake plant': {
-      optimalMin: 200, optimalMax: 800,
-      acceptableMin: 100, acceptableMax: 1000,
-      tolerableMin: 50, tolerableMax: 1200
-    },
-    'fiddle leaf fig': {
-      optimalMin: 400, optimalMax: 1000,
-      acceptableMin: 300, acceptableMax: 1200,
-      tolerableMin: 200, tolerableMax: 1500
-    },
-    'monstera': {
-      optimalMin: 300, optimalMax: 900,
-      acceptableMin: 200, acceptableMax: 1100,
-      tolerableMin: 100, tolerableMax: 1300
-    },
-    'pothos': {
-      optimalMin: 200, optimalMax: 700,
-      acceptableMin: 100, acceptableMax: 900,
-      tolerableMin: 50, tolerableMax: 1100
-    },
-    'succulent': {
-      optimalMin: 500, optimalMax: 1000,
-      acceptableMin: 300, acceptableMax: 1200,
-      tolerableMin: 200, tolerableMax: 1500
+  testCases.forEach((testCase, index) => {
+    console.log(`Test ${index + 1}: ${testCase.name}`);
+    console.log(`Input:`, testCase.input);
+    
+    try {
+      const result = calculatePlantHealth(testCase.input);
+      console.log(`Output:`, result);
+      console.log(`Expected: ${testCase.expected}`);
+    } catch (error) {
+      console.log(`Error: ${error.message}`);
     }
-  };
-  
-  return preferences[species.toLowerCase()] || preferences['snake plant'];
-}
-
-/**
- * Get temperature preferences for different plant species
- * @param {string} species - Plant species
- * @returns {Object} Temperature preference ranges
- */
-function getTemperaturePreferences(species) {
-  const preferences = {
-    'snake plant': {
-      optimalMin: 65, optimalMax: 85,
-      acceptableMin: 60, acceptableMax: 90,
-      tolerableMin: 55, tolerableMax: 95
-    },
-    'fiddle leaf fig': {
-      optimalMin: 65, optimalMax: 75,
-      acceptableMin: 60, acceptableMax: 80,
-      tolerableMin: 55, tolerableMax: 85
-    },
-    'monstera': {
-      optimalMin: 68, optimalMax: 86,
-      acceptableMin: 65, acceptableMax: 90,
-      tolerableMin: 60, tolerableMax: 95
-    },
-    'pothos': {
-      optimalMin: 60, optimalMax: 85,
-      acceptableMin: 55, acceptableMax: 90,
-      tolerableMin: 50, tolerableMax: 95
-    },
-    'succulent': {
-      optimalMin: 60, optimalMax: 90,
-      acceptableMin: 55, acceptableMax: 95,
-      tolerableMin: 50, tolerableMax: 100
-    }
-  };
-  
-  return preferences[species.toLowerCase()] || preferences['snake plant'];
-}
-
-/**
- * Get humidity preferences for different plant species
- * @param {string} species - Plant species
- * @returns {Object} Humidity preference ranges
- */
-function getHumidityPreferences(species) {
-  const preferences = {
-    'snake plant': {
-      optimalMin: 30, optimalMax: 50,
-      acceptableMin: 20, acceptableMax: 60,
-      tolerableMin: 15, tolerableMax: 70
-    },
-    'fiddle leaf fig': {
-      optimalMin: 50, optimalMax: 70,
-      acceptableMin: 40, acceptableMax: 80,
-      tolerableMin: 30, tolerableMax: 90
-    },
-    'monstera': {
-      optimalMin: 60, optimalMax: 80,
-      acceptableMin: 50, acceptableMax: 85,
-      tolerableMin: 40, tolerableMax: 90
-    },
-    'pothos': {
-      optimalMin: 40, optimalMax: 60,
-      acceptableMin: 30, acceptableMax: 70,
-      tolerableMin: 20, tolerableMax: 80
-    },
-    'succulent': {
-      optimalMin: 20, optimalMax: 40,
-      acceptableMin: 15, acceptableMax: 50,
-      tolerableMin: 10, tolerableMax: 60
-    }
-  };
-  
-  return preferences[species.toLowerCase()] || preferences['snake plant'];
-}
-
-/**
- * Get health status based on score
- * @param {number} healthScore - Health score (0-1)
- * @returns {Object} Health status information
- */
-function getHealthStatus(healthScore) {
-  if (healthScore >= 0.9) {
-    return {
-      status: 'excellent',
-      message: 'Your plant is thriving! 🌟',
-      color: '#10B981',
-      emoji: '🌟'
-    };
-  } else if (healthScore >= 0.7) {
-    return {
-      status: 'good',
-      message: 'Your plant is doing well! 😊',
-      color: '#34D399',
-      emoji: '😊'
-    };
-  } else if (healthScore >= 0.5) {
-    return {
-      status: 'fair',
-      message: 'Your plant needs some attention 📝',
-      color: '#FBBF24',
-      emoji: '📝'
-    };
-  } else if (healthScore >= 0.3) {
-    return {
-      status: 'poor',
-      message: 'Your plant needs help! 🆘',
-      color: '#F59E0B',
-      emoji: '🆘'
-    };
-  } else {
-    return {
-      status: 'critical',
-      message: 'Your plant needs immediate attention! 🚨',
-      color: '#EF4444',
-      emoji: '🚨'
-    };
-  }
+    console.log('---\n');
+  });
 }
 
 module.exports = {
-  calculateHealthScore,
-  calculateMoistureScore,
-  calculateLightScore,
-  calculateTemperatureScore,
-  calculateHumidityScore,
-  calculateCareScore,
-  getHealthStatus
+  calculatePlantHealth,
+  healthCalculationEndpoint,
+  normalizeSensorReading
 };

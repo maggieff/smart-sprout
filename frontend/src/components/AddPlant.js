@@ -11,6 +11,7 @@ import {
   FiImage
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import PlantEditModal from './PlantEditModal';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -32,6 +33,15 @@ const SearchSection = styled.div`
   width: 100%;
   max-width: 500px;
   margin-bottom: 1rem;
+`;
+
+const QuickAddHeader = styled.h2`
+  font-family: 'Cubano', 'Karla', sans-serif;
+  font-size: 2rem;
+  font-weight: normal;
+  color: white;
+  text-align: center;
+  margin: 1rem 0 0.5rem 0;
 `;
 
 const PlantGrid = styled.div`
@@ -85,6 +95,7 @@ const PlantName = styled.div`
   color: white;
   font-weight: 500;
   font-size: 0.875rem;
+  font-family: 'Karla', sans-serif;
   margin-bottom: 0.5rem;
 `;
 
@@ -99,6 +110,7 @@ const AddButton = styled.button`
   padding: 0.5rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 500;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -124,6 +136,7 @@ const SearchInput = styled.input`
   border-radius: 0.75rem;
   background: #E0E0D0;
   font-size: 1rem;
+  font-family: 'Karla', sans-serif;
   color: #1f2937;
   outline: none;
   transition: all 0.2s ease;
@@ -202,6 +215,7 @@ const CloseButton = styled.button`
   border: none;
   font-size: 1.5rem;
   color: #6b7280;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 0.5rem;
@@ -226,6 +240,7 @@ const OptionButton = styled.button`
   border: 2px solid #e5e7eb;
   border-radius: 0.75rem;
   background: white;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   
@@ -248,12 +263,14 @@ const OptionText = styled.div`
 const OptionTitle = styled.div`
   font-weight: 600;
   color: #1f2937;
+  font-family: 'Karla', sans-serif;
   margin-bottom: 0.25rem;
 `;
 
 const OptionDescription = styled.div`
   font-size: 0.875rem;
   color: #6b7280;
+  font-family: 'Karla', sans-serif;
 `;
 
 const HiddenFileInput = styled.input`
@@ -279,6 +296,7 @@ const AnalyzeButton = styled.button`
   border-radius: 0.5rem;
   padding: 0.75rem 1.5rem;
   font-weight: 600;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   
@@ -313,6 +331,8 @@ const AddPlant = ({ onPlantAdd }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [identifiedPlant, setIdentifiedPlant] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [plantToEdit, setPlantToEdit] = useState(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -436,6 +456,23 @@ const AddPlant = ({ onPlantAdd }) => {
     if (!identifiedPlant) return;
 
     try {
+      // Get additional care information from the database
+      const careResponse = await fetch('/api/plant-care/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          plantName: identifiedPlant.species
+        })
+      });
+
+      let additionalCareInfo = null;
+      if (careResponse.ok) {
+        const careData = await careResponse.json();
+        additionalCareInfo = careData;
+      }
+
       // Create new plant object with required fields
       const newPlant = {
         id: `plant-${Date.now()}-${identifiedPlant.id}`,
@@ -453,6 +490,9 @@ const AddPlant = ({ onPlantAdd }) => {
         },
         careInfo: identifiedPlant.careInfo,
         careKnowledge: identifiedPlant.careKnowledge,
+        additionalCareInfo: additionalCareInfo,
+        careTips: additionalCareInfo ? additionalCareInfo.quickTips : null,
+        careSummary: additionalCareInfo ? additionalCareInfo.careInfo : null,
         growthStage: identifiedPlant.growthStage,
         issues: identifiedPlant.issues,
         recommendations: identifiedPlant.recommendations,
@@ -460,18 +500,10 @@ const AddPlant = ({ onPlantAdd }) => {
         confidence: identifiedPlant.confidence
       };
 
-      // Call the parent component's add function
-      if (onPlantAdd) {
-        onPlantAdd(newPlant);
-      }
-
-      toast.success(`${identifiedPlant.name} added to your collection!`);
-      
-      // Close modal and navigate
+      // Show edit modal instead of directly adding
+      setPlantToEdit(newPlant);
+      setShowEditModal(true);
       handleCloseModal();
-      setTimeout(() => {
-        navigate('/my-plants');
-      }, 1500);
 
     } catch (error) {
       console.error('Error adding identified plant:', error);
@@ -481,6 +513,23 @@ const AddPlant = ({ onPlantAdd }) => {
 
   const handleClearSearch = () => {
     setSearchTerm('');
+  };
+
+  const handleEditSave = (editedPlant) => {
+    if (onPlantAdd) {
+      onPlantAdd(editedPlant);
+    }
+    toast.success(`${editedPlant.name} added to your collection!`);
+    setShowEditModal(false);
+    setPlantToEdit(null);
+    setTimeout(() => {
+      navigate('/my-plants');
+    }, 1500);
+  };
+
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+    setPlantToEdit(null);
   };
 
   const handleAddPlant = async (plantId) => {
@@ -494,8 +543,22 @@ const AddPlant = ({ onPlantAdd }) => {
     try {
       setAddingPlants(prev => new Set(prev).add(plantId));
       
-      // Simulate API call to add plant
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Get care information from the database
+      const careResponse = await fetch('/api/plant-care/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          plantName: plant.name
+        })
+      });
+
+      let careInfo = null;
+      if (careResponse.ok) {
+        const careData = await careResponse.json();
+        careInfo = careData;
+      }
       
       // Create new plant object with required fields
       const newPlant = {
@@ -511,20 +574,15 @@ const AddPlant = ({ onPlantAdd }) => {
           light: Math.floor(Math.random() * 200) + 300,  // 300-500
           temperature: Math.floor(Math.random() * 20) + 65, // 65-85°F
           humidity: Math.floor(Math.random() * 30) + 40   // 40-70%
-        }
+        },
+        careInfo: careInfo,
+        careTips: careInfo ? careInfo.quickTips : null,
+        careSummary: careInfo ? careInfo.careInfo : null
       };
 
-      // Call the parent component's add function
-      if (onPlantAdd) {
-        onPlantAdd(newPlant);
-      }
-
-      toast.success(`${plant.name} added to your collection!`);
-      
-      // Navigate to My Plants page after a short delay
-      setTimeout(() => {
-        navigate('/my-plants');
-      }, 1500);
+      // Show edit modal instead of directly adding
+      setPlantToEdit(newPlant);
+      setShowEditModal(true);
 
     } catch (error) {
       console.error('Error adding plant:', error);
@@ -554,7 +612,7 @@ const AddPlant = ({ onPlantAdd }) => {
               <form onSubmit={handleSearch}>
                 <SearchInput
                   type="text"
-                  placeholder="Search by plant name..."
+                  placeholder="Search by plant name/species or upload a photo..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -573,7 +631,9 @@ const AddPlant = ({ onPlantAdd }) => {
         </SearchSection>
 
         {filteredPlants.length > 0 ? (
-          <PlantGrid>
+          <>
+            <QuickAddHeader>Quick Add</QuickAddHeader>
+            <PlantGrid>
             {filteredPlants.map((plant, index) => (
               <PlantCard
                 key={plant.id}
@@ -599,6 +659,7 @@ const AddPlant = ({ onPlantAdd }) => {
               </PlantCard>
             ))}
           </PlantGrid>
+          </>
         ) : (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -706,6 +767,14 @@ const AddPlant = ({ onPlantAdd }) => {
           </ModalContent>
         </CameraModal>
       )}
+
+      <PlantEditModal
+        isOpen={showEditModal}
+        onClose={handleEditCancel}
+        plantData={plantToEdit}
+        onSave={handleEditSave}
+        title="Customize Your Plant"
+      />
     </Container>
   );
 };

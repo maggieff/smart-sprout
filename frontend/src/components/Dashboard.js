@@ -132,6 +132,7 @@ const Input = styled.input`
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   font-size: 1rem;
+  font-family: 'Karla', sans-serif;
   transition: all 0.2s ease;
 
   &:focus {
@@ -177,6 +178,7 @@ const SubmitButton = styled.button`
   border: none;
   border-radius: 0.5rem;
   font-weight: 500;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   margin-top: 0.5rem;
@@ -289,6 +291,7 @@ const RefreshButton = styled.button`
   background: none;
   border: none;
   color: #6B7280;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 0.25rem;
@@ -318,12 +321,13 @@ const TimeDisplay = styled.div`
 `;
 
 const Card = styled(motion.div)`
-  background: rgba(107, 124, 50, 0.3);
+  background: #65876a;
   border-radius: 0.75rem;
   padding: 1.5rem;
   margin: 1rem 2rem 0 2rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #5a6b5d;
+  color: white;
 `;
 
 const SectionHeader = styled.div`
@@ -337,7 +341,7 @@ const SectionTitle = styled.h2`
   font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.5rem;
   font-weight: normal;
-  color: #1f2937;
+  color: white;
   margin: 0;
 `;
 
@@ -351,6 +355,7 @@ const NewPlantButton = styled.button`
   border: none;
   border-radius: 0.5rem;
   font-weight: 500;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -395,29 +400,36 @@ const PlantName = styled.h3`
   font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.5rem;
   font-weight: normal;
-  color: #1f2937;
+  color: white;
   margin: 0 0 0.5rem 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: #E5E7EB;
+    text-decoration: underline;
+  }
 `;
 
 const PlantSpecies = styled.p`
   font-size: 1rem;
-  color: #6b7280;
+  color: #E5E7EB;
   margin: 0;
 `;
 
 const CareTips = styled.div`
-  color: #1f2937;
+  color: white;
   font-size: 1rem;
 `;
 
 const CareTipsLabel = styled.div`
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: #1f2937;
+  color: white;
 `;
 
 const CareTipsText = styled.div`
-  color: #6b7280;
+  color: #E5E7EB;
 `;
 
 const ViewDetailsButton = styled.button`
@@ -430,6 +442,7 @@ const ViewDetailsButton = styled.button`
   border: none;
   border-radius: 0.5rem;
   font-weight: 500;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   margin-top: 1rem;
@@ -462,13 +475,13 @@ const MetricItem = styled.div`
 const MetricLabel = styled.div`
   font-size: 1rem;
   font-weight: 500;
-  color: #1f2937;
+  color: white;
 `;
 
 const MetricValue = styled.div`
   font-size: 1.25rem;
   font-weight: 600;
-  color: #1f2937;
+  color: white;
   background: transparent;
   padding: 0.5rem 0;
 `;
@@ -1244,7 +1257,9 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
               ) : null}
             </PlantImage>
             <PlantDetails>
-              <PlantName>{selectedPlant ? selectedPlant.name : 'No plants yet'}</PlantName>
+              <PlantName onClick={() => selectedPlant && navigate(`/plant/${selectedPlant.id}`)}>
+                {selectedPlant ? selectedPlant.name : 'No plants yet'}
+              </PlantName>
               <PlantSpecies>{selectedPlant ? selectedPlant.species : 'Add your first plant to get started'}</PlantSpecies>
             </PlantDetails>
             <CareTips>

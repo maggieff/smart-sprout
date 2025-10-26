@@ -114,7 +114,7 @@ const InputField = styled.textarea`
   border: 2px solid #e5e7eb;
   border-radius: 0.75rem;
   font-size: 0.875rem;
-  font-family: inherit;
+  font-family: 'Karla', sans-serif;
   resize: none;
   min-height: 2.5rem;
   max-height: 6rem;
@@ -141,6 +141,7 @@ const SendButton = styled.button`
   color: white;
   border: none;
   border-radius: 0.75rem;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
@@ -166,6 +167,7 @@ const CameraButton = styled.button`
   color: white;
   border: none;
   border-radius: 0.75rem;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
@@ -257,6 +259,7 @@ const CaptureButton = styled.button`
   justify-content: center;
   color: white;
   font-size: 1.5rem;
+  font-family: 'Karla', sans-serif;
   transition: all 0.2s ease;
 
   &:hover {
@@ -275,6 +278,7 @@ const CloseButton = styled.button`
   color: white;
   border: none;
   border-radius: 0.5rem;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -308,6 +312,7 @@ const SuggestionButton = styled.button`
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   font-size: 0.75rem;
+  font-family: 'Karla', sans-serif;
   color: #374151;
   cursor: pointer;
   transition: all 0.2s ease;
