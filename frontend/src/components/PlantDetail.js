@@ -118,7 +118,7 @@ const ActionButton = styled.button`
 `;
 
 const Section = styled.div`
-  background: white;
+  background: #6B8E4A;
   border-radius: 1rem;
   padding: 2rem;
 `;
@@ -151,7 +151,7 @@ const SensorHistoryPlaceholder = styled.div`
 
 // Sidebar Components
 const SidebarSection = styled.div`
-  background: white;
+  background: #6B8E4A;
   border-radius: 1rem;
   padding: 1.5rem;
 `;
