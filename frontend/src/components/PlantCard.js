@@ -13,11 +13,11 @@ import {
 } from 'react-icons/fi';
 
 const Card = styled(motion.div)`
-  background: white;
+  background: #9CAF88;
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid #7A8B73;
   cursor: pointer;
   transition: all 0.2s ease;
 
