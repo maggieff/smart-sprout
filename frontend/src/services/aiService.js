@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://10.0.2.223:5001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -14,12 +14,11 @@ export const aiService = {
   /**
    * Ask a question to the AI assistant
    */
-  async askQuestion({ question, plantId, userId, species, sensorData }) {
+  async askQuestion({ question, plantId, species, sensorData }) {
     try {
       const response = await api.post('/ask-ai', {
         question,
         plantId,
-        userId,
         species,
         sensorData,
         context: 'plant_care'

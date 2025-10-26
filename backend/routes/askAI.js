@@ -1,7 +1,5 @@
 const express = require('express');
 const { getAIResponse } = require('../utils/aiAssistant');
-const { queryPlantKnowledge } = require('../utils/chromaClient');
-const database = require('../utils/database');
 
 const router = express.Router();
 
@@ -11,7 +9,6 @@ router.post('/', async (req, res) => {
     const { 
       question, 
       plantId, 
-      userId,
       species, 
       sensorData, 
       context = 'general' 
@@ -24,68 +21,20 @@ router.post('/', async (req, res) => {
     }
 
     console.log('🤖 AI Question:', question);
-    console.log('🌱 Plant Context:', { plantId, species, sensorData, userId });
+    console.log('🌱 Plant Context:', { plantId, species, sensorData });
 
-    // Get plant data from database if plantId is provided
-    let plantData = null;
-    let latestSensorData = null;
-    
-    if (plantId) {
-      try {
-        plantData = await database.getPlantById(plantId);
-        latestSensorData = await database.getLatestSensorData(plantId);
-        console.log('📊 Plant data from database:', plantData);
-        console.log('📈 Latest sensor data:', latestSensorData);
-      } catch (error) {
-        console.error('Error fetching plant data:', error);
-      }
-    }
-
-    // Use database sensor data if available, otherwise use provided sensorData
-    const effectiveSensorData = latestSensorData || sensorData || {};
-    const effectiveSpecies = plantData?.species || species || 'plant';
-
-    // Query Chroma DB for relevant plant care knowledge (with fallback)
-    let knowledgeContext = null;
-    try {
-      knowledgeContext = await queryPlantKnowledge(question, effectiveSpecies);
-    } catch (error) {
-      console.log('Chroma DB unavailable, using fallback knowledge');
-      knowledgeContext = null;
-    }
-    
-    // Generate AI response using OpenAI with enhanced context
+    // Generate AI response using OpenAI with plant knowledge
     const aiResponse = await getAIResponse({
       question,
-      species: effectiveSpecies,
-      sensorData: effectiveSensorData,
-      plantData: plantData,
-      knowledgeContext,
-      context
+      species: species || 'plant',
+      sensorData: sensorData || {}
     });
-
-    // Save the conversation to database if userId is provided
-    if (userId) {
-      try {
-        await database.saveAIConversation(
-          userId,
-          plantId,
-          question,
-          aiResponse.answer,
-          aiResponse.confidence,
-          aiResponse.model || 'gpt-3.5-turbo'
-        );
-        console.log('💾 Conversation saved to database');
-      } catch (error) {
-        console.error('Error saving conversation:', error);
-      }
-    }
 
     // Log the interaction for analytics
     logAIInteraction({
       question,
       plantId,
-      species: effectiveSpecies,
+      species,
       response: aiResponse,
       timestamp: new Date().toISOString()
     });
@@ -96,13 +45,6 @@ router.post('/', async (req, res) => {
       confidence: aiResponse.confidence,
       sources: aiResponse.sources,
       recommendations: aiResponse.recommendations,
-      model: aiResponse.model,
-      plantContext: plantData ? {
-        name: plantData.name,
-        species: plantData.species,
-        healthScore: plantData.health_score
-      } : null,
-      sensorContext: effectiveSensorData,
       timestamp: new Date().toISOString()
     });
 
