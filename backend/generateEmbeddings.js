@@ -13,15 +13,18 @@ async function generateEmbeddings() {
   console.log('🧠 Generating embeddings for plant care knowledge base...\n');
   
   try {
-    // Load plant care dataset
-    const datasetPath = path.join(__dirname, '../backend/data/plantCareDataset.json');
+    // Load comprehensive plant care dataset
+    const datasetPath = path.join(__dirname, '../backend/data/comprehensive_plant_data.json');
     const dataset = JSON.parse(fs.readFileSync(datasetPath, 'utf8'));
     
     console.log(`📚 Loaded ${dataset.length} plant care items`);
     
-    // Initialize Chroma client
+    // Initialize Chroma Cloud client
     const chroma = new ChromaClient({
-      path: 'http://localhost:8000'
+      path: 'https://api.trychroma.com',
+      apiKey: 'ck-BPG2XTtPWBPa2tFsatrfHmbsBTLdJYtKsnX75g8ZccYg',
+      tenant: '36db7d89-6330-46bf-a396-2836596dbd9a',
+      database: 'plants'
     });
     
     // Create or get collection

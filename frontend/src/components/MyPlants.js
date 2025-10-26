@@ -8,7 +8,8 @@ import {
   FiSearch,
   FiFilter,
   FiGrid,
-  FiList
+  FiList,
+  FiChevronDown
 } from 'react-icons/fi';
 
 const Container = styled.div`
@@ -27,8 +28,9 @@ const Header = styled.div`
 `;
 
 const Title = styled.h1`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: normal;
   color: #1f2937;
   margin: 0;
 `;
@@ -68,6 +70,12 @@ const SearchIcon = styled(FiSearch)`
   font-size: 1rem;
 `;
 
+const FilterContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
 const FilterButton = styled.button`
   display: flex;
   align-items: center;
@@ -81,11 +89,64 @@ const FilterButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-width: 120px;
+  justify-content: space-between;
 
   &:hover {
     background: #f9fafb;
     border-color: #10B981;
   }
+`;
+
+const FilterDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 0.25rem;
+`;
+
+const FilterOption = styled.button`
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #374151;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+
+  &:first-child {
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+
+  &:last-child {
+    border-radius: 0 0 0.5rem 0.5rem;
+  }
+`;
+
+const FilterCount = styled.span`
+  background: #e5e7eb;
+  color: #6b7280;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
 `;
 
 const ViewToggle = styled.div`
@@ -192,8 +253,9 @@ const EmptyIcon = styled.div`
 `;
 
 const EmptyTitle = styled.h3`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: normal;
   color: #1f2937;
   margin-bottom: 0.5rem;
 `;
@@ -207,12 +269,93 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [viewMode, setViewMode] = React.useState('grid');
   const [filterStatus, setFilterStatus] = React.useState('all');
+  const [filterCategory, setFilterCategory] = React.useState('all');
+  const [showFilterDropdown, setShowFilterDropdown] = React.useState(false);
+  const filterRef = React.useRef(null);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilterDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Plant categories
+  const plantCategories = [
+    'Flower',
+    'Tree', 
+    'Shrub',
+    'Grass',
+    'Fern',
+    'Vine / Climber',
+    'Succulent',
+    'Cactus',
+    'Herb',
+    'Vegetable',
+    'Fruit plant',
+    'Aquatic plant',
+    'Moss',
+    'Algae',
+    'Mushroom / Fungus'
+  ];
+
+  // Function to determine plant category based on species
+  const getPlantCategory = (plant) => {
+    const species = plant.species?.toLowerCase() || '';
+    const name = plant.name?.toLowerCase() || '';
+    
+    // Cactus detection
+    if (species.includes('cactus') || species.includes('cactaceae') || name.includes('cactus')) {
+      return 'Cactus';
+    }
+    
+    // Succulent detection
+    if (species.includes('aloe') || species.includes('crassula') || species.includes('echeveria') || 
+        species.includes('sedum') || species.includes('haworthia') || name.includes('succulent')) {
+      return 'Succulent';
+    }
+    
+    // Tree detection
+    if (species.includes('tree') || species.includes('oak') || species.includes('pine') || 
+        species.includes('maple') || species.includes('birch') || name.includes('tree')) {
+      return 'Tree';
+    }
+    
+    // Flower detection
+    if (species.includes('rose') || species.includes('tulip') || species.includes('sunflower') || 
+        species.includes('lavender') || species.includes('orchid') || species.includes('lily') ||
+        name.includes('flower') || name.includes('rose') || name.includes('tulip')) {
+      return 'Flower';
+    }
+    
+    // Fern detection
+    if (species.includes('fern') || species.includes('pteridophyta') || name.includes('fern')) {
+      return 'Fern';
+    }
+    
+    // Herb detection
+    if (species.includes('herb') || species.includes('basil') || species.includes('mint') || 
+        species.includes('oregano') || species.includes('thyme') || name.includes('herb')) {
+      return 'Herb';
+    }
+    
+    // Default to 'Other' if no category matches
+    return 'Other';
+  };
 
   const filteredPlants = plants.filter(plant => {
     const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          plant.species.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || plant.status === filterStatus;
-    return matchesSearch && matchesFilter;
+    const matchesCategory = filterCategory === 'all' || getPlantCategory(plant) === filterCategory;
+    return matchesSearch && matchesFilter && matchesCategory;
   });
 
   const getStatusCounts = () => {
@@ -235,6 +378,16 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
   };
 
   const statusCounts = getStatusCounts();
+
+  const getCategoryCounts = () => {
+    const counts = { all: plants.length };
+    plantCategories.forEach(category => {
+      counts[category] = plants.filter(plant => getPlantCategory(plant) === category).length;
+    });
+    return counts;
+  };
+
+  const categoryCounts = getCategoryCounts();
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -273,10 +426,39 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
             />
           </SearchContainer>
           
-          <FilterButton onClick={() => setFilterStatus(filterStatus === 'all' ? 'excellent' : 'all')}>
-            <FiFilter />
-            Filter
-          </FilterButton>
+          <FilterContainer ref={filterRef}>
+            <FilterButton onClick={() => setShowFilterDropdown(!showFilterDropdown)}>
+              <FiFilter />
+              {filterCategory === 'all' ? 'All Categories' : filterCategory}
+              <FiChevronDown />
+            </FilterButton>
+            
+            {showFilterDropdown && (
+              <FilterDropdown>
+                <FilterOption 
+                  onClick={() => {
+                    setFilterCategory('all');
+                    setShowFilterDropdown(false);
+                  }}
+                >
+                  All Categories
+                  <FilterCount>{categoryCounts.all}</FilterCount>
+                </FilterOption>
+                {plantCategories.map(category => (
+                  <FilterOption 
+                    key={category}
+                    onClick={() => {
+                      setFilterCategory(category);
+                      setShowFilterDropdown(false);
+                    }}
+                  >
+                    {category}
+                    <FilterCount>{categoryCounts[category] || 0}</FilterCount>
+                  </FilterOption>
+                ))}
+              </FilterDropdown>
+            )}
+          </FilterContainer>
           
           <ViewToggle>
             <ViewButton 
@@ -338,18 +520,18 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
         <EmptyState>
           <EmptyIcon>🌱</EmptyIcon>
           <EmptyTitle>
-            {searchTerm || filterStatus !== 'all' 
+            {searchTerm || filterStatus !== 'all' || filterCategory !== 'all'
               ? 'No plants found' 
               : 'No plants yet'
             }
           </EmptyTitle>
           <EmptyDescription>
-            {searchTerm || filterStatus !== 'all'
+            {searchTerm || filterStatus !== 'all' || filterCategory !== 'all'
               ? 'Try adjusting your search or filter criteria'
               : 'Add your first plant to start tracking its health and growth'
             }
           </EmptyDescription>
-          {!searchTerm && filterStatus === 'all' && (
+          {!searchTerm && filterStatus === 'all' && filterCategory === 'all' && (
             <AddPlantButton to="/add-plant">
               <FiPlus />
               Add Your First Plant

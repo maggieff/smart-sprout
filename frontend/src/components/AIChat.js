@@ -9,6 +9,7 @@ import {
   FiHelpCircle
 } from 'react-icons/fi';
 import { aiService } from '../services/aiService';
+import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const ChatContainer = styled.div`
@@ -29,8 +30,9 @@ const ChatHeader = styled.div`
 `;
 
 const ChatTitle = styled.h1`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.875rem;
-  font-weight: 700;
+  font-weight: normal;
   color: #1f2937;
   margin-bottom: 0.5rem;
   display: flex;
@@ -199,6 +201,7 @@ const LoadingMessage = styled.div`
 `;
 
 const AIChat = ({ selectedPlant }) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -252,6 +255,7 @@ const AIChat = ({ selectedPlant }) => {
       const response = await aiService.askQuestion({
         question: userMessage.text,
         plantId: selectedPlant?.id,
+        userId: user?.id,
         species: selectedPlant?.species,
         sensorData: selectedPlant?.sensorData
       });
