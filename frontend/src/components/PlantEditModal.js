@@ -400,8 +400,8 @@ const PlantEditModal = ({
                 <SensorInput
                   name="light"
                   type="number"
-                  min="0"
-                  max="100"
+                  min="5000"
+                  max="80000"
                   value={formData.light}
                   onChange={handleInputChange}
                 />
