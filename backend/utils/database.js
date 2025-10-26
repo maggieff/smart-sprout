@@ -35,14 +35,111 @@ class Database {
         )
       `;
 
-      this.db.run(createUsersTable, (err) => {
-        if (err) {
-          console.error('Error creating users table:', err);
-          reject(err);
-        } else {
+      const createPlantsTable = `
+        CREATE TABLE IF NOT EXISTS plants (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          name TEXT NOT NULL,
+          species TEXT,
+          variety TEXT,
+          description TEXT,
+          image_url TEXT,
+          health_score REAL DEFAULT 0.8,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        )
+      `;
+
+      const createSensorDataTable = `
+        CREATE TABLE IF NOT EXISTS sensor_data (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          plant_id INTEGER NOT NULL,
+          moisture REAL,
+          temperature REAL,
+          light REAL,
+          humidity REAL,
+          ph REAL,
+          recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (plant_id) REFERENCES plants (id) ON DELETE CASCADE
+        )
+      `;
+
+      const createCareLogsTable = `
+        CREATE TABLE IF NOT EXISTS care_logs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          plant_id INTEGER NOT NULL,
+          user_id INTEGER NOT NULL,
+          action TEXT NOT NULL,
+          notes TEXT,
+          timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (plant_id) REFERENCES plants (id) ON DELETE CASCADE,
+          FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        )
+      `;
+
+      const createAIConversationsTable = `
+        CREATE TABLE IF NOT EXISTS ai_conversations (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          plant_id INTEGER,
+          question TEXT NOT NULL,
+          answer TEXT NOT NULL,
+          confidence REAL,
+          model TEXT,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+          FOREIGN KEY (plant_id) REFERENCES plants (id) ON DELETE CASCADE
+        )
+      `;
+
+      // Execute all table creation queries
+      this.db.serialize(() => {
+        this.db.run(createUsersTable, (err) => {
+          if (err) {
+            console.error('Error creating users table:', err);
+            reject(err);
+            return;
+          }
           console.log('Users table created/verified');
+        });
+
+        this.db.run(createPlantsTable, (err) => {
+          if (err) {
+            console.error('Error creating plants table:', err);
+            reject(err);
+            return;
+          }
+          console.log('Plants table created/verified');
+        });
+
+        this.db.run(createSensorDataTable, (err) => {
+          if (err) {
+            console.error('Error creating sensor_data table:', err);
+            reject(err);
+            return;
+          }
+          console.log('Sensor data table created/verified');
+        });
+
+        this.db.run(createCareLogsTable, (err) => {
+          if (err) {
+            console.error('Error creating care_logs table:', err);
+            reject(err);
+            return;
+          }
+          console.log('Care logs table created/verified');
+        });
+
+        this.db.run(createAIConversationsTable, (err) => {
+          if (err) {
+            console.error('Error creating ai_conversations table:', err);
+            reject(err);
+            return;
+          }
+          console.log('AI conversations table created/verified');
           resolve();
-        }
+        });
       });
     });
   }
@@ -213,6 +310,222 @@ class Database {
       this.db.all(selectUsers, [], (err, rows) => {
         if (err) {
           console.error('Error getting all users:', err);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
+  // Plant data methods
+  async createPlant(userId, plantData) {
+    return new Promise((resolve, reject) => {
+      const { name, species, variety, description, image_url } = plantData;
+      const insertPlant = `
+        INSERT INTO plants (user_id, name, species, variety, description, image_url)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `;
+
+      this.db.run(insertPlant, [userId, name, species, variety, description, image_url], function(err) {
+        if (err) {
+          console.error('Error creating plant:', err);
+          reject(err);
+        } else {
+          resolve({
+            success: true,
+            plant: {
+              id: this.lastID,
+              user_id: userId,
+              name,
+              species,
+              variety,
+              description,
+              image_url,
+              health_score: 0.8,
+              created_at: new Date().toISOString()
+            }
+          });
+        }
+      });
+    });
+  }
+
+  async getPlantsByUserId(userId) {
+    return new Promise((resolve, reject) => {
+      const selectPlants = `
+        SELECT p.*, 
+               (SELECT sd.moisture FROM sensor_data sd WHERE sd.plant_id = p.id ORDER BY sd.recorded_at DESC LIMIT 1) as current_moisture,
+               (SELECT sd.temperature FROM sensor_data sd WHERE sd.plant_id = p.id ORDER BY sd.recorded_at DESC LIMIT 1) as current_temperature,
+               (SELECT sd.light FROM sensor_data sd WHERE sd.plant_id = p.id ORDER BY sd.recorded_at DESC LIMIT 1) as current_light,
+               (SELECT sd.humidity FROM sensor_data sd WHERE sd.plant_id = p.id ORDER BY sd.recorded_at DESC LIMIT 1) as current_humidity
+        FROM plants p 
+        WHERE p.user_id = ? 
+        ORDER BY p.created_at DESC
+      `;
+      
+      this.db.all(selectPlants, [userId], (err, rows) => {
+        if (err) {
+          console.error('Error getting plants by user ID:', err);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
+  async getPlantById(plantId) {
+    return new Promise((resolve, reject) => {
+      const selectPlant = `
+        SELECT p.*, 
+               (SELECT sd.moisture FROM sensor_data sd WHERE sd.plant_id = p.id ORDER BY sd.recorded_at DESC LIMIT 1) as current_moisture,
+               (SELECT sd.temperature FROM sensor_data sd WHERE sd.plant_id = p.id ORDER BY sd.recorded_at DESC LIMIT 1) as current_temperature,
+               (SELECT sd.light FROM sensor_data sd WHERE sd.plant_id = p.id ORDER BY sd.recorded_at DESC LIMIT 1) as current_light,
+               (SELECT sd.humidity FROM sensor_data sd WHERE sd.plant_id = p.id ORDER BY sd.recorded_at DESC LIMIT 1) as current_humidity
+        FROM plants p 
+        WHERE p.id = ?
+      `;
+      
+      this.db.get(selectPlant, [plantId], (err, row) => {
+        if (err) {
+          console.error('Error getting plant by ID:', err);
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
+    });
+  }
+
+  async addSensorData(plantId, sensorData) {
+    return new Promise((resolve, reject) => {
+      const { moisture, temperature, light, humidity, ph } = sensorData;
+      const insertSensorData = `
+        INSERT INTO sensor_data (plant_id, moisture, temperature, light, humidity, ph)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `;
+
+      this.db.run(insertSensorData, [plantId, moisture, temperature, light, humidity, ph], function(err) {
+        if (err) {
+          console.error('Error adding sensor data:', err);
+          reject(err);
+        } else {
+          resolve({
+            success: true,
+            sensorDataId: this.lastID
+          });
+        }
+      });
+    });
+  }
+
+  async getLatestSensorData(plantId) {
+    return new Promise((resolve, reject) => {
+      const selectSensorData = `
+        SELECT * FROM sensor_data 
+        WHERE plant_id = ? 
+        ORDER BY recorded_at DESC 
+        LIMIT 1
+      `;
+      
+      this.db.get(selectSensorData, [plantId], (err, row) => {
+        if (err) {
+          console.error('Error getting latest sensor data:', err);
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
+    });
+  }
+
+  async addCareLog(plantId, userId, action, notes) {
+    return new Promise((resolve, reject) => {
+      const insertCareLog = `
+        INSERT INTO care_logs (plant_id, user_id, action, notes)
+        VALUES (?, ?, ?, ?)
+      `;
+
+      this.db.run(insertCareLog, [plantId, userId, action, notes], function(err) {
+        if (err) {
+          console.error('Error adding care log:', err);
+          reject(err);
+        } else {
+          resolve({
+            success: true,
+            logId: this.lastID
+          });
+        }
+      });
+    });
+  }
+
+  async getCareLogs(plantId, limit = 10) {
+    return new Promise((resolve, reject) => {
+      const selectCareLogs = `
+        SELECT cl.*, u.name as user_name
+        FROM care_logs cl
+        JOIN users u ON cl.user_id = u.id
+        WHERE cl.plant_id = ?
+        ORDER BY cl.timestamp DESC
+        LIMIT ?
+      `;
+      
+      this.db.all(selectCareLogs, [plantId, limit], (err, rows) => {
+        if (err) {
+          console.error('Error getting care logs:', err);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
+  async saveAIConversation(userId, plantId, question, answer, confidence, model) {
+    return new Promise((resolve, reject) => {
+      const insertConversation = `
+        INSERT INTO ai_conversations (user_id, plant_id, question, answer, confidence, model)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `;
+
+      this.db.run(insertConversation, [userId, plantId, question, answer, confidence, model], function(err) {
+        if (err) {
+          console.error('Error saving AI conversation:', err);
+          reject(err);
+        } else {
+          resolve({
+            success: true,
+            conversationId: this.lastID
+          });
+        }
+      });
+    });
+  }
+
+  async getAIConversations(userId, plantId = null, limit = 20) {
+    return new Promise((resolve, reject) => {
+      let selectConversations = `
+        SELECT ac.*, p.name as plant_name
+        FROM ai_conversations ac
+        LEFT JOIN plants p ON ac.plant_id = p.id
+        WHERE ac.user_id = ?
+      `;
+      
+      const params = [userId];
+      
+      if (plantId) {
+        selectConversations += ` AND ac.plant_id = ?`;
+        params.push(plantId);
+      }
+      
+      selectConversations += ` ORDER BY ac.created_at DESC LIMIT ?`;
+      params.push(limit);
+      
+      this.db.all(selectConversations, params, (err, rows) => {
+        if (err) {
+          console.error('Error getting AI conversations:', err);
           reject(err);
         } else {
           resolve(rows);
