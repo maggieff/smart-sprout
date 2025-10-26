@@ -276,13 +276,14 @@ const OtherPlantCard = styled(Link)`
 const PlantImage = styled.div`
   width: 40px;
   height: 40px;
-  background: #D1D5DB;
+  background: ${props => props.hasImage ? 'transparent' : '#D1D5DB'};
   border-radius: 50%;
   margin: 0 auto 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.2rem;
+  overflow: hidden;
 `;
 
 const OtherPlantName = styled.div`
@@ -570,8 +571,19 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
                     key={otherPlant.id} 
                     to={`/plant/${otherPlant.id}`}
                   >
-                    <PlantImage>
-                      {otherPlant.image || '🌱'}
+                    <PlantImage hasImage={!!otherPlant.image}>
+                      {otherPlant.image ? (
+                        <img 
+                          src={otherPlant.image} 
+                          alt={otherPlant.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            borderRadius: '50%'
+                          }}
+                        />
+                      ) : null}
                     </PlantImage>
                     <OtherPlantName>{otherPlant.name}</OtherPlantName>
                     <OtherPlantSpecies>{otherPlant.species}</OtherPlantSpecies>
