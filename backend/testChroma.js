@@ -2,13 +2,16 @@ const { ChromaClient } = require('chromadb');
 
 async function testChroma() {
   try {
-    console.log('Testing Chroma DB connection...');
+    console.log('Testing Chroma Cloud connection...');
     
     const chroma = new ChromaClient({
-      path: 'http://localhost:8000'
+      path: 'https://api.trychroma.com',
+      apiKey: process.env.CHROMA_API_KEY || 'ck-BPG2XTtPWBPa2tFsatrfHmbsBTLdJYtKsnX75g8ZccYg',
+      tenant: process.env.CHROMA_TENANT || '36db7d89-6330-46bf-a396-2836596dbd9a',
+      database: process.env.CHROMA_DATABASE || 'plants'
     });
     
-    console.log('Chroma client created');
+    console.log('Chroma Cloud client created');
     
     // Test basic connection
     const collections = await chroma.listCollections();
@@ -29,7 +32,7 @@ async function testChroma() {
     console.log('Query results:', results);
     
   } catch (error) {
-    console.error('Chroma DB test failed:', error.message);
+    console.error('Chroma Cloud test failed:', error.message);
     console.error('Full error:', error);
   }
 }
