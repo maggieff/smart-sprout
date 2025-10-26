@@ -756,8 +756,6 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
       const weatherData = await fetchWeatherData(coords.lat, coords.lon);
       console.log('Weather data received:', weatherData);
       setWeather(weatherData);
-      
-      toast.success(`Weather loaded for ${weatherData.name}`);
     } catch (error) {
       console.error('Error loading weather:', error);
       toast.error(error.message || 'Unable to get weather data');
