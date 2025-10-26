@@ -277,6 +277,10 @@ const HiddenFileInput = styled.input`
   display: none;
 `;
 
+const GalleryFileInput = styled.input`
+  display: none;
+`;
+
 const PreviewContainer = styled.div`
   margin-top: 1rem;
   text-align: center;
@@ -334,22 +338,80 @@ const AddPlant = ({ onPlantAdd }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [plantToEdit, setPlantToEdit] = useState(null);
   const fileInputRef = useRef(null);
+  const galleryInputRef = useRef(null);
   const navigate = useNavigate();
 
-  // Sample plant data
+  // Comprehensive plant data - 60 most common plants
   const allPlants = [
-    { id: 1, name: 'Snake Plant', image: '🌱', species: 'Sansevieria' },
+    // Popular Houseplants
+    { id: 1, name: 'Snake Plant', image: '🌱', species: 'Sansevieria trifasciata' },
     { id: 2, name: 'Monstera', image: '🌿', species: 'Monstera deliciosa' },
-    { id: 3, name: 'Cactus', image: '🌵', species: 'Cactaceae' },
-    { id: 4, name: 'Rose', image: '🌺', species: 'Rosa' },
-    { id: 5, name: 'Sunflower', image: '🌻', species: 'Helianthus' },
-    { id: 6, name: 'Tulip', image: '🌷', species: 'Tulipa' },
-    { id: 7, name: 'Lavender', image: '💜', species: 'Lavandula' },
-    { id: 8, name: 'Bamboo', image: '🎋', species: 'Bambusoideae' },
-    { id: 9, name: 'Fern', image: '🌿', species: 'Pteridophyta' },
-    { id: 10, name: 'Orchid', image: '🌺', species: 'Orchidaceae' },
-    { id: 11, name: 'Aloe', image: '🌵', species: 'Aloe vera' },
-    { id: 12, name: 'Jade Plant', image: '🌱', species: 'Crassula ovata' }
+    { id: 3, name: 'Pothos', image: '🌿', species: 'Epipremnum aureum' },
+    { id: 4, name: 'Fiddle Leaf Fig', image: '🌿', species: 'Ficus lyrata' },
+    { id: 5, name: 'Rubber Plant', image: '🌿', species: 'Ficus elastica' },
+    { id: 6, name: 'Peace Lily', image: '🌺', species: 'Spathiphyllum' },
+    { id: 7, name: 'ZZ Plant', image: '🌱', species: 'Zamioculcas zamiifolia' },
+    { id: 8, name: 'Spider Plant', image: '🌿', species: 'Chlorophytum comosum' },
+    { id: 9, name: 'Philodendron', image: '🌿', species: 'Philodendron hederaceum' },
+    { id: 10, name: 'Chinese Evergreen', image: '🌿', species: 'Aglaonema' },
+    { id: 11, name: 'Dracaena', image: '🌿', species: 'Dracaena fragrans' },
+    { id: 12, name: 'Dieffenbachia', image: '🌿', species: 'Dieffenbachia' },
+    { id: 13, name: 'Calathea', image: '🌿', species: 'Calathea orbifolia' },
+    { id: 14, name: 'Maranta', image: '🌿', species: 'Maranta leuconeura' },
+    { id: 15, name: 'Anthurium', image: '🌺', species: 'Anthurium andraeanum' },
+    { id: 16, name: 'Bird of Paradise', image: '🌿', species: 'Strelitzia reginae' },
+    { id: 17, name: 'Croton', image: '🌿', species: 'Codiaeum variegatum' },
+    { id: 18, name: 'Schefflera', image: '🌿', species: 'Schefflera arboricola' },
+    { id: 19, name: 'Parlor Palm', image: '🌿', species: 'Chamaedorea elegans' },
+    { id: 20, name: 'Boston Fern', image: '🌿', species: 'Nephrolepis exaltata' },
+
+    // Succulents & Cacti
+    { id: 21, name: 'Aloe Vera', image: '🌵', species: 'Aloe vera' },
+    { id: 22, name: 'Jade Plant', image: '🌱', species: 'Crassula ovata' },
+    { id: 23, name: 'Echeveria', image: '🌵', species: 'Echeveria elegans' },
+    { id: 24, name: 'Hens and Chicks', image: '🌵', species: 'Sempervivum' },
+    { id: 25, name: 'Barrel Cactus', image: '🌵', species: 'Echinocactus grusonii' },
+    { id: 26, name: 'Christmas Cactus', image: '🌵', species: 'Schlumbergera' },
+    { id: 27, name: 'String of Pearls', image: '🌵', species: 'Senecio rowleyanus' },
+    { id: 28, name: 'Haworthia', image: '🌵', species: 'Haworthia attenuata' },
+    { id: 29, name: 'Kalanchoe', image: '🌵', species: 'Kalanchoe blossfeldiana' },
+    { id: 30, name: 'Sedum', image: '🌵', species: 'Sedum morganianum' },
+
+    // Herbs & Edibles
+    { id: 31, name: 'Basil', image: '🌿', species: 'Ocimum basilicum' },
+    { id: 32, name: 'Mint', image: '🌿', species: 'Mentha' },
+    { id: 33, name: 'Rosemary', image: '🌿', species: 'Rosmarinus officinalis' },
+    { id: 34, name: 'Thyme', image: '🌿', species: 'Thymus vulgaris' },
+    { id: 35, name: 'Oregano', image: '🌿', species: 'Origanum vulgare' },
+    { id: 36, name: 'Parsley', image: '🌿', species: 'Petroselinum crispum' },
+    { id: 37, name: 'Cilantro', image: '🌿', species: 'Coriandrum sativum' },
+    { id: 38, name: 'Chives', image: '🌿', species: 'Allium schoenoprasum' },
+    { id: 39, name: 'Lavender', image: '💜', species: 'Lavandula angustifolia' },
+    { id: 40, name: 'Sage', image: '🌿', species: 'Salvia officinalis' },
+
+    // Flowering Plants
+    { id: 41, name: 'Rose', image: '🌺', species: 'Rosa' },
+    { id: 42, name: 'Orchid', image: '🌺', species: 'Phalaenopsis' },
+    { id: 43, name: 'Geranium', image: '🌺', species: 'Pelargonium' },
+    { id: 44, name: 'Begonia', image: '🌺', species: 'Begonia' },
+    { id: 45, name: 'African Violet', image: '🌺', species: 'Saintpaulia' },
+    { id: 46, name: 'Hibiscus', image: '🌺', species: 'Hibiscus rosa-sinensis' },
+    { id: 47, name: 'Petunia', image: '🌺', species: 'Petunia' },
+    { id: 48, name: 'Impatiens', image: '🌺', species: 'Impatiens walleriana' },
+    { id: 49, name: 'Marigold', image: '🌻', species: 'Tagetes' },
+    { id: 50, name: 'Pansy', image: '🌺', species: 'Viola tricolor' },
+
+    // Garden Plants
+    { id: 51, name: 'Tomato', image: '🍅', species: 'Solanum lycopersicum' },
+    { id: 52, name: 'Pepper', image: '🌶️', species: 'Capsicum' },
+    { id: 53, name: 'Lettuce', image: '🥬', species: 'Lactuca sativa' },
+    { id: 54, name: 'Spinach', image: '🥬', species: 'Spinacia oleracea' },
+    { id: 55, name: 'Carrot', image: '🥕', species: 'Daucus carota' },
+    { id: 56, name: 'Sunflower', image: '🌻', species: 'Helianthus annuus' },
+    { id: 57, name: 'Tulip', image: '🌷', species: 'Tulipa' },
+    { id: 58, name: 'Daffodil', image: '🌼', species: 'Narcissus' },
+    { id: 59, name: 'Bamboo', image: '🎋', species: 'Bambusoideae' },
+    { id: 60, name: 'Ivy', image: '🌿', species: 'Hedera helix' }
   ];
 
   // Filter plants based on search term
@@ -388,14 +450,191 @@ const AddPlant = ({ onPlantAdd }) => {
     }
   };
 
-  const handleTakePhoto = () => {
-    // For now, we'll trigger file input for camera
-    // In a real implementation, you'd use getUserMedia API
-    fileInputRef.current?.click();
+  const handleTakePhoto = async () => {
+    try {
+      // Check if camera is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast.error('Camera not supported in this browser. Please use gallery upload.');
+        galleryInputRef.current?.click();
+        return;
+      }
+
+      // Request camera access
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment', // Use rear camera if available
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
+      });
+      
+      // Create video element to show camera feed
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.style.width = '100%';
+      video.style.height = 'auto';
+      video.style.borderRadius = '0.75rem';
+      video.autoplay = true;
+      video.muted = true;
+      
+      // Create container for camera interface
+      const cameraContainer = document.createElement('div');
+      cameraContainer.style.position = 'fixed';
+      cameraContainer.style.top = '0';
+      cameraContainer.style.left = '0';
+      cameraContainer.style.width = '100vw';
+      cameraContainer.style.height = '100vh';
+      cameraContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+      cameraContainer.style.zIndex = '99999';
+      cameraContainer.style.display = 'flex';
+      cameraContainer.style.flexDirection = 'column';
+      cameraContainer.style.alignItems = 'center';
+      cameraContainer.style.justifyContent = 'center';
+      cameraContainer.style.gap = '2rem';
+      cameraContainer.style.padding = '2rem';
+      cameraContainer.style.boxSizing = 'border-box';
+      
+      // Create capture button
+      const captureBtn = document.createElement('button');
+      captureBtn.innerHTML = '📸 Capture Photo';
+      captureBtn.style.padding = '1.5rem 3rem';
+      captureBtn.style.backgroundColor = '#9CAF88';
+      captureBtn.style.color = 'white';
+      captureBtn.style.border = 'none';
+      captureBtn.style.borderRadius = '0.75rem';
+      captureBtn.style.fontSize = '1.25rem';
+      captureBtn.style.fontWeight = '700';
+      captureBtn.style.cursor = 'pointer';
+      captureBtn.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+      captureBtn.style.transition = 'all 0.2s ease';
+      captureBtn.style.fontFamily = 'Karla, sans-serif';
+      
+      // Add hover effect
+      captureBtn.onmouseover = () => {
+        captureBtn.style.backgroundColor = '#7A8B73';
+        captureBtn.style.transform = 'scale(1.05)';
+      };
+      captureBtn.onmouseout = () => {
+        captureBtn.style.backgroundColor = '#9CAF88';
+        captureBtn.style.transform = 'scale(1)';
+      };
+      
+      // Create cancel button
+      const cancelBtn = document.createElement('button');
+      cancelBtn.innerHTML = '❌ Cancel';
+      cancelBtn.style.padding = '1.5rem 3rem';
+      cancelBtn.style.backgroundColor = '#ef4444';
+      cancelBtn.style.color = 'white';
+      cancelBtn.style.border = 'none';
+      cancelBtn.style.borderRadius = '0.75rem';
+      cancelBtn.style.fontSize = '1.25rem';
+      cancelBtn.style.fontWeight = '700';
+      cancelBtn.style.cursor = 'pointer';
+      cancelBtn.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+      cancelBtn.style.transition = 'all 0.2s ease';
+      cancelBtn.style.fontFamily = 'Karla, sans-serif';
+      
+      // Add hover effect
+      cancelBtn.onmouseover = () => {
+        cancelBtn.style.backgroundColor = '#dc2626';
+        cancelBtn.style.transform = 'scale(1.05)';
+      };
+      cancelBtn.onmouseout = () => {
+        cancelBtn.style.backgroundColor = '#ef4444';
+        cancelBtn.style.transform = 'scale(1)';
+      };
+      
+      // Create instruction text
+      const instructionText = document.createElement('div');
+      instructionText.innerHTML = '📸 Position your plant in the camera view and click "Capture Photo"<br><small style="font-size: 0.9rem; opacity: 0.8;">Press Enter to capture or Escape to cancel</small>';
+      instructionText.style.color = 'white';
+      instructionText.style.fontSize = '1.25rem';
+      instructionText.style.fontWeight = '600';
+      instructionText.style.textAlign = 'center';
+      instructionText.style.fontFamily = 'Karla, sans-serif';
+      instructionText.style.marginBottom = '1rem';
+      
+      // Create button container
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.display = 'flex';
+      buttonContainer.style.gap = '2rem';
+      buttonContainer.style.flexWrap = 'wrap';
+      buttonContainer.style.justifyContent = 'center';
+      
+      buttonContainer.appendChild(captureBtn);
+      buttonContainer.appendChild(cancelBtn);
+      
+      cameraContainer.appendChild(video);
+      cameraContainer.appendChild(instructionText);
+      cameraContainer.appendChild(buttonContainer);
+      document.body.appendChild(cameraContainer);
+      
+      // Add keyboard shortcut for capture (Enter key)
+      const handleKeyPress = (e) => {
+        if (e.key === 'Enter' && !captureBtn.disabled) {
+          captureBtn.click();
+        } else if (e.key === 'Escape') {
+          cancelBtn.click();
+        }
+      };
+      document.addEventListener('keydown', handleKeyPress);
+      
+      // Handle capture
+      const handleCapture = () => {
+        document.removeEventListener('keydown', handleKeyPress);
+        
+        // Show loading state
+        captureBtn.innerHTML = '⏳ Processing...';
+        captureBtn.style.backgroundColor = '#6b7280';
+        captureBtn.disabled = true;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        
+        // Convert to blob and handle as file
+        canvas.toBlob((blob) => {
+          const file = new File([blob], 'camera-photo.jpg', { type: 'image/jpeg' });
+          handleFileUpload({ target: { files: [file] } });
+          
+          // Clean up
+          stream.getTracks().forEach(track => track.stop());
+          document.body.removeChild(cameraContainer);
+        }, 'image/jpeg', 0.8);
+      };
+      
+      // Handle cancel
+      const handleCancel = () => {
+        document.removeEventListener('keydown', handleKeyPress);
+        stream.getTracks().forEach(track => track.stop());
+        document.body.removeChild(cameraContainer);
+      };
+      
+      captureBtn.onclick = handleCapture;
+      cancelBtn.onclick = handleCancel;
+      
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      
+      if (error.name === 'NotAllowedError') {
+        toast.error('Camera access denied. Please allow camera permissions and try again.');
+      } else if (error.name === 'NotFoundError') {
+        toast.error('No camera found. Please use gallery upload instead.');
+      } else if (error.name === 'NotSupportedError') {
+        toast.error('Camera not supported. Please use gallery upload instead.');
+      } else {
+        toast.error('Could not access camera. Please try uploading from gallery instead.');
+      }
+      
+      // Fallback to file input
+      galleryInputRef.current?.click();
+    }
   };
 
   const handleUploadFromGallery = () => {
-    fileInputRef.current?.click();
+    galleryInputRef.current?.click();
   };
 
   const analyzeImage = async () => {
@@ -760,6 +999,14 @@ const AddPlant = ({ onPlantAdd }) => {
 
             <HiddenFileInput
               ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileUpload}
+            />
+            
+            <GalleryFileInput
+              ref={galleryInputRef}
               type="file"
               accept="image/*"
               onChange={handleFileUpload}
