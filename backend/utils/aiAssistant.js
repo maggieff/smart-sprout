@@ -1,306 +1,199 @@
-/**
- * AI Assistant using OpenAI API for plant care recommendations
- */
-
 const OpenAI = require('openai');
+const fs = require('fs');
+const path = require('path');
 
-let openai = null;
+// Initialize OpenAI client
+let openai;
+try {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY || 'your_openai_api_key_here'
+  });
+  console.log('✅ OpenAI client initialized');
+} catch (error) {
+  console.log('⚠️ OpenAI client initialization failed:', error.message);
+}
 
-/**
- * Initialize OpenAI client
- */
-function initializeOpenAI() {
-  try {
-    if (!process.env.OPENAI_API_KEY) {
-      console.warn('⚠️ OpenAI API key not found. Using fallback responses.');
-      return false;
-    }
-
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
-
-    console.log('✅ OpenAI client initialized');
-    return true;
-  } catch (error) {
-    console.error('❌ Failed to initialize OpenAI:', error);
-    return false;
-  }
+// Load plant care dataset
+let plantCareData = [];
+try {
+  const dataPath = path.join(__dirname, '../data/plantCareDataset.json');
+  const rawData = fs.readFileSync(dataPath, 'utf8');
+  plantCareData = JSON.parse(rawData);
+  console.log(`✅ Loaded ${plantCareData.length} plant care items`);
+} catch (error) {
+  console.error('❌ Error loading plant care data:', error.message);
 }
 
 /**
- * Get AI response for plant care questions
- * @param {Object} params - Request parameters
- * @returns {Object} AI response with answer and metadata
+ * Search plant knowledge for relevant tips
  */
-async function getAIResponse(params) {
-  try {
-    if (!openai) {
-      initializeOpenAI();
-    }
+function searchPlantKnowledge(question, species) {
+  if (!plantCareData || plantCareData.length === 0) {
+    return [];
+  }
 
-    if (!openai) {
-      return getFallbackResponse(params);
-    }
-
-    const { question, species, sensorData, knowledgeContext, context } = params;
-
-    // Build context for the AI
-    const systemPrompt = buildSystemPrompt(species, sensorData, knowledgeContext);
-    const userPrompt = buildUserPrompt(question, context);
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt
-        },
-        {
-          role: "user",
-          content: userPrompt
-        }
-      ],
-      max_tokens: 500,
-      temperature: 0.7,
-      presence_penalty: 0.1,
-      frequency_penalty: 0.1
-    });
-
-    const aiResponse = completion.choices[0].message.content;
+  const query = question.toLowerCase();
+  const speciesQuery = species ? species.toLowerCase() : '';
+  
+  // Score and filter plant care tips
+  const scoredTips = plantCareData.map(tip => {
+    let score = 0;
     
-    return {
-      answer: aiResponse,
-      confidence: 0.9,
-      sources: knowledgeContext?.sources || [],
-      recommendations: extractRecommendations(aiResponse),
-      model: "gpt-3.5-turbo",
-      timestamp: new Date().toISOString()
-    };
-
-  } catch (error) {
-    console.error('Error getting AI response:', error);
-    return getFallbackResponse(params);
-  }
+    // Species match (highest priority)
+    if (speciesQuery && tip.species && tip.species.toLowerCase().includes(speciesQuery)) {
+      score += 10;
+    }
+    
+    // Question keyword matches
+    const tipText = tip.text.toLowerCase();
+    const tipCategory = tip.category.toLowerCase();
+    
+    // High-value keywords
+    const highValueKeywords = ['water', 'watering', 'light', 'sun', 'soil', 'fertilizer', 'prune', 'propagate', 'repot', 'disease', 'pest', 'yellow', 'brown', 'droop', 'wilt'];
+    highValueKeywords.forEach(keyword => {
+      if (query.includes(keyword) && tipText.includes(keyword)) {
+        score += 3;
+      }
+    });
+    
+    // General keyword matches
+    const words = query.split(' ').filter(word => word.length > 2);
+    words.forEach(word => {
+      if (tipText.includes(word)) {
+        score += 1;
+      }
+      if (tipCategory.includes(word)) {
+        score += 2;
+      }
+    });
+    
+    return { ...tip, score };
+  });
+  
+  // Filter out zero scores and sort by score
+  return scoredTips
+    .filter(tip => tip.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5); // Return top 5 matches
 }
 
 /**
- * Build system prompt for the AI
- * @param {string} species - Plant species
- * @param {Object} sensorData - Current sensor readings
- * @param {Object} knowledgeContext - Relevant knowledge from Chroma DB
- * @returns {string} System prompt
+ * Build system prompt for OpenAI
  */
 function buildSystemPrompt(species, sensorData, knowledgeContext) {
-  let prompt = `You are a helpful plant care assistant with expertise in houseplant care. You provide practical, actionable advice based on current plant conditions and scientific knowledge.
+  let prompt = `You are a helpful plant care assistant with access to a comprehensive plant care database.
 
-Current Plant Information:
-- Species: ${species || 'Unknown'}
-- Sensor Data: ${JSON.stringify(sensorData, null, 2)}
+RELEVANT PLANT KNOWLEDGE:
+`;
 
-Relevant Knowledge Base:
-${knowledgeContext?.relevantTips?.map(tip => `- ${tip.text} (Confidence: ${tip.confidence.toFixed(2)})`).join('\n') || 'No specific knowledge found'}
-
-Guidelines:
-1. Provide specific, actionable advice
-2. Consider the current sensor readings in your recommendations
-3. Be encouraging and supportive
-4. Use emojis appropriately to make responses friendly
-5. If you're unsure about something, say so
-6. Focus on practical care tips that users can implement immediately
-7. Consider the plant's specific needs based on its species
-
-Response Format:
-- Start with a brief assessment of the current situation
-- Provide specific recommendations
-- Include any warnings or important notes
-- End with encouragement and next steps`;
-
-  return prompt;
-}
-
-/**
- * Build user prompt
- * @param {string} question - User's question
- * @param {string} context - Additional context
- * @returns {string} User prompt
- */
-function buildUserPrompt(question, context) {
-  let prompt = `User Question: ${question}`;
-  
-  if (context && context !== 'general') {
-    prompt += `\n\nContext: ${context}`;
+  if (knowledgeContext && knowledgeContext.length > 0) {
+    knowledgeContext.forEach((tip, index) => {
+      prompt += `${index + 1}. **${tip.category}**: ${tip.text}\n`;
+    });
+  } else {
+    prompt += `No specific knowledge found for this query. Use your general plant care knowledge.`;
   }
-  
-  prompt += `\n\nPlease provide a helpful response based on the plant information and knowledge base above.`;
-  
+
+  prompt += `
+
+CURRENT PLANT CONTEXT:
+- Species: ${species || 'Not specified'}
+- Sensor Data: ${JSON.stringify(sensorData || {})}
+
+INSTRUCTIONS:
+1. Provide specific, actionable advice based on the knowledge above
+2. If sensor data is available, reference it in your response
+3. Be encouraging and supportive
+4. If you don't have specific information, say so and provide general guidance
+5. Keep responses concise but helpful
+6. Use emojis sparingly and appropriately
+
+Respond as a friendly plant care expert:`;
+
   return prompt;
 }
 
 /**
  * Extract recommendations from AI response
- * @param {string} response - AI response text
- * @returns {Array} Array of recommendations
  */
 function extractRecommendations(response) {
   const recommendations = [];
-  
-  // Look for bullet points or numbered lists
   const lines = response.split('\n');
   
   lines.forEach(line => {
-    const trimmed = line.trim();
-    if (trimmed.match(/^[-•*]\s/) || trimmed.match(/^\d+\.\s/)) {
-      recommendations.push(trimmed.replace(/^[-•*]\s/, '').replace(/^\d+\.\s/, ''));
+    if (line.includes('•') || line.includes('-') || line.includes('*')) {
+      const clean = line.replace(/[•\-*]\s*/, '').trim();
+      if (clean.length > 0) {
+        recommendations.push(clean);
+      }
     }
   });
   
-  return recommendations;
+  return recommendations.slice(0, 3); // Max 3 recommendations
 }
 
 /**
- * Get fallback response when AI is unavailable
- * @param {Object} params - Request parameters
- * @returns {Object} Fallback response
+ * Get AI response
  */
-function getFallbackResponse(params) {
-  const { question, species, sensorData } = params;
-  const lowerQuestion = question.toLowerCase();
-  
-  let answer = '';
-  let recommendations = [];
-  
-  // Watering-related questions
-  if (lowerQuestion.includes('water') || lowerQuestion.includes('watering')) {
-    answer = `For your ${species || 'plant'}, water when the top 2 inches of soil are dry. `;
-    if (sensorData && sensorData.moisture < 30) {
-      answer += `Your current moisture level is ${sensorData.moisture}%, which suggests the soil is quite dry. I recommend watering your plant today. `;
-    } else if (sensorData && sensorData.moisture > 80) {
-      answer += `Your current moisture level is ${sensorData.moisture}%, which suggests the soil is very wet. Hold off on watering for a few days. `;
-    } else {
-      answer += `Check the soil moisture by sticking your finger 2 inches into the soil. `;
-    }
-    answer += `Water thoroughly until water drains from the bottom of the pot.`;
-    recommendations.push('Check soil moisture before watering');
-    recommendations.push('Water thoroughly and allow drainage');
-  }
-  
-  // Light-related questions
-  else if (lowerQuestion.includes('light') || lowerQuestion.includes('sunlight')) {
-    answer = `Your ${species || 'plant'} prefers bright, indirect light. `;
-    if (sensorData && sensorData.light < 300) {
-      answer += `Your current light level is ${sensorData.light}, which is quite low. Consider moving your plant to a brighter location. `;
-    } else if (sensorData && sensorData.light > 1000) {
-      answer += `Your current light level is ${sensorData.light}, which might be too intense. Consider moving your plant away from direct sunlight. `;
-    } else {
-      answer += `Avoid direct sunlight which can burn the leaves. `;
-    }
-    answer += `A spot near a bright window with filtered light is ideal.`;
-    recommendations.push('Provide bright, indirect light');
-    recommendations.push('Avoid direct sunlight');
-  }
-  
-  // Health/troubleshooting questions
-  else if (lowerQuestion.includes('yellow') || lowerQuestion.includes('leaves')) {
-    answer = `Yellow leaves can indicate several issues: overwatering, underwatering, or nutrient deficiency. `;
-    if (sensorData && sensorData.moisture > 80) {
-      answer += `Your high moisture level (${sensorData.moisture}%) suggests overwatering might be the cause. `;
-    } else if (sensorData && sensorData.moisture < 20) {
-      answer += `Your low moisture level (${sensorData.moisture}%) suggests underwatering might be the cause. `;
-    }
-    answer += `Check the soil moisture and adjust your watering schedule accordingly. Remove yellow leaves to help the plant focus energy on healthy growth.`;
-    recommendations.push('Check soil moisture levels');
-    recommendations.push('Remove yellow leaves');
-    recommendations.push('Adjust watering schedule');
-  }
-  
-  // General care questions
-  else {
-    answer = `I'd be happy to help with your ${species || 'plant'} care! `;
-    if (sensorData) {
-      answer += `Based on your current sensor readings (moisture: ${sensorData.moisture}%, light: ${sensorData.light}, temperature: ${sensorData.temperature}°F), `;
-    }
-    answer += `here are some general care tips: water when soil is dry, provide bright indirect light, and maintain consistent care. For specific advice, please provide more details about your plant's current condition.`;
-    recommendations.push('Water when soil is dry');
-    recommendations.push('Provide bright indirect light');
-    recommendations.push('Maintain consistent care');
-  }
-  
-  return {
-    answer: answer,
-    confidence: 0.6,
-    sources: ['fallback_knowledge'],
-    recommendations: recommendations,
-    model: 'fallback',
-    timestamp: new Date().toISOString()
-  };
-}
+async function getAIResponse(params) {
+  try {
+    const { question, species, sensorData } = params;
 
-/**
- * Generate plant care reminders based on sensor data
- * @param {Object} sensorData - Current sensor readings
- * @param {Object} plant - Plant information
- * @returns {Array} Array of reminders
- */
-function generateCareReminders(sensorData, plant) {
-  const reminders = [];
-  
-  // Moisture-based reminders
-  if (sensorData.moisture < 20) {
-    reminders.push({
-      type: 'watering',
-      priority: 'high',
-      message: '🌱 Your plant needs water - soil is very dry',
-      action: 'Water thoroughly until water drains from bottom'
+    // Search for relevant plant care tips
+    const relevantTips = searchPlantKnowledge(question, species);
+    console.log(`✅ Found ${relevantTips.length} relevant tips for "${question}"`);
+
+    // Build system prompt
+    const systemPrompt = buildSystemPrompt(species, sensorData, relevantTips);
+
+    if (!openai) {
+      console.log('⚠️ OpenAI not available, using fallback response');
+      return {
+        answer: "I'd be happy to help with your plant care! For the best advice, please provide more specific details about your plant's current condition.",
+        confidence: 0.3,
+        sources: ['fallback_knowledge'],
+        recommendations: ['Provide more specific details about your plant'],
+        model: 'fallback',
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    // Generate AI response using OpenAI
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: question }
+      ],
+      max_tokens: 500,
+      temperature: 0.7
     });
-  } else if (sensorData.moisture > 90) {
-    reminders.push({
-      type: 'watering',
-      priority: 'medium',
-      message: '💧 Soil is very wet - hold off on watering',
-      action: 'Check for drainage issues and reduce watering frequency'
-    });
+
+    const aiResponse = completion.choices[0].message.content;
+
+    return {
+      answer: aiResponse,
+      confidence: 0.9,
+      sources: ['plant_care_database', 'openai_gpt3.5'],
+      recommendations: extractRecommendations(aiResponse),
+      model: 'gpt-3.5-turbo',
+      timestamp: new Date().toISOString()
+    };
+
+  } catch (error) {
+    console.error('Error getting AI response:', error);
+    return {
+      answer: "I'm having trouble accessing my plant care database right now. Please try again later.",
+      confidence: 0.1,
+      sources: ['error_fallback'],
+      recommendations: ['Try again later'],
+      model: 'error_fallback',
+      timestamp: new Date().toISOString()
+    };
   }
-  
-  // Light-based reminders
-  if (sensorData.light < 200) {
-    reminders.push({
-      type: 'lighting',
-      priority: 'medium',
-      message: '☀️ Plant needs more light',
-      action: 'Move to a brighter location with indirect light'
-    });
-  } else if (sensorData.light > 1200) {
-    reminders.push({
-      type: 'lighting',
-      priority: 'low',
-      message: '🕶️ Light might be too intense',
-      action: 'Consider moving away from direct sunlight'
-    });
-  }
-  
-  // Temperature-based reminders
-  if (sensorData.temperature < 60) {
-    reminders.push({
-      type: 'environment',
-      priority: 'medium',
-      message: '❄️ Temperature is quite low',
-      action: 'Move to a warmer location or check for drafts'
-    });
-  } else if (sensorData.temperature > 90) {
-    reminders.push({
-      type: 'environment',
-      priority: 'medium',
-      message: '🔥 Temperature is quite high',
-      action: 'Move to a cooler location or provide shade'
-    });
-  }
-  
-  return reminders;
 }
 
 module.exports = {
-  initializeOpenAI,
   getAIResponse,
-  generateCareReminders
+  searchPlantKnowledge
 };
