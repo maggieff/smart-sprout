@@ -119,14 +119,14 @@ const SensorInfo = styled.div`
 
 const SensorLabel = styled.div`
   font-size: 0.75rem;
-  color: white;
+  color: #1F2937;
   margin-bottom: 0.125rem;
 `;
 
 const SensorValue = styled.div`
   font-size: 0.875rem;
   font-weight: 600;
-  color: white;
+  color: #1F2937;
 `;
 
 const StatusBadge = styled.div`
