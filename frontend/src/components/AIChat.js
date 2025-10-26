@@ -351,8 +351,8 @@ const AIChat = ({ selectedPlant }) => {
   ];
 
   useEffect(() => {
-    // Add welcome message
-    if (messages.length === 0) {
+    // Add welcome message only once when component mounts or plant changes
+    if (messages.length === 0 && selectedPlant) {
       const getWelcomeMessage = async () => {
         let plantName = selectedPlant?.name || 'plant';
         
@@ -410,15 +410,33 @@ const AIChat = ({ selectedPlant }) => {
     try {
       // Get the most recent photo analysis to determine the actual plant species
       let actualSpecies = selectedPlant?.species;
+      
+      // Try to get species from recent photo analysis
       try {
-        const photosResponse = await fetch(`http://localhost:5001/api/upload/photos?plantId=${selectedPlant?.id}`);
+        // First try with selectedPlant ID
+        let photosResponse = await fetch(`http://localhost:5001/api/upload/photos?plantId=${selectedPlant?.id || 'unknown'}`);
         if (photosResponse.ok) {
           const photos = await photosResponse.json();
           if (photos.photos && photos.photos.length > 0) {
-            const latestPhoto = photos.photos[0]; // Photos are sorted by newest first
+            const latestPhoto = photos.photos[0];
             if (latestPhoto.analysis && latestPhoto.analysis.species && latestPhoto.analysis.species !== 'Unknown Plant') {
               actualSpecies = latestPhoto.analysis.species;
               console.log(`🌱 Using photo-identified species: ${actualSpecies}`);
+            }
+          }
+        }
+        
+        // If no photos found, try to get from recent uploads (for unknown plantId)
+        if (!actualSpecies || actualSpecies === selectedPlant?.species) {
+          photosResponse = await fetch(`http://localhost:5001/api/upload/photos?plantId=unknown`);
+          if (photosResponse.ok) {
+            const photos = await photosResponse.json();
+            if (photos.photos && photos.photos.length > 0) {
+              const latestPhoto = photos.photos[0];
+              if (latestPhoto.analysis && latestPhoto.analysis.species && latestPhoto.analysis.species !== 'Unknown Plant') {
+                actualSpecies = latestPhoto.analysis.species;
+                console.log(`🌱 Using recent photo-identified species: ${actualSpecies}`);
+              }
             }
           }
         }
@@ -563,9 +581,9 @@ const AIChat = ({ selectedPlant }) => {
       formData.append('plantId', selectedPlant?.id || 'unknown');
       formData.append('description', 'Live camera capture for plant identification');
 
-      console.log('📤 Uploading to:', 'http://192.168.7.88:5001/api/upload');
+      console.log('📤 Uploading to:', 'http://localhost:5001/api/upload');
       
-      const response = await fetch('http://192.168.7.88:5001/api/upload', {
+      const response = await fetch('http://localhost:5001/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -587,16 +605,29 @@ const AIChat = ({ selectedPlant }) => {
 
         setMessages(prev => [...prev, imageMessage]);
 
-        // Add AI response about the plant identification
+        // Add processing message
+        const processingMessage = {
+          id: (Date.now() + 0.5).toString(),
+          text: `🔍 Analyzing your plant image... This may take a few seconds.`,
+          isUser: false,
+          timestamp: new Date().toISOString(),
+          isProcessing: true
+        };
+
+        setMessages(prev => [...prev, processingMessage]);
+
+        // Replace processing message with AI response
         const aiResponse = {
-          id: (Date.now() + 1).toString(),
+          id: (Date.now() + 0.5).toString(), // Same ID as processing message
           text: `Based on your photo, I can help identify this plant. ${result.photo.analysis?.species ? `This appears to be a ${result.photo.analysis.species}.` : 'I\'m analyzing the image to identify the plant species.'} Would you like to know more about its care requirements?`,
           isUser: false,
           timestamp: new Date().toISOString(),
           confidence: result.photo.analysis?.confidence || 0.7
         };
 
-        setMessages(prev => [...prev, aiResponse]);
+        setMessages(prev => prev.map(msg => 
+          msg.id === processingMessage.id ? aiResponse : msg
+        ));
         toast.success('Photo captured and uploaded successfully!');
       } else {
         throw new Error(result.error || 'Upload failed');
@@ -647,9 +678,9 @@ const AIChat = ({ selectedPlant }) => {
         type: file.type,
         size: file.size
       });
-      console.log('📤 Upload URL:', 'http://192.168.7.88:5001/api/upload');
-
-      const response = await fetch('http://192.168.7.88:5001/api/upload', {
+      console.log('📤 Upload URL:', 'http://localhost:5001/api/upload');
+      
+      const response = await fetch('http://localhost:5001/api/upload', {
         method: 'POST',
         body: formData,
       });

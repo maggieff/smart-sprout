@@ -5,12 +5,39 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const OpenAI = require('openai');
+const sharp = require('sharp');
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || 'your_openai_api_key_here'
 });
+
+// Simple in-memory cache for analysis results
+const analysisCache = new Map();
+
+/**
+ * Optimize image for faster API processing
+ * Reduces file size while maintaining quality for plant identification
+ */
+async function optimizeImageForAPI(imageBuffer) {
+  try {
+    return await sharp(imageBuffer)
+      .resize(1024, 1024, { 
+        fit: 'inside',
+        withoutEnlargement: true 
+      })
+      .jpeg({ 
+        quality: 85,
+        progressive: true 
+      })
+      .toBuffer();
+  } catch (error) {
+    console.log('⚠️ Image optimization failed, using original:', error.message);
+    return imageBuffer; // Fallback to original
+  }
+}
 
 /**
  * Analyze plant image for health issues and growth stage
@@ -24,11 +51,26 @@ async function analyzePlantImage(imagePath, plantId) {
     
     // Read the image file
     const imageBuffer = fs.readFileSync(imagePath);
-    const base64Image = imageBuffer.toString('base64');
     
-    // Create OpenAI Vision API request
+    // Create cache key based on image hash
+    const imageHash = crypto.createHash('md5').update(imageBuffer).digest('hex');
+    const cacheKey = `${imageHash}_${plantId}`;
+    
+    // Check cache first
+    if (analysisCache.has(cacheKey)) {
+      console.log('⚡ Using cached analysis result');
+      return analysisCache.get(cacheKey);
+    }
+    
+    // Optimize image size for faster processing
+    const optimizedBuffer = await optimizeImageForAPI(imageBuffer);
+    const base64Image = optimizedBuffer.toString('base64');
+    
+    // Create OpenAI Vision API request with optimized settings
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
+      max_tokens: 800, // Reduced from 1000 for faster response
+      temperature: 0.2, // Lower temperature for more consistent, faster responses
       messages: [
         {
           role: "user",
@@ -101,6 +143,16 @@ Please respond in JSON format with this structure:
     };
     
     console.log(`✅ OpenAI Vision analysis complete - Species: ${analysis.species}, Health Score: ${analysis.healthScore.toFixed(2)}`);
+    
+    // Cache the result for future use
+    analysisCache.set(cacheKey, analysis);
+    
+    // Limit cache size to prevent memory issues
+    if (analysisCache.size > 100) {
+      const firstKey = analysisCache.keys().next().value;
+      analysisCache.delete(firstKey);
+    }
+    
     return analysis;
     
   } catch (error) {
