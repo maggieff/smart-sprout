@@ -1,6 +1,5 @@
 const express = require('express');
 const { getAIResponse } = require('../utils/aiAssistant');
-const { queryPlantKnowledge } = require('../utils/chromaClient');
 
 const router = express.Router();
 
@@ -24,16 +23,11 @@ router.post('/', async (req, res) => {
     console.log('🤖 AI Question:', question);
     console.log('🌱 Plant Context:', { plantId, species, sensorData });
 
-    // Query Chroma DB for relevant plant care knowledge
-    const knowledgeContext = await queryPlantKnowledge(question, species);
-    
-    // Generate AI response using OpenAI
+    // Generate AI response using OpenAI with plant knowledge
     const aiResponse = await getAIResponse({
       question,
       species: species || 'plant',
-      sensorData: sensorData || {},
-      knowledgeContext,
-      context
+      sensorData: sensorData || {}
     });
 
     // Log the interaction for analytics
