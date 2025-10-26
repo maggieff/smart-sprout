@@ -1,116 +1,79 @@
-#!/usr/bin/env node
-
 /**
- * Setup Chroma DB Cloud with plant care knowledge
+ * Setup script for Chroma Cloud
+ * This script helps you get the correct credentials and test the connection
  */
 
-const chromadb = require('chromadb');
-const fs = require('fs');
-const path = require('path');
+const { ChromaClient } = require('chromadb');
 
 async function setupChromaCloud() {
-  console.log('🧠 Setting up Chroma DB Cloud for plant care knowledge...\n');
+  console.log('🌱 Setting up Chroma Cloud for Smart Sprout...\n');
+  
+  console.log('📋 Steps to get your Chroma Cloud credentials:');
+  console.log('1. Go to https://cloud.trychroma.com/');
+  console.log('2. Sign up or log in to your account');
+  console.log('3. Create a new database (or use existing one)');
+  console.log('4. Get your API key from the dashboard');
+  console.log('5. Get your tenant ID from your account settings\n');
+  
+  // Test with current credentials
+  console.log('🔍 Testing current credentials...');
   
   try {
-    // Initialize Chroma client (cloud instance)
-    const client = new chromadb.ChromaClient({
+    const chroma = new ChromaClient({
       path: 'https://api.trychroma.com',
-      apiKey: 'ck-BPG2XTtPWBPa2tFsatrfHmbsBTLdJYtKsnX75g8ZccYg',
-      tenant: '36db7d89-6330-46bf-a396-2836596dbd9a',
-      database: 'plants'
+      apiKey: process.env.CHROMA_API_KEY || 'ck-BPG2XTtPWBPa2tFsatrfHmbsBTLdJYtKsnX75g8ZccYg',
+      tenant: process.env.CHROMA_TENANT || '36db7d89-6330-46bf-a396-2836596dbd9a',
+      database: process.env.CHROMA_DATABASE || 'plants'
     });
     
-    console.log('✅ Connected to Chroma DB Cloud');
+    console.log('✅ Chroma Cloud client created successfully');
     
-    // Load plant care dataset
-    const datasetPath = path.join(__dirname, 'data/plantCareDataset.json');
-    const dataset = JSON.parse(fs.readFileSync(datasetPath, 'utf8'));
+    // Try to list collections
+    const collections = await chroma.listCollections();
+    console.log('✅ Successfully connected to Chroma Cloud!');
+    console.log('📊 Collections found:', collections.length);
     
-    console.log(`📚 Loaded ${dataset.length} plant care items`);
-    
-    // Create or get collection
-    let collection;
-    try {
-      collection = await client.getCollection({
-        name: 'plant_care_knowledge'
+    if (collections.length > 0) {
+      console.log('📋 Available collections:');
+      collections.forEach((col, index) => {
+        console.log(`   ${index + 1}. ${col.name}`);
       });
-      console.log('✅ Connected to existing collection');
-    } catch (error) {
-      collection = await client.createCollection({
-        name: 'plant_care_knowledge',
+    }
+    
+    // Test creating a collection
+    console.log('\n🧪 Testing collection creation...');
+    try {
+      const testCollection = await chroma.createCollection({
+        name: 'smart_sprout_test',
         metadata: { 
-          description: 'Plant care tips and knowledge base',
+          description: 'Test collection for Smart Sprout',
           created_at: new Date().toISOString()
         }
       });
-      console.log('✅ Created new collection');
+      console.log('✅ Test collection created successfully');
+      
+      // Clean up test collection
+      await chroma.deleteCollection({ name: 'smart_sprout_test' });
+      console.log('🧹 Test collection cleaned up');
+      
+    } catch (error) {
+      console.log('⚠️  Collection creation test failed:', error.message);
     }
     
-    // Process each item in the dataset
-    const documents = [];
-    const metadatas = [];
-    const ids = [];
-    
-    for (let i = 0; i < dataset.length; i++) {
-      const item = dataset[i];
-      
-      documents.push(item.text);
-      metadatas.push({
-        species: item.species,
-        category: item.category,
-        source: 'plant_care_dataset',
-        created_at: new Date().toISOString()
-      });
-      ids.push(item.id);
-      
-      if ((i + 1) % 10 === 0) {
-        console.log(`📝 Processed ${i + 1}/${dataset.length} items`);
-      }
-    }
-    
-    // Add documents to collection
-    console.log('\n🔄 Adding documents to Chroma DB Cloud...');
-    await collection.add({
-      documents: documents,
-      metadatas: metadatas,
-      ids: ids
-    });
-    
-    console.log('✅ Successfully added all documents to Chroma DB Cloud');
-    
-    // Test the collection
-    console.log('\n🧪 Testing collection...');
-    const testResults = await collection.query({
-      queryTexts: ['How often should I water my plant?'],
-      nResults: 3
-    });
-    
-    console.log('✅ Collection test successful');
-    console.log(`📊 Found ${testResults.documents[0].length} relevant results`);
-    
-    // Get collection info
-    const collectionInfo = await collection.get();
-    console.log(`📈 Collection contains ${collectionInfo.ids.length} documents`);
-    
-    console.log('\n🎉 Chroma DB Cloud setup complete!');
-    console.log('\n📋 Next steps:');
-    console.log('   1. Restart the backend server: npm start');
-    console.log('   2. The AI assistant will now use Chroma DB Cloud for sophisticated responses');
-    console.log('   3. Test by asking: "Should I water my Snake Plant today?"');
+    console.log('\n🎉 Chroma Cloud setup is working correctly!');
+    console.log('💡 You can now use Chroma Cloud for your plant care knowledge base.');
     
   } catch (error) {
-    console.error('❌ Error setting up Chroma DB Cloud:', error.message);
-    console.log('\n🔧 Troubleshooting:');
-    console.log('   - Check your API key and credentials');
-    console.log('   - Verify network connectivity');
-    console.log('   - Ensure the plant care dataset exists');
-    process.exit(1);
+    console.log('❌ Chroma Cloud connection failed:');
+    console.log('   Error:', error.message);
+    console.log('\n🔧 Troubleshooting steps:');
+    console.log('1. Verify your API key is correct');
+    console.log('2. Verify your tenant ID is correct');
+    console.log('3. Make sure you have created a database in Chroma Cloud');
+    console.log('4. Check that your account has the necessary permissions');
+    console.log('\n📖 For more help, visit: https://docs.trychroma.com/docs/overview/getting-started');
   }
 }
 
-// Run setup if called directly
-if (require.main === module) {
-  setupChromaCloud();
-}
-
-module.exports = { setupChromaCloud };
+// Run the setup
+setupChromaCloud().catch(console.error);
