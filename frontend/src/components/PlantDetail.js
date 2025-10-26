@@ -9,12 +9,14 @@ import {
   FiThermometer, 
   FiWind,
   FiEdit3,
-  FiTrash2
+  FiTrash2,
+  FiEdit
 } from 'react-icons/fi';
 import { plantService } from '../services/plantService';
 import { logService } from '../services/logService';
 import LoadingSpinner from './LoadingSpinner';
 import QuickActions from './QuickActions';
+import PlantEditModal from './PlantEditModal';
 import toast from 'react-hot-toast';
 
 const Container = styled.div`
@@ -406,6 +408,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
   const [plant, setPlant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [plantPhoto, setPlantPhoto] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   const tooltipRef = useRef(null);
   const chartDataRef = useRef(null);
 
@@ -618,6 +621,19 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
     }
   };
 
+  const handleEditSave = (editedPlant) => {
+    if (onPlantUpdate) {
+      onPlantUpdate(editedPlant);
+    }
+    setPlant(editedPlant);
+    setShowEditModal(false);
+    toast.success('Plant updated successfully!');
+  };
+
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+  };
+
   if (loading) {
     return (
       <Container>
@@ -693,7 +709,11 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
           </PlantImagePlaceholder>
 
           <ActionButtons>
-            <ActionButton primary onClick={handleDeletePhoto}>
+            <ActionButton primary onClick={() => setShowEditModal(true)}>
+              <FiEdit />
+              Edit Plant
+            </ActionButton>
+            <ActionButton onClick={handleDeletePhoto}>
               <FiEdit3 />
               Delete Photo
             </ActionButton>
@@ -727,7 +747,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
           </Section>
 
           <Section>
-            <SectionTitle>Quick Actions</SectionTitle>
+            <SectionTitle>Quick Log!</SectionTitle>
             <QuickActions 
               plant={plant}
               onActionComplete={() => {
@@ -822,7 +842,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
           </SidebarSection>
 
           <SidebarSection>
-            <SidebarTitle>Soil Temperature</SidebarTitle>
+            <SidebarTitle>Environment</SidebarTitle>
             <TemperatureBar>
               <TemperatureBarContainer>
                 <TemperatureFill percentage={Math.min((temperature / 30) * 100, 100)} />
@@ -832,6 +852,20 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
                 <TemperatureLabel>Temperature</TemperatureLabel>
               </TemperatureValue>
             </TemperatureBar>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', gap: '1rem' }}>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1F2937' }}>
+                  {plant.sensorData?.light || 400}
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>Light (lumens)</div>
+              </div>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1F2937' }}>
+                  {plant.sensorData?.humidity || 50}%
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>Humidity</div>
+              </div>
+            </div>
           </SidebarSection>
 
           <SidebarSection>
@@ -877,6 +911,14 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
           </SidebarSection>
         </RightSidebar>
       </MainContent>
+
+      <PlantEditModal
+        isOpen={showEditModal}
+        onClose={handleEditCancel}
+        plantData={plant}
+        onSave={handleEditSave}
+        title="Edit Plant Details"
+      />
     </Container>
   );
 };

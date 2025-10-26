@@ -11,6 +11,7 @@ import {
   FiImage
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import PlantEditModal from './PlantEditModal';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -330,6 +331,8 @@ const AddPlant = ({ onPlantAdd }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [identifiedPlant, setIdentifiedPlant] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [plantToEdit, setPlantToEdit] = useState(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -497,18 +500,10 @@ const AddPlant = ({ onPlantAdd }) => {
         confidence: identifiedPlant.confidence
       };
 
-      // Call the parent component's add function
-      if (onPlantAdd) {
-        onPlantAdd(newPlant);
-      }
-
-      toast.success(`${identifiedPlant.name} added to your collection!`);
-      
-      // Close modal and navigate
+      // Show edit modal instead of directly adding
+      setPlantToEdit(newPlant);
+      setShowEditModal(true);
       handleCloseModal();
-      setTimeout(() => {
-        navigate('/my-plants');
-      }, 1500);
 
     } catch (error) {
       console.error('Error adding identified plant:', error);
@@ -518,6 +513,23 @@ const AddPlant = ({ onPlantAdd }) => {
 
   const handleClearSearch = () => {
     setSearchTerm('');
+  };
+
+  const handleEditSave = (editedPlant) => {
+    if (onPlantAdd) {
+      onPlantAdd(editedPlant);
+    }
+    toast.success(`${editedPlant.name} added to your collection!`);
+    setShowEditModal(false);
+    setPlantToEdit(null);
+    setTimeout(() => {
+      navigate('/my-plants');
+    }, 1500);
+  };
+
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+    setPlantToEdit(null);
   };
 
   const handleAddPlant = async (plantId) => {
@@ -568,17 +580,9 @@ const AddPlant = ({ onPlantAdd }) => {
         careSummary: careInfo ? careInfo.careInfo : null
       };
 
-      // Call the parent component's add function
-      if (onPlantAdd) {
-        onPlantAdd(newPlant);
-      }
-
-      toast.success(`${plant.name} added to your collection!`);
-      
-      // Navigate to My Plants page after a short delay
-      setTimeout(() => {
-        navigate('/my-plants');
-      }, 1500);
+      // Show edit modal instead of directly adding
+      setPlantToEdit(newPlant);
+      setShowEditModal(true);
 
     } catch (error) {
       console.error('Error adding plant:', error);
@@ -763,6 +767,14 @@ const AddPlant = ({ onPlantAdd }) => {
           </ModalContent>
         </CameraModal>
       )}
+
+      <PlantEditModal
+        isOpen={showEditModal}
+        onClose={handleEditCancel}
+        plantData={plantToEdit}
+        onSave={handleEditSave}
+        title="Customize Your Plant"
+      />
     </Container>
   );
 };
