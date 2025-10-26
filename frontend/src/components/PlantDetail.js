@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { 
@@ -12,7 +12,10 @@ import {
   FiMessageCircle,
   FiCamera,
   FiPlus,
-  FiEdit3
+  FiEdit3,
+  FiChevronDown,
+  FiChevronUp,
+  FiBook
 } from 'react-icons/fi';
 import { plantService } from '../services/plantService';
 import { logService } from '../services/logService';
@@ -21,6 +24,7 @@ import SensorChart from './SensorChart';
 import RecentLogs from './RecentLogs';
 import LoadingSpinner from './LoadingSpinner';
 import toast from 'react-hot-toast';
+import { getSpeciesInfo } from '../data/speciesInfo';
 
 const DetailContainer = styled.div`
   max-width: 1200px;
@@ -51,19 +55,20 @@ const PlantHeader = styled.div`
   margin-bottom: 2rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   gap: 2rem;
   align-items: center;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     text-align: center;
+    gap: 1rem;
   }
 `;
 
 const PlantImage = styled.div`
-  width: 6rem;
-  height: 6rem;
+  width: 8rem;
+  height: 8rem;
   background: linear-gradient(135deg, #10B981, #34D399);
   border-radius: 1rem;
   display: flex;
@@ -71,6 +76,13 @@ const PlantImage = styled.div`
   justify-content: center;
   font-size: 2.5rem;
   color: white;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const PlantInfo = styled.div`
@@ -114,6 +126,27 @@ const HealthLabel = styled.div`
   color: #6b7280;
 `;
 
+const EditPlantButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #6B8E6F;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #5a7a5e;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 142, 111, 0.3);
+  }
+`;
+
 const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -124,6 +157,12 @@ const Grid = styled.div`
     grid-template-columns: 1fr;
     gap: 1rem;
   }
+`;
+
+const QuickActionsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
 `;
 
 const Card = styled(motion.div)`
@@ -210,6 +249,13 @@ const SensorValue = styled.div`
   color: #1f2937;
 `;
 
+const SensorStatus = styled.div`
+  font-size: 0.75rem;
+  color: ${props => props.color || '#6b7280'};
+  font-weight: 500;
+  margin-top: 0.25rem;
+`;
+
 const CareInstructions = styled.div`
   background: #f0fdf4;
   border-radius: 0.75rem;
@@ -246,11 +292,149 @@ const InstructionValue = styled.span`
   color: #6b7280;
 `;
 
+const BioSection = styled(motion.div)`
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+`;
+
+const BioHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  transition: all 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const BioHeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const BioIcon = styled.div`
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(135deg, #6B8E6F, #8BAB8F);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+`;
+
+const BioToggle = styled.div`
+  color: #6B8E6F;
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+  transform: ${props => props.isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
+`;
+
+const BioTitle = styled.h2`
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+`;
+
+const BioSubtitle = styled.p`
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-style: italic;
+  margin: 0.25rem 0 0 0;
+`;
+
+const BioContent = styled(motion.div)`
+  overflow: hidden;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #f3f4f6;
+`;
+
+const BioDescription = styled.p`
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #374151;
+  margin-bottom: 1.5rem;
+  text-align: justify;
+`;
+
+const BioMetadata = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 0.75rem;
+`;
+
+const MetadataItem = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const MetadataLabel = styled.span`
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+`;
+
+const MetadataValue = styled.span`
+  font-size: 0.875rem;
+  color: #1f2937;
+  font-weight: 500;
+`;
+
+const BioList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+`;
+
+const BioListItem = styled.li`
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #374151;
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+
+  &:before {
+    content: '•';
+    position: absolute;
+    left: 0.5rem;
+    color: #6B8E6F;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+`;
+
+const BioSectionTitle = styled.h3`
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+`;
+
 const PlantDetail = ({ plants, onPlantUpdate }) => {
   const { plantId } = useParams();
+  const navigate = useNavigate();
   const [plant, setPlant] = useState(null);
   const [loading, setLoading] = useState(true);
   const [logs, setLogs] = useState([]);
+  const [isBioExpanded, setIsBioExpanded] = useState(false);
 
   useEffect(() => {
     loadPlantData();
@@ -312,6 +496,77 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
     }
   };
 
+  const getSensorStatus = (value, range, sensorType) => {
+    if (!range) return { message: '', color: '#6b7280' };
+
+    const { min, max, optimal } = range;
+    const percentDiff = ((value - optimal) / optimal) * 100;
+
+    // Critical thresholds
+    if (value < min * 0.5 || value > max * 1.5) {
+      if (sensorType === 'moisture' && value < min * 0.5) {
+        return { message: '⚠️ Very dry - water needed', color: '#dc2626' };
+      } else if (sensorType === 'moisture' && value > max * 1.5) {
+        return { message: '⚠️ Too wet - check drainage', color: '#dc2626' };
+      } else if (sensorType === 'temperature' && value < min) {
+        return { message: '❄️ Too cold for this plant', color: '#dc2626' };
+      } else if (sensorType === 'temperature' && value > max) {
+        return { message: '🔥 Too hot for this plant', color: '#dc2626' };
+      }
+      return { message: '⚠️ Outside safe range', color: '#dc2626' };
+    }
+
+    // Below minimum
+    if (value < min) {
+      if (sensorType === 'moisture') {
+        return { message: '💧 Could use some water', color: '#f59e0b' };
+      } else if (sensorType === 'light') {
+        return { message: '☀️ A bit dim - more light would help', color: '#f59e0b' };
+      } else if (sensorType === 'temperature') {
+        return { message: '🌡️ A little cool', color: '#f59e0b' };
+      } else if (sensorType === 'humidity') {
+        return { message: '💨 Slightly dry air', color: '#f59e0b' };
+      }
+      return { message: 'Below ideal range', color: '#f59e0b' };
+    }
+
+    // Above maximum
+    if (value > max) {
+      if (sensorType === 'moisture') {
+        return { message: '💦 Soil is quite moist', color: '#f59e0b' };
+      } else if (sensorType === 'light') {
+        return { message: '☀️ Very bright - ensure no leaf burn', color: '#f59e0b' };
+      } else if (sensorType === 'temperature') {
+        return { message: '🌡️ Quite warm', color: '#f59e0b' };
+      } else if (sensorType === 'humidity') {
+        return { message: '💧 High humidity', color: '#f59e0b' };
+      }
+      return { message: 'Above ideal range', color: '#f59e0b' };
+    }
+
+    // Within range but not optimal
+    if (Math.abs(percentDiff) > 15) {
+      if (value < optimal) {
+        if (sensorType === 'moisture') {
+          return { message: 'Good - may need water soon', color: '#059669' };
+        } else if (sensorType === 'light') {
+          return { message: 'Good - could be brighter', color: '#059669' };
+        }
+        return { message: 'Good - slightly below optimal', color: '#059669' };
+      } else {
+        if (sensorType === 'moisture') {
+          return { message: 'Good - well hydrated', color: '#059669' };
+        } else if (sensorType === 'light') {
+          return { message: 'Good - plenty of light', color: '#059669' };
+        }
+        return { message: 'Good - slightly above optimal', color: '#059669' };
+      }
+    }
+
+    // Perfect range
+    return { message: '✨ Perfect conditions!', color: '#10b981' };
+  };
+
   if (loading) {
     return <LoadingSpinner message="Loading plant details..." />;
   }
@@ -326,27 +581,32 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
           <p className="text-white/80 mb-6">
             The plant you're looking for doesn't exist.
           </p>
-          <Link to="/" className="btn btn-primary">
+          <Link to="/my-plants" className="btn btn-primary">
             <FiArrowLeft />
-            Back to Dashboard
+            Back to My Plants
           </Link>
         </div>
       </DetailContainer>
     );
   }
 
-  const { sensorData, healthScore, status, careInstructions } = plant;
+  const { sensorData, healthScore, status, careInstructions, optimalRanges } = plant;
+  const speciesData = getSpeciesInfo(plant.species);
 
   return (
     <DetailContainer>
-      <BackButton to="/">
+      <BackButton to="/my-plants">
         <FiArrowLeft />
-        Back to Dashboard
+        Back to My Plants
       </BackButton>
 
       <PlantHeader>
         <PlantImage>
-          🌱
+          {plant.image && plant.image !== '/images/plant-placeholder.jpg' ? (
+            <img src={plant.image} alt={plant.name} />
+          ) : (
+            '🌱'
+          )}
         </PlantImage>
         <PlantInfo>
           <PlantName>{plant.name}</PlantName>
@@ -359,7 +619,82 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
           <HealthScore>{Math.round(healthScore * 100)}%</HealthScore>
           <HealthLabel>Health Score</HealthLabel>
         </HealthSection>
+        <EditPlantButton onClick={() => navigate(`/edit-plant/${plantId}`)}>
+          <FiEdit3 />
+          Edit Plant
+        </EditPlantButton>
       </PlantHeader>
+
+      <BioSection
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <BioHeader onClick={() => setIsBioExpanded(!isBioExpanded)}>
+          <BioHeaderLeft>
+            <BioIcon>
+              <FiBook />
+            </BioIcon>
+            <div>
+              <BioTitle>Species Information</BioTitle>
+              <BioSubtitle>{speciesData.scientificName}</BioSubtitle>
+            </div>
+          </BioHeaderLeft>
+          <BioToggle isOpen={isBioExpanded}>
+            <FiChevronDown />
+          </BioToggle>
+        </BioHeader>
+
+        {isBioExpanded && (
+          <BioContent
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <BioDescription>
+              {speciesData.description}
+            </BioDescription>
+
+            <BioMetadata>
+              <MetadataItem>
+                <MetadataLabel>Family</MetadataLabel>
+                <MetadataValue>{speciesData.family}</MetadataValue>
+              </MetadataItem>
+              <MetadataItem>
+                <MetadataLabel>Origin</MetadataLabel>
+                <MetadataValue>{speciesData.origin}</MetadataValue>
+              </MetadataItem>
+              <MetadataItem>
+                <MetadataLabel>Common Name</MetadataLabel>
+                <MetadataValue>{speciesData.commonName}</MetadataValue>
+              </MetadataItem>
+            </BioMetadata>
+
+            {speciesData.characteristics && speciesData.characteristics.length > 0 && (
+              <div>
+                <BioSectionTitle>Key Characteristics</BioSectionTitle>
+                <BioList>
+                  {speciesData.characteristics.map((char, index) => (
+                    <BioListItem key={index}>{char}</BioListItem>
+                  ))}
+                </BioList>
+              </div>
+            )}
+
+            {speciesData.funFacts && speciesData.funFacts.length > 0 && (
+              <div>
+                <BioSectionTitle>Did You Know?</BioSectionTitle>
+                <BioList>
+                  {speciesData.funFacts.map((fact, index) => (
+                    <BioListItem key={index}>{fact}</BioListItem>
+                  ))}
+                </BioList>
+              </div>
+            )}
+          </BioContent>
+        )}
+      </BioSection>
 
       <Grid>
         <Card
@@ -390,7 +725,7 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
               Add Log
             </ActionButton>
           </CardHeader>
-          <div className="grid grid-cols-2 gap-2">
+          <QuickActionsGrid>
             <ActionButton>
               <FiDroplet />
               Water
@@ -399,7 +734,7 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
               <FiCamera />
               Photo
             </ActionButton>
-          </div>
+          </QuickActionsGrid>
         </Card>
       </Grid>
 
@@ -407,6 +742,7 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
+        style={{ marginBottom: '2rem' }}
       >
         <CardHeader>
           <CardTitle>Current Sensor Data</CardTitle>
@@ -419,6 +755,11 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
             <SensorInfo>
               <SensorLabel>Moisture</SensorLabel>
               <SensorValue>{sensorData?.moisture || 0}%</SensorValue>
+              {optimalRanges && (
+                <SensorStatus color={getSensorStatus(sensorData?.moisture || 0, optimalRanges.moisture, 'moisture').color}>
+                  {getSensorStatus(sensorData?.moisture || 0, optimalRanges.moisture, 'moisture').message}
+                </SensorStatus>
+              )}
             </SensorInfo>
           </SensorCard>
 
@@ -428,7 +769,12 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
             </SensorIcon>
             <SensorInfo>
               <SensorLabel>Light</SensorLabel>
-              <SensorValue>{sensorData?.light || 0}</SensorValue>
+              <SensorValue>{sensorData?.light || 0} lux</SensorValue>
+              {optimalRanges && (
+                <SensorStatus color={getSensorStatus(sensorData?.light || 0, optimalRanges.light, 'light').color}>
+                  {getSensorStatus(sensorData?.light || 0, optimalRanges.light, 'light').message}
+                </SensorStatus>
+              )}
             </SensorInfo>
           </SensorCard>
 
@@ -439,6 +785,11 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
             <SensorInfo>
               <SensorLabel>Temperature</SensorLabel>
               <SensorValue>{sensorData?.temperature || 0}°F</SensorValue>
+              {optimalRanges && (
+                <SensorStatus color={getSensorStatus(sensorData?.temperature || 0, optimalRanges.temperature, 'temperature').color}>
+                  {getSensorStatus(sensorData?.temperature || 0, optimalRanges.temperature, 'temperature').message}
+                </SensorStatus>
+              )}
             </SensorInfo>
           </SensorCard>
 
@@ -449,6 +800,11 @@ const PlantDetail = ({ plants, onPlantUpdate }) => {
             <SensorInfo>
               <SensorLabel>Humidity</SensorLabel>
               <SensorValue>{sensorData?.humidity || 0}%</SensorValue>
+              {optimalRanges && (
+                <SensorStatus color={getSensorStatus(sensorData?.humidity || 0, optimalRanges.humidity, 'humidity').color}>
+                  {getSensorStatus(sensorData?.humidity || 0, optimalRanges.humidity, 'humidity').message}
+                </SensorStatus>
+              )}
             </SensorInfo>
           </SensorCard>
         </SensorGrid>

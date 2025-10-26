@@ -1,20 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import PlantCard from './PlantCard';
+import AuthModal from './AuthModal';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   FiPlus,
   FiSearch,
   FiFilter,
-  FiGrid,
-  FiList
+  FiLock
 } from 'react-icons/fi';
 
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
+  min-height: 100vh;
 `;
 
 const Header = styled.div`
@@ -27,9 +29,9 @@ const Header = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  color: #1f2937;
+  color: #1a1a1a;
   margin: 0;
 `;
 
@@ -49,15 +51,20 @@ const SearchContainer = styled.div`
 const SearchInput = styled.input`
   padding: 0.75rem 1rem 0.75rem 2.5rem;
   border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   font-size: 0.875rem;
   width: 250px;
   transition: all 0.2s ease;
+  background: white;
 
   &:focus {
     outline: none;
-    border-color: #10B981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    border-color: #6B8E6F;
+    box-shadow: 0 0 0 3px rgba(107, 142, 111, 0.1);
+  }
+
+  &::placeholder {
+    color: #9CA3AF;
   }
 `;
 
@@ -72,10 +79,10 @@ const FilterButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.25rem;
   background: white;
   border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   color: #374151;
   font-size: 0.875rem;
   font-weight: 500;
@@ -84,32 +91,7 @@ const FilterButton = styled.button`
 
   &:hover {
     background: #f9fafb;
-    border-color: #10B981;
-  }
-`;
-
-const ViewToggle = styled.div`
-  display: flex;
-  background: #f3f4f6;
-  border-radius: 0.5rem;
-  overflow: hidden;
-`;
-
-const ViewButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: ${props => props.active ? '#10B981' : 'transparent'};
-  color: ${props => props.active ? 'white' : '#6b7280'};
-  border: none;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: ${props => props.active ? '#059669' : '#e5e7eb'};
+    border-color: #6B8E6F;
   }
 `;
 
@@ -118,63 +100,83 @@ const AddPlantButton = styled(Link)`
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: #10B981;
+  background: #2D3E2D;
   color: white;
   text-decoration: none;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s ease;
 
   &:hover {
-    background: #059669;
+    background: #1F2A1F;
     transform: translateY(-1px);
   }
 `;
 
 const StatsContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
   margin-bottom: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const StatCard = styled(motion.div)`
-  background: white;
-  padding: 1.5rem;
+  background: #6B8E6F;
+  padding: 2rem 1.5rem;
   border-radius: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.05);
+    pointer-events: none;
+  }
 `;
 
 const StatValue = styled.div`
-  font-size: 2rem;
+  font-size: 3rem;
   font-weight: 700;
-  color: #1f2937;
+  color: white;
   margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const StatLabel = styled.div`
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
 `;
 
 const StatIcon = styled.div`
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
+  display: none;
 `;
 
 const PlantsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
-`;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
 
-const PlantsList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const EmptyState = styled.div`
@@ -203,10 +205,77 @@ const EmptyDescription = styled.p`
   margin-bottom: 2rem;
 `;
 
+const UnauthenticatedContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+`;
+
+const UnauthenticatedCard = styled(motion.div)`
+  background: white;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+`;
+
+const LockIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  background: linear-gradient(135deg, #6B8E6F 0%, #97AC83 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+`;
+
+const UnauthenticatedTitle = styled.h2`
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+`;
+
+const UnauthenticatedMessage = styled.p`
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+`;
+
+const SignInButton = styled.button`
+  background: linear-gradient(135deg, #6B8E6F 0%, #97AC83 100%);
+  color: white;
+  padding: 0.875rem 2rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(107, 142, 111, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(107, 142, 111, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [viewMode, setViewMode] = React.useState('grid');
   const [filterStatus, setFilterStatus] = React.useState('all');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { isAuthenticated, loading } = useAuth();
 
   const filteredPlants = plants.filter(plant => {
     const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -258,6 +327,59 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
     }
   };
 
+  // Show loading state
+  if (loading) {
+    return (
+      <Container>
+        <UnauthenticatedContainer>
+          <UnauthenticatedCard
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <LockIcon>
+              <FiLock />
+            </LockIcon>
+            <UnauthenticatedTitle>Loading...</UnauthenticatedTitle>
+          </UnauthenticatedCard>
+        </UnauthenticatedContainer>
+      </Container>
+    );
+  }
+
+  // Show sign-in prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <>
+        <Container>
+          <UnauthenticatedContainer>
+            <UnauthenticatedCard
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <LockIcon>
+                <FiLock />
+              </LockIcon>
+              <UnauthenticatedTitle>Sign In Required</UnauthenticatedTitle>
+              <UnauthenticatedMessage>
+                You need to be signed in to view and manage your plant collection. 
+                Sign in or create an account to get started!
+              </UnauthenticatedMessage>
+              <SignInButton onClick={() => setShowAuthModal(true)}>
+                Sign In to Continue
+              </SignInButton>
+            </UnauthenticatedCard>
+          </UnauthenticatedContainer>
+        </Container>
+        <AuthModal 
+          isOpen={showAuthModal} 
+          onClose={() => setShowAuthModal(false)} 
+        />
+      </>
+    );
+  }
+
   return (
     <Container>
       <Header>
@@ -278,26 +400,9 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
             Filter
           </FilterButton>
           
-          <ViewToggle>
-            <ViewButton 
-              active={viewMode === 'grid'} 
-              onClick={() => setViewMode('grid')}
-            >
-              <FiGrid />
-              Grid
-            </ViewButton>
-            <ViewButton 
-              active={viewMode === 'list'} 
-              onClick={() => setViewMode('list')}
-            >
-              <FiList />
-              List
-            </ViewButton>
-          </ViewToggle>
-          
           <AddPlantButton to="/add-plant">
             <FiPlus />
-            Add Plant
+            Add Plants
           </AddPlantButton>
         </Controls>
       </Header>
@@ -308,7 +413,6 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <StatIcon>🌱</StatIcon>
           <StatValue>{statusCounts.all}</StatValue>
           <StatLabel>Total Plants</StatLabel>
         </StatCard>
@@ -318,9 +422,8 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <StatIcon>🌟</StatIcon>
-          <StatValue>{statusCounts.excellent}</StatValue>
-          <StatLabel>Excellent Health</StatLabel>
+          <StatValue>{statusCounts.excellent + statusCounts.good}</StatValue>
+          <StatLabel>Good Condition</StatLabel>
         </StatCard>
         
         <StatCard
@@ -328,7 +431,6 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <StatIcon>📝</StatIcon>
           <StatValue>{statusCounts.fair + statusCounts.poor + statusCounts.critical}</StatValue>
           <StatLabel>Need Attention</StatLabel>
         </StatCard>
@@ -357,39 +459,21 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
           )}
         </EmptyState>
       ) : (
-        viewMode === 'grid' ? (
-          <PlantsGrid>
-            {filteredPlants.map((plant, index) => (
-              <motion.div
-                key={plant.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <PlantCard 
-                  plant={plant} 
-                  onClick={() => onPlantSelect(plant)}
-                />
-              </motion.div>
-            ))}
-          </PlantsGrid>
-        ) : (
-          <PlantsList>
-            {filteredPlants.map((plant, index) => (
-              <motion.div
-                key={plant.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <PlantCard 
-                  plant={plant} 
-                  onClick={() => onPlantSelect(plant)}
-                />
-              </motion.div>
-            ))}
-          </PlantsList>
-        )
+        <PlantsGrid>
+          {filteredPlants.map((plant, index) => (
+            <motion.div
+              key={plant.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <PlantCard 
+                plant={plant} 
+                onClick={() => {/* Navigate in PlantCard component */}}
+              />
+            </motion.div>
+          ))}
+        </PlantsGrid>
       )}
     </Container>
   );

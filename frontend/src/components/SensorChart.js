@@ -13,8 +13,9 @@ import {
 
 const ChartContainer = styled.div`
   width: 100%;
-  height: 300px;
+  height: 380px;
   margin-top: 1rem;
+  padding-bottom: 1rem;
 `;
 
 const ChartTitle = styled.h4`
@@ -119,7 +120,10 @@ const SensorChart = ({ data = [] }) => {
             fontSize={12}
           />
           <Tooltip content={<CustomTooltipContent />} />
-          <Legend />
+          <Legend 
+            wrapperStyle={{ paddingTop: '20px' }}
+            iconType="circle"
+          />
           <Line 
             type="monotone" 
             dataKey="moisture" 

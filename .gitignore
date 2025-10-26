@@ -4,4 +4,6 @@ dist/
 .env
 *.log
 .DS_Store
+backend/uploads/
+backend/data/users.db
 

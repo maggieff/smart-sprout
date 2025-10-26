@@ -9,6 +9,8 @@ import Dashboard from './components/Dashboard';
 import PlantDetail from './components/PlantDetail';
 import AIChat from './components/AIChat';
 import MyPlants from './components/MyPlants';
+import AddPlant from './components/AddPlant';
+import EditPlant from './components/EditPlant';
 import LoadingSpinner from './components/LoadingSpinner';
 
 // Context
@@ -72,6 +74,11 @@ function App() {
     }
   };
 
+  const handlePlantAdd = (newPlant) => {
+    setPlants(prevPlants => [...prevPlants, newPlant]);
+    setSelectedPlant(newPlant);
+  };
+
   if (loading) {
     return (
       <AppContainer>
@@ -125,6 +132,22 @@ function App() {
                 <MyPlants 
                   plants={plants}
                   onPlantSelect={handlePlantSelect}
+                  onPlantUpdate={handlePlantUpdate}
+                />
+              } 
+            />
+            <Route 
+              path="/add-plant" 
+              element={
+                <AddPlant 
+                  onPlantAdd={handlePlantAdd}
+                />
+              } 
+            />
+            <Route 
+              path="/edit-plant/:plantId" 
+              element={
+                <EditPlant 
                   onPlantUpdate={handlePlantUpdate}
                 />
               } 

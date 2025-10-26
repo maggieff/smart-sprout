@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
 import { 
   FiHome, 
   FiMessageCircle, 
@@ -84,7 +83,6 @@ const NavLink = styled(Link)`
     background-color: #f0fdf4;
   }
 `;
-
 
 const MobileMenuButton = styled.button`
   display: none;
@@ -186,7 +184,6 @@ const Header = ({ plants, selectedPlant, onPlantSelect }) => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-
   return (
     <HeaderContainer>
       <HeaderContent>
@@ -218,7 +215,6 @@ const Header = ({ plants, selectedPlant, onPlantSelect }) => {
             <FiGrid />
             My Plants
           </NavLink>
-
         </Nav>
 
         <AuthSection>

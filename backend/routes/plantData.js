@@ -1,7 +1,36 @@
 const express = require('express');
 const router = express.Router();
-const { getSimulatedSensorData } = require('../utils/simulateSensors');
+const multer = require('multer');
+const path = require('path');
+const { getSimulatedSensorData, PLANT_SENSOR_RANGES } = require('../utils/simulateSensors');
 const { calculateHealthScore } = require('../utils/healthCalculator');
+
+// Configure multer for image uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'plant-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'));
+    }
+  }
+});
 
 // In-memory storage for demo purposes
 let plantStorage = {
@@ -52,6 +81,21 @@ router.get('/', async (req, res) => {
     // Get recent logs for this plant
     const recentLogs = await getRecentLogs(plantId);
     
+    // Get optimal ranges for this species
+    const speciesKey = plant.species.toLowerCase().replace('sansevieria trifasciata', 'snake plant')
+      .replace('ficus lyrata', 'fiddle leaf fig')
+      .replace('monstera deliciosa', 'monstera')
+      .replace('epipremnum aureum', 'pothos')
+      .replace(/succulent.*/i, 'succulent');
+    
+    console.log('Species:', plant.species);
+    console.log('Species Key:', speciesKey);
+    console.log('PLANT_SENSOR_RANGES available:', Object.keys(PLANT_SENSOR_RANGES || {}));
+    
+    const optimalRanges = PLANT_SENSOR_RANGES[speciesKey] || PLANT_SENSOR_RANGES['snake plant'];
+    
+    console.log('Optimal Ranges:', optimalRanges);
+
     const response = {
       ...plant,
       sensorData: {
@@ -61,6 +105,7 @@ router.get('/', async (req, res) => {
         humidity: sensorData.humidity,
         timestamp: new Date().toISOString()
       },
+      optimalRanges,
       healthScore: healthScore,
       status: getPlantStatus(healthScore),
       recentLogs: recentLogs,
@@ -75,21 +120,202 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/plant-data/all - Get all plants
+// GET /api/plant-data/all - Get all plants with sensor data
 router.get('/all', (req, res) => {
   try {
-    const plants = Object.values(plantStorage).map(plant => ({
-      id: plant.id,
-      name: plant.name,
-      species: plant.species,
-      image: plant.image,
-      lastWatered: plant.lastWatered
-    }));
+    const plants = Object.values(plantStorage).map(plant => {
+      // Get simulated sensor data for each plant
+      const sensorData = getSimulatedSensorData(plant.species);
+      
+      // Calculate health score
+      const healthScore = calculateHealthScore(sensorData, plant);
+      
+      return {
+        id: plant.id,
+        name: plant.name,
+        species: plant.species,
+        image: plant.image,
+        lastWatered: plant.lastWatered,
+        sensorData: {
+          moisture: sensorData.moisture,
+          light: sensorData.light,
+          temperature: sensorData.temperature,
+          humidity: sensorData.humidity
+        },
+        healthScore: healthScore,
+        status: getPlantStatus(healthScore)
+      };
+    });
     
     res.json({ plants });
   } catch (error) {
     console.error('Error fetching all plants:', error);
     res.status(500).json({ error: 'Failed to fetch plants' });
+  }
+});
+
+// POST /api/plant-data - Create a new plant (with optional image upload)
+router.post('/', upload.single('image'), (req, res) => {
+  try {
+    console.log('Received request body:', req.body);
+    console.log('Received file:', req.file ? req.file.filename : 'No file');
+    
+    const { name, species, notes } = req.body;
+    
+    console.log('Extracted data:', { name, species, notes });
+    
+    if (!name || !species) {
+      console.log('Validation failed - missing name or species');
+      return res.status(400).json({ 
+        error: 'Name and species are required',
+        received: { name, species }
+      });
+    }
+    
+    // Generate unique ID
+    const plantId = `plant-${Date.now()}`;
+    
+    // Map species to display name
+    const speciesMap = {
+      'snake-plant': 'Sansevieria trifasciata',
+      'fiddle-leaf-fig': 'Ficus lyrata',
+      'monstera': 'Monstera deliciosa',
+      'pothos': 'Epipremnum aureum',
+      'succulent': 'Succulent',
+      'peace-lily': 'Spathiphyllum',
+      'spider-plant': 'Chlorophytum comosum',
+      'aloe-vera': 'Aloe vera',
+      'rubber-plant': 'Ficus elastica',
+      'zz-plant': 'Zamioculcas zamiifolia'
+    };
+    
+    // Get image path if uploaded
+    const imagePath = req.file 
+      ? `/uploads/${req.file.filename}` 
+      : '/images/plant-placeholder.jpg';
+    
+    // Create new plant object
+    const newPlant = {
+      id: plantId,
+      name: name.trim(),
+      species: speciesMap[species] || species,
+      image: imagePath,
+      lastWatered: new Date(),
+      notes: notes || '',
+      careInstructions: {
+        watering: 'Adjust based on plant type',
+        light: 'Adjust based on plant type',
+        temperature: '60-85°F',
+        humidity: '40-60%'
+      }
+    };
+    
+    // Store the plant
+    plantStorage[plantId] = newPlant;
+    
+    console.log(`Created new plant: ${name} (${plantId})${req.file ? ' with image' : ''}`);
+    
+    res.status(201).json({
+      success: true,
+      plant: newPlant,
+      message: 'Plant created successfully'
+    });
+    
+  } catch (error) {
+    console.error('Error creating plant:', error);
+    res.status(500).json({ error: 'Failed to create plant' });
+  }
+});
+
+// PUT /api/plant-data/:id - Update an existing plant
+router.put('/:id', upload.single('image'), (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, species, notes, existingImage } = req.body;
+    
+    console.log(`Updating plant ${id}:`, { name, species, notes });
+    
+    if (!plantStorage[id]) {
+      return res.status(404).json({ error: 'Plant not found' });
+    }
+    
+    if (!name || !species) {
+      return res.status(400).json({ error: 'Name and species are required' });
+    }
+    
+    // Map species to display name
+    const speciesMap = {
+      'snake-plant': 'Sansevieria trifasciata',
+      'fiddle-leaf-fig': 'Ficus lyrata',
+      'monstera': 'Monstera deliciosa',
+      'pothos': 'Epipremnum aureum',
+      'succulent': 'Succulent',
+      'peace-lily': 'Spathiphyllum',
+      'spider-plant': 'Chlorophytum comosum',
+      'aloe-vera': 'Aloe vera',
+      'rubber-plant': 'Ficus elastica',
+      'zz-plant': 'Zamioculcas zamiifolia'
+    };
+    
+    // Determine image path
+    let imagePath;
+    if (req.file) {
+      // New image uploaded
+      imagePath = `/uploads/${req.file.filename}`;
+    } else if (existingImage) {
+      // Keep existing image
+      imagePath = existingImage;
+    } else {
+      // Use existing plant's image or placeholder
+      imagePath = plantStorage[id].image || '/images/plant-placeholder.jpg';
+    }
+    
+    // Update plant
+    plantStorage[id] = {
+      ...plantStorage[id],
+      name: name.trim(),
+      species: speciesMap[species] || species,
+      image: imagePath,
+      notes: notes || '',
+      lastUpdated: new Date()
+    };
+    
+    console.log(`Updated plant: ${name} (${id})${req.file ? ' with new image' : ''}`);
+    
+    res.json({
+      success: true,
+      plant: plantStorage[id],
+      message: 'Plant updated successfully'
+    });
+    
+  } catch (error) {
+    console.error('Error updating plant:', error);
+    res.status(500).json({ error: 'Failed to update plant' });
+  }
+});
+
+// DELETE /api/plant-data/:id - Delete a plant
+router.delete('/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (!plantStorage[id]) {
+      return res.status(404).json({ error: 'Plant not found' });
+    }
+    
+    const plantName = plantStorage[id].name;
+    delete plantStorage[id];
+    
+    console.log(`Deleted plant: ${plantName} (${id})`);
+    
+    res.json({
+      success: true,
+      message: 'Plant deleted successfully'
+    });
+    
+  } catch (error) {
+    console.error('Error deleting plant:', error);
+    res.status(500).json({ error: 'Failed to delete plant' });
   }
 });
 
