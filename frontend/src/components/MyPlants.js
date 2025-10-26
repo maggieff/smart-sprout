@@ -206,18 +206,19 @@ const StatCard = styled(motion.div)`
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.05);
+  color: white;
 `;
 
 const StatValue = styled.div`
   font-size: 2rem;
   font-weight: 700;
-  color: #1f2937;
+  color: white;
   margin-bottom: 0.5rem;
 `;
 
 const StatLabel = styled.div`
   font-size: 0.875rem;
-  color: #6b7280;
+  color: white;
   font-weight: 500;
 `;
 
@@ -245,6 +246,7 @@ const EmptyState = styled.div`
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.05);
+  color: white;
 `;
 
 const EmptyIcon = styled.div`
@@ -256,12 +258,12 @@ const EmptyTitle = styled.h3`
   font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.25rem;
   font-weight: normal;
-  color: #1f2937;
+  color: white;
   margin-bottom: 0.5rem;
 `;
 
 const EmptyDescription = styled.p`
-  color: #6b7280;
+  color: white;
   margin-bottom: 2rem;
 `;
 
