@@ -252,7 +252,7 @@ const OtherPlants = styled.div`
   gap: 1rem;
 `;
 
-const OtherPlantCard = styled.div`
+const OtherPlantCard = styled(Link)`
   background: #F3F4F6;
   border-radius: 0.75rem;
   padding: 1rem;
@@ -261,11 +261,38 @@ const OtherPlantCard = styled.div`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-decoration: none;
+  display: block;
 
   &:hover {
     background: #E5E7EB;
     transform: translateY(-2px);
+    color: #374151;
   }
+`;
+
+const PlantImage = styled.div`
+  width: 40px;
+  height: 40px;
+  background: #D1D5DB;
+  border-radius: 50%;
+  margin: 0 auto 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+`;
+
+const PlantName = styled.div`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.25rem;
+`;
+
+const PlantSpecies = styled.div`
+  font-size: 0.75rem;
+  color: #6B7280;
 `;
 
 const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
@@ -486,8 +513,31 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
           <SidebarSection>
             <SidebarTitle style={{ textDecoration: 'underline' }}>Other Plants</SidebarTitle>
             <OtherPlants>
-              <OtherPlantCard>Plant A</OtherPlantCard>
-              <OtherPlantCard>Plant B</OtherPlantCard>
+              {plants
+                .filter(p => p.id !== plantId)
+                .slice(0, 3)
+                .map(otherPlant => (
+                  <OtherPlantCard 
+                    key={otherPlant.id} 
+                    to={`/plant/${otherPlant.id}`}
+                  >
+                    <PlantImage>
+                      {otherPlant.image || '🌱'}
+                    </PlantImage>
+                    <PlantName>{otherPlant.name}</PlantName>
+                    <PlantSpecies>{otherPlant.species}</PlantSpecies>
+                  </OtherPlantCard>
+                ))}
+              {plants.filter(p => p.id !== plantId).length === 0 && (
+                <div style={{ 
+                  textAlign: 'center', 
+                  color: '#6B7280', 
+                  fontStyle: 'italic',
+                  padding: '1rem'
+                }}>
+                  No other plants in collection
+                </div>
+              )}
             </OtherPlants>
           </SidebarSection>
         </RightSidebar>
