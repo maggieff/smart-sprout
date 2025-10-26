@@ -74,7 +74,7 @@ const PlantName = styled.h1`
 
 const PlantImagePlaceholder = styled.div`
   width: 100%;
-  height: 400px;
+  height: 500px;
   background: #E5E7EB;
   border-radius: 1rem;
   display: flex;
