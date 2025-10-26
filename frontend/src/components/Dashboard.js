@@ -1133,6 +1133,11 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
             <FiRefreshCcw className={weatherLoading ? 'animate-spin' : ''} />
           </RefreshButton>
           
+          {/* Debug info - remove this after testing */}
+          <div style={{ fontSize: '0.75rem', color: '#9CA3AF', marginBottom: '1rem', textAlign: 'center' }}>
+            Debug: {getTimeOfDay().timeString} - {getTimeOfDay().isDay ? 'DAY' : 'NIGHT'} - Hour: {getTimeOfDay().hours}
+          </div>
+          
           {weatherLoading ? (
             <div style={{ textAlign: 'center', padding: '2rem 0' }}>
               <TimeDisplay>
