@@ -1,0 +1,26 @@
+{
+  "name": "smart-sprout",
+  "version": "1.0.0",
+  "description": "- Node.js (v16+) - npm or yarn - Docker (for Chroma DB) - OpenAI API key (optional - has fallback responses)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maggieff/smart-sprout.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/maggieff/smart-sprout/issues"
+  },
+  "homepage": "https://github.com/maggieff/smart-sprout#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "openai": "^6.7.0"
+  }
+}

@@ -93,28 +93,6 @@ router.get('/all', (req, res) => {
   }
 });
 
-// DELETE /api/plant-data/:plantId - Delete a plant
-router.delete('/:plantId', (req, res) => {
-  try {
-    const { plantId } = req.params;
-    
-    if (!plantStorage[plantId]) {
-      return res.status(404).json({ error: 'Plant not found' });
-    }
-    
-    // Remove the plant from storage
-    delete plantStorage[plantId];
-    
-    res.json({ 
-      message: 'Plant deleted successfully',
-      plantId: plantId 
-    });
-  } catch (error) {
-    console.error('Error deleting plant:', error);
-    res.status(500).json({ error: 'Failed to delete plant' });
-  }
-});
-
 // Helper functions
 async function getRecentLogs(plantId) {
   // In a real app, this would query the database
