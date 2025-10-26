@@ -2,6 +2,21 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
+// Helper function to get current user ID from localStorage
+const getCurrentUserId = () => {
+  try {
+    const user = localStorage.getItem('smart-sprout-user');
+    if (user) {
+      const userData = JSON.parse(user);
+      return userData.id;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
+};
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
@@ -9,6 +24,21 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Request interceptor to add user ID header
+api.interceptors.request.use(
+  (config) => {
+    const userId = getCurrentUserId();
+    if (userId) {
+      config.headers['user-id'] = userId;
+    }
+    return config;
+  },
+  (error) => {
+    console.error('❌ API Request Error:', error);
+    return Promise.reject(error);
+  }
+);
 
 export const logService = {
   /**

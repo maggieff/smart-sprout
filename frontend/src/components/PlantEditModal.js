@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { FiX, FiCalendar, FiDroplet, FiSun, FiThermometer, FiWind } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import { plantService } from '../services/plantService';
 
 const ModalOverlay = styled(motion.div)`
   position: fixed;
@@ -241,7 +242,7 @@ const PlantEditModal = ({
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!formData.name.trim()) {
@@ -254,23 +255,33 @@ const PlantEditModal = ({
       return;
     }
 
-    const updatedPlant = {
-      ...plantData,
-      name: formData.name.trim(),
-      species: formData.species.trim(),
-      description: formData.description.trim(),
-      lastWatered: new Date(formData.lastWatered),
-      healthScore: formData.healthScore,
-      sensorData: {
-        moisture: formData.moisture,
-        light: formData.light,
-        temperature: formData.temperature,
-        humidity: formData.humidity
-      }
-    };
+    try {
+      const newPlantData = {
+        name: formData.name.trim(),
+        species: formData.species.trim(),
+        image: plantData?.image || null
+      };
 
-    onSave(updatedPlant);
-    onClose();
+      let savedPlant;
+      if (plantData?.id && plantData.id.startsWith('plant-')) {
+        // This is a new plant, create it in the database
+        const response = await plantService.createPlant(newPlantData);
+        savedPlant = response.plant;
+        toast.success('Plant added successfully!');
+      } else {
+        // This is an existing plant, update it
+        const response = await plantService.updatePlant(plantData.id, newPlantData);
+        savedPlant = { ...plantData, ...newPlantData };
+        toast.success('Plant updated successfully!');
+      }
+
+      // Call the onSave callback with the saved plant
+      onSave(savedPlant);
+      onClose();
+    } catch (error) {
+      console.error('Error saving plant:', error);
+      toast.error('Failed to save plant. Please try again.');
+    }
   };
 
   if (!isOpen) return null;

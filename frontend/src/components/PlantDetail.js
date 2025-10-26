@@ -575,48 +575,18 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
   const handleRemovePlant = async () => {
     if (window.confirm('Are you sure you want to remove this plant?')) {
       try {
-        // For plants added through the frontend (with IDs like plant-${timestamp}-${id}),
-        // we only need to update the frontend state
-        if (plantId.startsWith('plant-') && plantId.includes('-')) {
-          // This is a frontend-added plant, just update the state
-          if (onPlantRemove) {
-            onPlantRemove(plantId);
-          }
-          toast.success('Plant removed successfully!');
-          navigate('/my-plants');
-        } else {
-          // This is a backend plant, try to delete from backend
-          const response = await fetch(`http://localhost:5001/api/plant-data/${plantId}`, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-
-          if (response.ok) {
-            // Update the parent component's plants list
-            if (onPlantRemove) {
-              onPlantRemove(plantId);
-            }
-            toast.success('Plant removed successfully!');
-            navigate('/my-plants');
-          } else {
-            // If backend deletion fails, still remove from frontend state
-            if (onPlantRemove) {
-              onPlantRemove(plantId);
-            }
-            toast.success('Plant removed from your collection!');
-            navigate('/my-plants');
-          }
-        }
-      } catch (error) {
-        console.error('Error removing plant:', error);
-        // Even if there's an error, try to remove from frontend state
+        // Delete plant from database
+        await plantService.deletePlant(plantId);
+        
+        // Update the parent component's plants list
         if (onPlantRemove) {
           onPlantRemove(plantId);
         }
-        toast.success('Plant removed from your collection!');
+        toast.success('Plant removed successfully!');
         navigate('/my-plants');
+      } catch (error) {
+        console.error('Error removing plant:', error);
+        toast.error('Failed to remove plant. Please try again.');
       }
     }
   };

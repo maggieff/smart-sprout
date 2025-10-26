@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-
-// In-memory storage for demo purposes
-let logsStorage = [];
+const database = require('../utils/database');
+const { authenticateUser } = require('../middleware/auth');
 
 // POST /api/logs - Create a new plant care log
-router.post('/', async (req, res) => {
+router.post('/', authenticateUser, async (req, res) => {
   try {
     const { plantId, note, type = 'general', mood, photos } = req.body;
     
@@ -16,27 +15,32 @@ router.post('/', async (req, res) => {
       });
     }
 
-    const newLog = {
+    // Verify the plant belongs to the user
+    const plant = await database.getPlantById(plantId, req.user.id);
+    if (!plant) {
+      return res.status(404).json({ error: 'Plant not found' });
+    }
+
+    const logData = {
       id: uuidv4(),
       plantId,
       note: note.trim(),
       type: type || 'general',
       mood: mood || 'neutral',
-      photos: photos || [],
-      timestamp: new Date().toISOString(),
-      createdAt: new Date().toISOString()
+      photos: photos || []
     };
 
-    logsStorage.push(newLog);
+    const result = await database.createLog(req.user.id, logData);
     
-    // Sort by timestamp (newest first)
-    logsStorage.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-    res.status(201).json({
-      success: true,
-      log: newLog,
-      message: 'Log created successfully'
-    });
+    if (result.success) {
+      res.status(201).json({
+        success: true,
+        log: result.log,
+        message: 'Log created successfully'
+      });
+    } else {
+      res.status(500).json({ error: 'Failed to create log' });
+    }
   } catch (error) {
     console.error('Error creating log:', error);
     res.status(500).json({ error: 'Failed to create log' });
@@ -44,7 +48,7 @@ router.post('/', async (req, res) => {
 });
 
 // GET /api/logs - Get logs for a specific plant
-router.get('/', async (req, res) => {
+router.get('/', authenticateUser, async (req, res) => {
   try {
     const { plantId, limit = 10, type } = req.query;
     
@@ -54,18 +58,17 @@ router.get('/', async (req, res) => {
       });
     }
 
-    let filteredLogs = logsStorage.filter(log => log.plantId === plantId);
-    
-    if (type) {
-      filteredLogs = filteredLogs.filter(log => log.type === type);
+    // Verify the plant belongs to the user
+    const plant = await database.getPlantById(plantId, req.user.id);
+    if (!plant) {
+      return res.status(404).json({ error: 'Plant not found' });
     }
-    
-    // Limit results
-    filteredLogs = filteredLogs.slice(0, parseInt(limit));
+
+    const logs = await database.getUserLogs(req.user.id, plantId, parseInt(limit), type);
     
     res.json({
-      logs: filteredLogs,
-      count: filteredLogs.length,
+      logs,
+      count: logs.length,
       plantId
     });
   } catch (error) {
@@ -75,7 +78,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/logs/stats - Get logging statistics for a plant
-router.get('/stats', async (req, res) => {
+router.get('/stats', authenticateUser, async (req, res) => {
   try {
     const { plantId } = req.query;
     
@@ -85,24 +88,13 @@ router.get('/stats', async (req, res) => {
       });
     }
 
-    const plantLogs = logsStorage.filter(log => log.plantId === plantId);
-    
-    const stats = {
-      totalLogs: plantLogs.length,
-      logsThisWeek: plantLogs.filter(log => {
-        const logDate = new Date(log.timestamp);
-        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        return logDate >= weekAgo;
-      }).length,
-      logsThisMonth: plantLogs.filter(log => {
-        const logDate = new Date(log.timestamp);
-        const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-        return logDate >= monthAgo;
-      }).length,
-      typeBreakdown: getTypeBreakdown(plantLogs),
-      moodBreakdown: getMoodBreakdown(plantLogs),
-      lastLogDate: plantLogs.length > 0 ? plantLogs[0].timestamp : null
-    };
+    // Verify the plant belongs to the user
+    const plant = await database.getPlantById(plantId, req.user.id);
+    if (!plant) {
+      return res.status(404).json({ error: 'Plant not found' });
+    }
+
+    const stats = await database.getLogStats(req.user.id, plantId);
 
     res.json({ stats });
   } catch (error) {
@@ -112,44 +104,26 @@ router.get('/stats', async (req, res) => {
 });
 
 // DELETE /api/logs/:logId - Delete a specific log
-router.delete('/:logId', async (req, res) => {
+router.delete('/:logId', authenticateUser, async (req, res) => {
   try {
     const { logId } = req.params;
     
-    const logIndex = logsStorage.findIndex(log => log.id === logId);
+    const result = await database.deleteLog(logId, req.user.id);
     
-    if (logIndex === -1) {
-      return res.status(404).json({ error: 'Log not found' });
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Log deleted successfully'
+      });
+    } else {
+      res.status(404).json({ error: 'Log not found' });
     }
-    
-    const deletedLog = logsStorage.splice(logIndex, 1)[0];
-    
-    res.json({
-      success: true,
-      message: 'Log deleted successfully',
-      deletedLog
-    });
   } catch (error) {
     console.error('Error deleting log:', error);
     res.status(500).json({ error: 'Failed to delete log' });
   }
 });
 
-// Helper functions
-function getTypeBreakdown(logs) {
-  const breakdown = {};
-  logs.forEach(log => {
-    breakdown[log.type] = (breakdown[log.type] || 0) + 1;
-  });
-  return breakdown;
-}
-
-function getMoodBreakdown(logs) {
-  const breakdown = {};
-  logs.forEach(log => {
-    breakdown[log.mood] = (breakdown[log.mood] || 0) + 1;
-  });
-  return breakdown;
-}
+// Helper functions (moved to database layer)
 
 module.exports = router;

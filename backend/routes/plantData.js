@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const { v4: uuidv4 } = require('uuid');
 const { getSimulatedSensorData } = require('../utils/simulateSensors');
 const { calculateHealthScore } = require('../utils/healthCalculator');
-
-// In-memory storage for demo purposes
-let plantStorage = {};
+const database = require('../utils/database');
+const { authenticateUser } = require('../middleware/auth');
 
 // GET /api/plant-data - Get current plant data with simulated sensors
-router.get('/', async (req, res) => {
+router.get('/', authenticateUser, async (req, res) => {
   try {
     const plantId = req.query.plantId;
     
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
       return res.status(400).json({ error: 'Plant ID is required' });
     }
     
-    const plant = plantStorage[plantId];
+    const plant = await database.getPlantById(plantId, req.user.id);
     
     if (!plant) {
       return res.status(404).json({ error: 'Plant not found' });
@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
     const healthScore = calculateHealthScore(sensorData, plant);
     
     // Get recent logs for this plant
-    const recentLogs = await getRecentLogs(plantId);
+    const recentLogs = await database.getUserLogs(req.user.id, plantId, 5);
     
     const response = {
       ...plant,
@@ -53,44 +53,105 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/plant-data/all - Get all plants
-router.get('/all', (req, res) => {
+// GET /api/plant-data/all - Get all plants for authenticated user
+router.get('/all', authenticateUser, async (req, res) => {
   try {
-    const plants = Object.values(plantStorage).map(plant => ({
+    const plants = await database.getUserPlants(req.user.id);
+    
+    const formattedPlants = plants.map(plant => ({
       id: plant.id,
       name: plant.name,
       species: plant.species,
       image: plant.image,
-      lastWatered: plant.lastWatered
+      lastWatered: plant.last_watered,
+      createdAt: plant.created_at
     }));
     
-    res.json({ plants });
+    res.json({ plants: formattedPlants });
   } catch (error) {
     console.error('Error fetching all plants:', error);
     res.status(500).json({ error: 'Failed to fetch plants' });
   }
 });
 
-// Helper functions
-async function getRecentLogs(plantId) {
-  // In a real app, this would query the database
-  return [
-    {
-      id: 'log-001',
-      plantId: plantId,
-      note: 'Plant looks healthy, leaves are perky',
-      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      type: 'observation'
-    },
-    {
-      id: 'log-002',
-      plantId: plantId,
-      note: 'Watered thoroughly, soil was dry',
-      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'watering'
+// POST /api/plant-data - Create a new plant
+router.post('/', authenticateUser, async (req, res) => {
+  try {
+    const { name, species, image } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ error: 'Plant name is required' });
     }
-  ];
-}
+
+    const plantData = {
+      id: uuidv4(),
+      name,
+      species: species || 'Unknown',
+      image: image || null,
+      lastWatered: new Date().toISOString()
+    };
+
+    const result = await database.createPlant(req.user.id, plantData);
+    
+    if (result.success) {
+      res.status(201).json({
+        success: true,
+        plant: result.plant,
+        message: 'Plant created successfully'
+      });
+    } else {
+      res.status(500).json({ error: 'Failed to create plant' });
+    }
+  } catch (error) {
+    console.error('Error creating plant:', error);
+    res.status(500).json({ error: 'Failed to create plant' });
+  }
+});
+
+// PUT /api/plant-data/:plantId - Update a plant
+router.put('/:plantId', authenticateUser, async (req, res) => {
+  try {
+    const { plantId } = req.params;
+    const updates = req.body;
+
+    const result = await database.updatePlant(plantId, req.user.id, updates);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Plant updated successfully'
+      });
+    } else {
+      res.status(400).json({ error: result.error });
+    }
+  } catch (error) {
+    console.error('Error updating plant:', error);
+    res.status(500).json({ error: 'Failed to update plant' });
+  }
+});
+
+// DELETE /api/plant-data/:plantId - Delete a plant
+router.delete('/:plantId', authenticateUser, async (req, res) => {
+  try {
+    const { plantId } = req.params;
+
+    const result = await database.deletePlant(plantId, req.user.id);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Plant deleted successfully'
+      });
+    } else {
+      res.status(404).json({ error: 'Plant not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting plant:', error);
+    res.status(500).json({ error: 'Failed to delete plant' });
+  }
+});
+
+// Helper functions
 
 function getPlantStatus(healthScore) {
   if (healthScore >= 0.8) return 'excellent';
