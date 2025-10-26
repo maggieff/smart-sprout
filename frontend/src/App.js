@@ -9,7 +9,11 @@ import Dashboard from './components/Dashboard';
 import PlantDetail from './components/PlantDetail';
 import AIChat from './components/AIChat';
 import MyPlants from './components/MyPlants';
+import AddPlant from './components/AddPlant';
 import LoadingSpinner from './components/LoadingSpinner';
+
+// Context
+import { AuthProvider } from './contexts/AuthContext';
 
 // Services
 import { plantService } from './services/plantService';
@@ -69,6 +73,17 @@ function App() {
     }
   };
 
+  const handlePlantAdd = (newPlant) => {
+    setPlants(prevPlants => [...prevPlants, newPlant]);
+  };
+
+  const handlePlantRemove = (plantId) => {
+    setPlants(prevPlants => prevPlants.filter(plant => plant.id !== plantId));
+    if (selectedPlant && selectedPlant.id === plantId) {
+      setSelectedPlant(null);
+    }
+  };
+
   if (loading) {
     return (
       <AppContainer>
@@ -78,56 +93,67 @@ function App() {
   }
 
   return (
-    <AppContainer>
-      <Header 
-        plants={plants}
-        selectedPlant={selectedPlant}
-        onPlantSelect={handlePlantSelect}
-      />
-      
-      <MainContent>
-        <Routes>
-          <Route 
-            path="/" 
-            element={
-              <Dashboard 
-                plants={plants}
-                selectedPlant={selectedPlant}
-                onPlantSelect={handlePlantSelect}
-                onPlantUpdate={handlePlantUpdate}
-              />
-            } 
-          />
-          <Route 
-            path="/plant/:plantId" 
-            element={
-              <PlantDetail 
-                plants={plants}
-                onPlantUpdate={handlePlantUpdate}
-              />
-            } 
-          />
-          <Route 
-            path="/ai-chat" 
-            element={
-              <AIChat 
-                selectedPlant={selectedPlant}
-              />
-            } 
-          />
-          <Route 
-            path="/my-plants" 
-            element={
-              <MyPlants 
-                plants={plants}
-                onPlantSelect={handlePlantSelect}
-                onPlantUpdate={handlePlantUpdate}
-              />
-            } 
-          />
-        </Routes>
-      </MainContent>
-    </AppContainer>
+    <AuthProvider>
+      <AppContainer>
+        <Header 
+          plants={plants}
+          selectedPlant={selectedPlant}
+          onPlantSelect={handlePlantSelect}
+        />
+        
+        <MainContent>
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                <Dashboard 
+                  plants={plants}
+                  selectedPlant={selectedPlant}
+                  onPlantSelect={handlePlantSelect}
+                  onPlantUpdate={handlePlantUpdate}
+                />
+              } 
+            />
+            <Route 
+              path="/plant/:plantId" 
+              element={
+                <PlantDetail 
+                  plants={plants}
+                  onPlantUpdate={handlePlantUpdate}
+                  onPlantRemove={handlePlantRemove}
+                />
+              } 
+            />
+            <Route 
+              path="/ai-chat" 
+              element={
+                <AIChat 
+                  selectedPlant={selectedPlant}
+                />
+              } 
+            />
+            <Route 
+              path="/my-plants" 
+              element={
+                <MyPlants 
+                  plants={plants}
+                  onPlantSelect={handlePlantSelect}
+                  onPlantUpdate={handlePlantUpdate}
+                />
+              } 
+            />
+            <Route 
+              path="/add-plant" 
+              element={
+                <AddPlant 
+                  onPlantAdd={handlePlantAdd}
+                />
+              } 
+            />
+          </Routes>
+        </MainContent>
+      </AppContainer>
+    </AuthProvider>
   );
 }
 
