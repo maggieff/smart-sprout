@@ -56,7 +56,7 @@ function AuthenticatedApp() {
         status: plant.status || 'good',
         sensorData: plant.sensorData || {
           moisture: Math.floor(Math.random() * 40) + 30,
-          light: Math.floor(Math.random() * 200) + 300,
+          light: Math.floor(Math.random() * 30000) + 10000, // Realistic lux values (10k-40k)
           temperature: Math.floor(Math.random() * 20) + 65,
           humidity: Math.floor(Math.random() * 30) + 40
         },

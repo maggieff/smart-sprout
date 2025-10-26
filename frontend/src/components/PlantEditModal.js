@@ -395,7 +395,7 @@ const PlantEditModal = ({
               <SensorGroup>
                 <SensorLabel>
                   <FiSun />
-                  Light (lumens)
+                  Light (lux)
                 </SensorLabel>
                 <SensorInput
                   name="light"

@@ -9,14 +9,14 @@ const router = express.Router();
  */
 router.post('/calculate', (req, res) => {
   try {
-    const { soil_temp, air_humidity, soil_moisture, light_lumens } = req.body;
+    const { soil_temp, air_humidity, soil_moisture, light_lux } = req.body;
     
     // Validate required fields
     if (typeof soil_temp !== 'number' || typeof air_humidity !== 'number' || 
-        typeof soil_moisture !== 'number' || typeof light_lumens !== 'number') {
+        typeof soil_moisture !== 'number' || typeof light_lux !== 'number') {
       return res.status(400).json({
         success: false,
-        error: 'All sensor readings (soil_temp, air_humidity, soil_moisture, light_lumens) must be provided as numbers'
+        error: 'All sensor readings (soil_temp, air_humidity, soil_moisture, light_lux) must be provided as numbers'
       });
     }
     
@@ -24,7 +24,7 @@ router.post('/calculate', (req, res) => {
       soil_temp,
       air_humidity,
       soil_moisture,
-      light_lumens
+      light_lux
     });
     
     res.json({
@@ -50,23 +50,23 @@ router.get('/ranges', (req, res) => {
     data: {
       soil_temp: {
         ideal: [18, 25],
-        danger: [10, 35],
+        absolute: [10, 35],
         unit: "°C"
       },
       air_humidity: {
         ideal: [40, 70],
-        danger: [20, 90],
+        absolute: [20, 90],
         unit: "%"
       },
       soil_moisture: {
         ideal: [40, 60],
-        danger: [20, 90],
+        absolute: [20, 90],
         unit: "%"
       },
-      light_lumens: {
+      light_lux: {
         ideal: [10000, 40000],
-        danger: [5000, 80000],
-        unit: "lumens"
+        absolute: [5000, 80000],
+        unit: "lux"
       },
       weights: {
         soil_moisture: 0.35,

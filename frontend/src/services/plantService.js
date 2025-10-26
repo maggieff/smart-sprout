@@ -106,14 +106,14 @@ export const plantService = {
     for (let i = 0; i < 24; i++) {
       const timestamp = new Date(now - (23 - i) * interval);
       const baseMoisture = 50 + Math.sin((i / 24) * Math.PI * 2) * 20;
-      const baseLight = 500 + Math.sin((i / 24) * Math.PI * 2 + Math.PI) * 200;
+      const baseLight = 15000 + Math.sin((i / 24) * Math.PI * 2 + Math.PI) * 10000; // Realistic lux values
       const baseTemp = 72 + Math.sin((i / 24) * Math.PI * 2) * 10;
       const baseHumidity = 50 + Math.sin((i / 24) * Math.PI * 2 + Math.PI/2) * 15;
       
       history.push({
         timestamp: timestamp.toISOString(),
         moisture: Math.max(0, Math.min(100, baseMoisture + (Math.random() - 0.5) * 10)),
-        light: Math.max(0, baseLight + (Math.random() - 0.5) * 100),
+        light: Math.max(0, baseLight + (Math.random() - 0.5) * 2000), // Realistic lux variation
         temperature: Math.max(50, Math.min(100, baseTemp + (Math.random() - 0.5) * 5)),
         humidity: Math.max(20, Math.min(90, baseHumidity + (Math.random() - 0.5) * 10))
       });

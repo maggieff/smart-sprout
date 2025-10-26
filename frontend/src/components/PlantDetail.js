@@ -827,7 +827,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1F2937' }}>
                   {plant.sensorData?.light || 400}
                 </div>
-                <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>Light (lumens)</div>
+                <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>Light (lux)</div>
               </div>
               <div style={{ flex: 1, textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1F2937' }}>
