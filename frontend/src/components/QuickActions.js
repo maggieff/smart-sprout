@@ -73,7 +73,12 @@ const QuickActions = ({ plant }) => {
 
   const handleAction = async (actionType) => {
     try {
-      // Simulate action
+      if (actionType === 'photographed') {
+        await handleTakePhoto();
+        return;
+      }
+      
+      // Simulate other actions
       setActions(prev => ({ ...prev, [actionType]: true }));
       
       // Show success message
@@ -94,6 +99,177 @@ const QuickActions = ({ plant }) => {
     } catch (error) {
       console.error('Error performing action:', error);
       toast.error('Failed to perform action');
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    try {
+      // Check if camera is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast.error('Camera not available on this device');
+        return;
+      }
+
+      // Try to use camera directly first (for better UX)
+      try {
+        await openCameraDirectly();
+      } catch (cameraError) {
+        console.log('Direct camera access failed, falling back to file input');
+        // Fallback to file input if direct camera access fails
+        openFileInput();
+      }
+      
+    } catch (error) {
+      console.error('Error accessing camera:', error);
+      toast.error('Failed to access camera');
+    }
+  };
+
+  const openCameraDirectly = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { 
+        facingMode: 'environment', // Use back camera on mobile
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      } 
+    });
+    
+    // Create camera modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    `;
+    
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.autoplay = true;
+    video.style.cssText = `
+      width: 90%;
+      max-width: 500px;
+      height: auto;
+      border-radius: 1rem;
+    `;
+    
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+    `;
+    
+    const captureButton = document.createElement('button');
+    captureButton.innerHTML = '📸 Capture';
+    captureButton.style.cssText = `
+      padding: 1rem 2rem;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+    `;
+    
+    const cancelButton = document.createElement('button');
+    cancelButton.innerHTML = '❌ Cancel';
+    cancelButton.style.cssText = `
+      padding: 1rem 2rem;
+      background: #6b7280;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+    `;
+    
+    captureButton.onclick = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0);
+      
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          await processCapturedPhoto(blob);
+        }
+        stream.getTracks().forEach(track => track.stop());
+        document.body.removeChild(modal);
+      }, 'image/jpeg', 0.8);
+    };
+    
+    cancelButton.onclick = () => {
+      stream.getTracks().forEach(track => track.stop());
+      document.body.removeChild(modal);
+    };
+    
+    buttonContainer.appendChild(captureButton);
+    buttonContainer.appendChild(cancelButton);
+    modal.appendChild(video);
+    modal.appendChild(buttonContainer);
+    document.body.appendChild(modal);
+  };
+
+  const openFileInput = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment'; // Use back camera on mobile
+    
+    input.onchange = async (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        await processCapturedPhoto(file);
+      }
+    };
+    
+    input.click();
+  };
+
+  const processCapturedPhoto = async (file) => {
+    try {
+      // Show loading state
+      setActions(prev => ({ ...prev, photographed: true }));
+      
+      // Simulate photo upload (you can replace this with actual upload logic)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Create a preview URL for the photo
+      const photoUrl = URL.createObjectURL(file);
+      
+      // Store photo info (you can extend this to save to backend)
+      const photoData = {
+        id: Date.now(),
+        file: file,
+        url: photoUrl,
+        plantId: plant?.id,
+        timestamp: new Date().toISOString(),
+        name: file.name || `plant-photo-${Date.now()}.jpg`
+      };
+      
+      // You can add logic here to save the photo to your backend
+      console.log('Photo captured:', photoData);
+      
+      toast.success('Photo captured successfully! 📸');
+      
+      // Reset after 3 seconds
+      setTimeout(() => {
+        setActions(prev => ({ ...prev, photographed: false }));
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error processing photo:', error);
+      toast.error('Failed to process photo');
+      setActions(prev => ({ ...prev, photographed: false }));
     }
   };
 
