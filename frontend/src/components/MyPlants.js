@@ -81,8 +81,8 @@ const FilterButton = styled.button`
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: #65876a;
-  border: 1px solid #5a6b5d;
+  background: white;
+  border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   color: #374151;
   font-size: 0.875rem;
@@ -103,8 +103,8 @@ const FilterDropdown = styled.div`
   top: 100%;
   left: 0;
   right: 0;
-  background: #65876a;
-  border: 1px solid #5a6b5d;
+  background: white;
+  border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   z-index: 50;
