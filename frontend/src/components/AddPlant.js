@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 
 const Container = styled.div`
   min-height: 100vh;
-  background: #94A88B;
+  background: #9CAF88;
   display: flex;
   flex-direction: column;
 `;

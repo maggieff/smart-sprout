@@ -13,13 +13,14 @@ import {
 } from 'react-icons/fi';
 
 const Card = styled(motion.div)`
-  background: white;
+  background: #65876a;
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid #5a6b5d;
   cursor: pointer;
   transition: all 0.2s ease;
+  color: white;
 
   &:hover {
     transform: translateY(-2px);
@@ -43,13 +44,14 @@ const PlantInfo = styled.div`
 const PlantImage = styled.div`
   width: 4rem;
   height: 4rem;
-  background: linear-gradient(135deg, #10B981, #34D399);
+  background: ${props => props.hasImage ? 'transparent' : 'linear-gradient(135deg, #10B981, #34D399)'};
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
   color: white;
+  overflow: hidden;
 `;
 
 const PlantDetails = styled.div`
@@ -60,13 +62,13 @@ const PlantName = styled.h3`
   font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.25rem;
   font-weight: normal;
-  color: #1f2937;
+  color: white;
   margin-bottom: 0.25rem;
 `;
 
 const PlantSpecies = styled.p`
   font-size: 0.875rem;
-  color: #6b7280;
+  color: white;
 `;
 
 const HealthScore = styled.div`
@@ -87,7 +89,7 @@ const ScoreValue = styled.div`
 
 const ScoreLabel = styled.div`
   font-size: 0.75rem;
-  color: #6b7280;
+  color: white;
   margin-top: 0.25rem;
 `;
 
@@ -118,14 +120,14 @@ const SensorInfo = styled.div`
 
 const SensorLabel = styled.div`
   font-size: 0.75rem;
-  color: #6b7280;
+  color: #1F2937;
   margin-bottom: 0.125rem;
 `;
 
 const SensorValue = styled.div`
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1f2937;
+  color: #1F2937;
 `;
 
 const StatusBadge = styled.div`
@@ -172,7 +174,7 @@ const LastWatered = styled.div`
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: white;
 `;
 
 const ViewButton = styled(Link)`
@@ -241,8 +243,21 @@ const PlantCard = ({ plant, onClick }) => {
     >
       <CardHeader>
         <PlantInfo>
-          <PlantImage>
-            🌱
+          <PlantImage hasImage={!!plant.image}>
+            {plant.image ? (
+              <img 
+                src={plant.image} 
+                alt={plant.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  borderRadius: '0.75rem'
+                }}
+              />
+            ) : (
+              '🌱'
+            )}
           </PlantImage>
           <PlantDetails>
             <PlantName>{plant.name}</PlantName>

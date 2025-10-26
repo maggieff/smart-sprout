@@ -6,7 +6,8 @@ import {
   FiMessageCircle, 
   FiUser,
   FiRefreshCw,
-  FiHelpCircle
+  FiHelpCircle,
+  FiCamera
 } from 'react-icons/fi';
 import { aiService } from '../services/aiService';
 import { useAuth } from '../contexts/AuthContext';
@@ -155,6 +156,133 @@ const SendButton = styled.button`
   }
 `;
 
+const CameraButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: #4b5563;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const HiddenFileInput = styled.input`
+  display: none;
+`;
+
+const MessageImage = styled.img`
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+  border: 2px solid #e5e7eb;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+`;
+
+const ImageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 0.5rem;
+`;
+
+const CameraModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const CameraContainer = styled.div`
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const CameraPreview = styled.video`
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border-radius: 0.5rem;
+  background: #000;
+`;
+
+const CameraControls = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+`;
+
+const CaptureButton = styled.button`
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: #10b981;
+  border: 4px solid white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #059669;
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
+const CloseButton = styled.button`
+  padding: 0.5rem 1rem;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #4b5563;
+  }
+`;
+
 const SuggestionsContainer = styled.div`
   margin-bottom: 1rem;
 `;
@@ -205,7 +333,13 @@ const AIChat = ({ selectedPlant }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraStream, setCameraStream] = useState(null);
+  const [cameraError, setCameraError] = useState(null);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const videoRef = useRef(null);
 
   const suggestions = [
     "How often should I water my plant?",
@@ -219,12 +353,34 @@ const AIChat = ({ selectedPlant }) => {
   useEffect(() => {
     // Add welcome message
     if (messages.length === 0) {
-      setMessages([{
-        id: 'welcome',
-        text: `Hello! I'm your plant care assistant. I can help you with questions about your ${selectedPlant?.name || 'plant'}. What would you like to know?`,
-        isUser: false,
-        timestamp: new Date().toISOString()
-      }]);
+      const getWelcomeMessage = async () => {
+        let plantName = selectedPlant?.name || 'plant';
+        
+        // Try to get the actual species from photo analysis
+        try {
+          const photosResponse = await fetch(`http://localhost:5001/api/upload/photos?plantId=${selectedPlant?.id}`);
+          if (photosResponse.ok) {
+            const photos = await photosResponse.json();
+            if (photos.photos && photos.photos.length > 0) {
+              const latestPhoto = photos.photos[0];
+              if (latestPhoto.analysis && latestPhoto.analysis.species && latestPhoto.analysis.species !== 'Unknown Plant') {
+                plantName = latestPhoto.analysis.species;
+              }
+            }
+          }
+        } catch (error) {
+          console.log('Could not fetch photo analysis for welcome message');
+        }
+        
+        setMessages([{
+          id: 'welcome',
+          text: `Hello! I'm your plant care assistant. I can help you with questions about your ${plantName}. What would you like to know?`,
+          isUser: false,
+          timestamp: new Date().toISOString()
+        }]);
+      };
+      
+      getWelcomeMessage();
     }
   }, [selectedPlant]);
 
@@ -252,11 +408,29 @@ const AIChat = ({ selectedPlant }) => {
     setLoading(true);
 
     try {
+      // Get the most recent photo analysis to determine the actual plant species
+      let actualSpecies = selectedPlant?.species;
+      try {
+        const photosResponse = await fetch(`http://localhost:5001/api/upload/photos?plantId=${selectedPlant?.id}`);
+        if (photosResponse.ok) {
+          const photos = await photosResponse.json();
+          if (photos.photos && photos.photos.length > 0) {
+            const latestPhoto = photos.photos[0]; // Photos are sorted by newest first
+            if (latestPhoto.analysis && latestPhoto.analysis.species && latestPhoto.analysis.species !== 'Unknown Plant') {
+              actualSpecies = latestPhoto.analysis.species;
+              console.log(`🌱 Using photo-identified species: ${actualSpecies}`);
+            }
+          }
+        }
+      } catch (photoError) {
+        console.log('Could not fetch photo analysis, using default species');
+      }
+
       const response = await aiService.askQuestion({
         question: userMessage.text,
         plantId: selectedPlant?.id,
         userId: user?.id,
-        species: selectedPlant?.species,
+        species: actualSpecies,
         sensorData: selectedPlant?.sensorData
       });
 
@@ -291,6 +465,241 @@ const AIChat = ({ selectedPlant }) => {
     setInput(suggestion);
   };
 
+  const handleCameraClick = async () => {
+    // Check if camera is supported
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast.error('Camera not supported on this device');
+      return;
+    }
+
+    try {
+      setShowCamera(true);
+      setCameraError(null);
+      
+      // Request camera access
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          facingMode: 'environment', // Use back camera on mobile
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      });
+      
+      setCameraStream(stream);
+      
+      // Set video source
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      
+    } catch (error) {
+      console.error('Camera access error:', error);
+      setCameraError(error.message);
+      toast.error('Camera access denied or not available');
+    }
+  };
+
+  const closeCamera = () => {
+    setShowCamera(false);
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setCameraError(null);
+  };
+
+  const capturePhoto = async () => {
+    if (!videoRef.current) return;
+
+    try {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      
+      // Set canvas dimensions to match video
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      
+      // Draw video frame to canvas
+      context.drawImage(videoRef.current, 0, 0);
+      
+      // Convert to blob
+      const blob = await new Promise(resolve => {
+        canvas.toBlob(resolve, 'image/jpeg', 0.8);
+      });
+      
+      // Create file from blob with proper MIME type
+      const file = new File([blob], 'camera-capture.jpg', { 
+        type: 'image/jpeg',
+        lastModified: Date.now()
+      });
+      
+      console.log('📸 Created file:', {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        lastModified: file.lastModified
+      });
+      
+      // Close camera
+      closeCamera();
+      
+      // Upload the captured photo
+      await uploadCapturedPhoto(file);
+      
+    } catch (error) {
+      console.error('Photo capture error:', error);
+      toast.error('Failed to capture photo');
+    }
+  };
+
+  const uploadCapturedPhoto = async (file) => {
+    setUploadingImage(true);
+    console.log('📸 Starting photo upload:', file.name, file.size);
+
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+      formData.append('plantId', selectedPlant?.id || 'unknown');
+      formData.append('description', 'Live camera capture for plant identification');
+
+      console.log('📤 Uploading to:', 'http://192.168.7.88:5001/api/upload');
+      
+      const response = await fetch('http://192.168.7.88:5001/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      console.log('📥 Upload response status:', response.status);
+      const result = await response.json();
+      console.log('📥 Upload result:', result);
+
+      if (result.success) {
+        // Add image message to chat
+        const imageMessage = {
+          id: Date.now().toString(),
+          text: `📸 I've captured a photo for plant identification`,
+          isUser: true,
+          timestamp: new Date().toISOString(),
+          imageUrl: result.photo.url,
+          imageAnalysis: result.photo.analysis
+        };
+
+        setMessages(prev => [...prev, imageMessage]);
+
+        // Add AI response about the plant identification
+        const aiResponse = {
+          id: (Date.now() + 1).toString(),
+          text: `Based on your photo, I can help identify this plant. ${result.photo.analysis?.species ? `This appears to be a ${result.photo.analysis.species}.` : 'I\'m analyzing the image to identify the plant species.'} Would you like to know more about its care requirements?`,
+          isUser: false,
+          timestamp: new Date().toISOString(),
+          confidence: result.photo.analysis?.confidence || 0.7
+        };
+
+        setMessages(prev => [...prev, aiResponse]);
+        toast.success('Photo captured and uploaded successfully!');
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Error uploading captured photo:', error);
+      toast.error('Failed to upload captured photo. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleImageUpload = async (event) => {
+    console.log('📁 File input event:', event);
+    console.log('📁 Event target:', event.target);
+    console.log('📁 Files:', event.target.files);
+    
+    const file = event.target.files[0];
+    console.log('📁 Selected file:', file);
+    
+    if (!file) {
+      console.log('❌ No file selected');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+      formData.append('plantId', selectedPlant?.id || 'unknown');
+      formData.append('description', 'Plant identification request');
+
+      console.log('📤 About to upload file:', {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
+      console.log('📤 Upload URL:', 'http://192.168.7.88:5001/api/upload');
+
+      const response = await fetch('http://192.168.7.88:5001/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      console.log('📥 Response received:', response.status, response.statusText);
+      const result = await response.json();
+
+      if (result.success) {
+        // Add image message to chat
+        const imageMessage = {
+          id: Date.now().toString(),
+          text: `📸 I've uploaded a photo for plant identification`,
+          isUser: true,
+          timestamp: new Date().toISOString(),
+          imageUrl: result.photo.url,
+          imageAnalysis: result.photo.analysis
+        };
+
+        setMessages(prev => [...prev, imageMessage]);
+
+        // Add AI response about the plant identification
+        const aiResponse = {
+          id: (Date.now() + 1).toString(),
+          text: `Based on your photo, I can help identify this plant. ${result.photo.analysis?.species ? `This appears to be a ${result.photo.analysis.species}.` : 'I\'m analyzing the image to identify the plant species.'} Would you like to know more about its care requirements?`,
+          isUser: false,
+          timestamp: new Date().toISOString(),
+          confidence: result.photo.analysis?.confidence || 0.7
+        };
+
+        setMessages(prev => [...prev, aiResponse]);
+        toast.success('Photo uploaded successfully!');
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('❌ Upload error details:', error);
+      console.error('❌ Error name:', error.name);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+      
+      toast.error('Failed to upload image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const formatTime = (timestamp) => {
     return new Date(timestamp).toLocaleTimeString('en-US', { 
       hour: '2-digit', 
@@ -310,6 +719,40 @@ const AIChat = ({ selectedPlant }) => {
         </ChatSubtitle>
       </ChatHeader>
 
+      {/* Camera Modal */}
+      {showCamera && (
+        <CameraModal onClick={closeCamera}>
+          <CameraContainer onClick={(e) => e.stopPropagation()}>
+            <h3>Take a Photo</h3>
+            {cameraError ? (
+              <div style={{ color: 'red', textAlign: 'center' }}>
+                <p>Camera Error: {cameraError}</p>
+                <CloseButton onClick={closeCamera}>Close</CloseButton>
+              </div>
+            ) : (
+              <>
+                <CameraPreview
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                />
+                <CameraControls>
+                  <CloseButton onClick={closeCamera}>Cancel</CloseButton>
+                  <CloseButton onClick={() => {
+                    closeCamera();
+                    fileInputRef.current?.click();
+                  }}>Upload File</CloseButton>
+                  <CaptureButton onClick={capturePhoto} disabled={uploadingImage}>
+                    📸
+                  </CaptureButton>
+                </CameraControls>
+              </>
+            )}
+          </CameraContainer>
+        </CameraModal>
+      )}
+
       <MessagesContainer>
         <AnimatePresence>
           {messages.map((message) => (
@@ -327,6 +770,15 @@ const AIChat = ({ selectedPlant }) => {
               <div>
                 <MessageContent isUser={message.isUser}>
                   {message.text}
+                  {message.imageUrl && (
+                    <ImageContainer>
+                      <MessageImage 
+                        src={message.imageUrl} 
+                        alt="Uploaded plant photo"
+                        onClick={() => window.open(message.imageUrl, '_blank')}
+                      />
+                    </ImageContainer>
+                  )}
                 </MessageContent>
                 <MessageTime isUser={message.isUser}>
                   {formatTime(message.timestamp)}
@@ -375,23 +827,37 @@ const AIChat = ({ selectedPlant }) => {
           </SuggestionsContainer>
         )}
 
-        <InputForm onSubmit={handleSubmit}>
-          <InputField
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about your plant care..."
-            rows={1}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit(e);
-              }
-            }}
-          />
-          <SendButton type="submit" disabled={!input.trim() || loading}>
-            <FiSend />
-          </SendButton>
-        </InputForm>
+               <InputForm onSubmit={handleSubmit}>
+                 <InputField
+                   value={input}
+                   onChange={(e) => setInput(e.target.value)}
+                   placeholder="Ask about your plant care..."
+                   rows={1}
+                   onKeyDown={(e) => {
+                     if (e.key === 'Enter' && !e.shiftKey) {
+                       e.preventDefault();
+                       handleSubmit(e);
+                     }
+                   }}
+                 />
+                 <CameraButton 
+                   type="button" 
+                   onClick={handleCameraClick}
+                   disabled={uploadingImage}
+                   title="Take photo with camera or upload from device"
+                 >
+                   <FiCamera />
+                 </CameraButton>
+                 <SendButton type="submit" disabled={!input.trim() || loading}>
+                   <FiSend />
+                 </SendButton>
+               </InputForm>
+               <HiddenFileInput
+                 ref={fileInputRef}
+                 type="file"
+                 accept="image/*"
+                 onChange={handleImageUpload}
+               />
       </InputContainer>
     </ChatContainer>
   );

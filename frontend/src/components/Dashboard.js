@@ -39,14 +39,14 @@ import { plantService } from '../services/plantService';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
-  background: #97AC83;
+  background: #9CAF88;
   padding: 0;
 `;
 
 // Sign-in interface styles
 const SignInContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #97AC83 0%, #6B8E4A 100%);
+  background: linear-gradient(135deg, #9CAF88 0%, #7A8B73 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,9 +54,10 @@ const SignInContainer = styled.div`
 `;
 
 const SignInCard = styled(motion.div)`
-  background: white;
+  background: #65876a;
   border-radius: 1rem;
   padding: 3rem;
+  color: white;
   width: 100%;
   max-width: 500px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -367,9 +368,33 @@ const PlantInfo = styled.div`
 const PlantImage = styled.div`
   width: 100%;
   height: 200px;
-  background: rgba(209, 213, 219, 0.6);
+  background: ${props => props.hasImage ? 'transparent' : 'rgba(209, 213, 219, 0.6)'};
   border-radius: 0.5rem;
-  backdrop-filter: blur(5px);
+  backdrop-filter: ${props => props.hasImage ? 'none' : 'blur(5px)'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+`;
+
+const PlantDetails = styled.div`
+  margin-bottom: 1rem;
+`;
+
+const PlantName = styled.h3`
+  font-family: 'Cubano', 'Karla', sans-serif;
+  font-size: 1.5rem;
+  font-weight: normal;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+`;
+
+const PlantSpecies = styled.p`
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
 `;
 
 const CareTips = styled.div`
@@ -1106,10 +1131,32 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
 
         <PlantContent>
           <PlantInfo>
-            <PlantImage />
+            <PlantImage hasImage={!!(selectedPlant && selectedPlant.image)}>
+              {selectedPlant && selectedPlant.image ? (
+                <img 
+                  src={selectedPlant.image} 
+                  alt={selectedPlant.name}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: '0.5rem'
+                  }}
+                />
+              ) : null}
+            </PlantImage>
+            <PlantDetails>
+              <PlantName>{selectedPlant ? selectedPlant.name : 'No plants yet'}</PlantName>
+              <PlantSpecies>{selectedPlant ? selectedPlant.species : 'Add your first plant to get started'}</PlantSpecies>
+            </PlantDetails>
             <CareTips>
               <CareTipsLabel>Care tips:</CareTipsLabel>
-              <CareTipsText>bla bla bla bla</CareTipsText>
+              <CareTipsText>
+                {selectedPlant ? 
+                  `Keep your ${selectedPlant.name} healthy by watering regularly and providing adequate sunlight. Monitor soil moisture and temperature for optimal growth.` 
+                  : 'Add a plant to see personalized care tips'
+                }
+              </CareTipsText>
             </CareTips>
           </PlantInfo>
 
