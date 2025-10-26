@@ -74,7 +74,7 @@ const PlantName = styled.h1`
 
 const PlantImagePlaceholder = styled.div`
   width: 100%;
-  height: 500px;
+  height: 600px;
   background: #E5E7EB;
   border-radius: 1rem;
   display: flex;
@@ -83,6 +83,7 @@ const PlantImagePlaceholder = styled.div`
   color: #6B7280;
   font-size: 1.2rem;
   font-weight: 500;
+  margin-bottom: 2rem;
 `;
 
 const ActionButtons = styled.div`
@@ -482,7 +483,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 height: '100%',
-                fontSize: '4rem',
+                fontSize: '6rem',
                 color: '#9CA3AF'
               }}>
                 🌱
