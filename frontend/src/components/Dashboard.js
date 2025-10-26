@@ -19,7 +19,8 @@ import {
   FiMail,
   FiLock,
   FiEye,
-  FiEyeOff
+  FiEyeOff,
+  FiArrowRight
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
@@ -410,6 +411,32 @@ const CareTipsLabel = styled.div`
 
 const CareTipsText = styled.div`
   color: #6b7280;
+`;
+
+const ViewDetailsButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+
+  &:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 `;
 
 const PlantMetrics = styled.div`
@@ -1158,6 +1185,12 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
                 }
               </CareTipsText>
             </CareTips>
+            {selectedPlant && (
+              <ViewDetailsButton onClick={() => navigate(`/plant/${selectedPlant.id}`)}>
+                View Details
+                <FiArrowRight />
+              </ViewDetailsButton>
+            )}
           </PlantInfo>
 
           <PlantMetrics>
