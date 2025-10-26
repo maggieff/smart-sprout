@@ -57,8 +57,9 @@ const PlantDetails = styled.div`
 `;
 
 const PlantName = styled.h3`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: normal;
   color: #1f2937;
   margin-bottom: 0.25rem;
 `;

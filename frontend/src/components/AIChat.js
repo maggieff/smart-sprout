@@ -30,8 +30,9 @@ const ChatHeader = styled.div`
 `;
 
 const ChatTitle = styled.h1`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.875rem;
-  font-weight: 700;
+  font-weight: normal;
   color: #1f2937;
   margin-bottom: 0.5rem;
   display: flex;
