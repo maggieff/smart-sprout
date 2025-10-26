@@ -54,7 +54,7 @@ const SignInContainer = styled.div`
 `;
 
 const SignInCard = styled(motion.div)`
-  background: #6B8E4A;
+  background: #65876a;
   border-radius: 1rem;
   padding: 3rem;
   width: 100%;
