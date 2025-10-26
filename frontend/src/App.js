@@ -45,9 +45,18 @@ function App() {
       const plantsData = await plantService.getAllPlants();
       setPlants(plantsData.plants || []);
       
-      // Set default selected plant
+      // Set most recently added plant as selected
       if (plantsData.plants && plantsData.plants.length > 0) {
-        setSelectedPlant(plantsData.plants[0]);
+        // Sort plants by creation time (most recent first)
+        const sortedPlants = plantsData.plants.sort((a, b) => {
+          // Extract timestamp from plant ID (format: plant-timestamp-id)
+          const getTimestamp = (plantId) => {
+            const parts = plantId.split('-');
+            return parts.length >= 3 ? parseInt(parts[1]) : 0;
+          };
+          return getTimestamp(b.id) - getTimestamp(a.id);
+        });
+        setSelectedPlant(sortedPlants[0]);
       }
       
     } catch (error) {
@@ -75,6 +84,8 @@ function App() {
 
   const handlePlantAdd = (newPlant) => {
     setPlants(prevPlants => [...prevPlants, newPlant]);
+    // Automatically select the newly added plant as the most recent plant
+    setSelectedPlant(newPlant);
   };
 
   const handlePlantRemove = (plantId) => {

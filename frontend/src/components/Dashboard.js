@@ -371,6 +371,29 @@ const PlantImage = styled.div`
   background: rgba(209, 213, 219, 0.6);
   border-radius: 0.5rem;
   backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  margin-bottom: 1rem;
+`;
+
+const PlantDetails = styled.div`
+  margin-bottom: 1rem;
+`;
+
+const PlantName = styled.h3`
+  font-family: 'Cubano', 'Karla', sans-serif;
+  font-size: 1.5rem;
+  font-weight: normal;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+`;
+
+const PlantSpecies = styled.p`
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
 `;
 
 const CareTips = styled.div`
@@ -1107,10 +1130,21 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
 
         <PlantContent>
           <PlantInfo>
-            <PlantImage />
+            <PlantImage>
+              {selectedPlant ? (selectedPlant.image || '🌱') : '🌱'}
+            </PlantImage>
+            <PlantDetails>
+              <PlantName>{selectedPlant ? selectedPlant.name : 'No plants yet'}</PlantName>
+              <PlantSpecies>{selectedPlant ? selectedPlant.species : 'Add your first plant to get started'}</PlantSpecies>
+            </PlantDetails>
             <CareTips>
               <CareTipsLabel>Care tips:</CareTipsLabel>
-              <CareTipsText>bla bla bla bla</CareTipsText>
+              <CareTipsText>
+                {selectedPlant ? 
+                  `Keep your ${selectedPlant.name} healthy by watering regularly and providing adequate sunlight. Monitor soil moisture and temperature for optimal growth.` 
+                  : 'Add a plant to see personalized care tips'
+                }
+              </CareTipsText>
             </CareTips>
           </PlantInfo>
 
