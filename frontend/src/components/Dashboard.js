@@ -368,14 +368,15 @@ const PlantInfo = styled.div`
 const PlantImage = styled.div`
   width: 100%;
   height: 200px;
-  background: rgba(209, 213, 219, 0.6);
+  background: ${props => props.hasImage ? 'transparent' : 'rgba(209, 213, 219, 0.6)'};
   border-radius: 0.5rem;
-  backdrop-filter: blur(5px);
+  backdrop-filter: ${props => props.hasImage ? 'none' : 'blur(5px)'};
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 4rem;
   margin-bottom: 1rem;
+  overflow: hidden;
 `;
 
 const PlantDetails = styled.div`
@@ -1130,8 +1131,19 @@ const Dashboard = ({ plants, selectedPlant, onPlantSelect, onPlantUpdate }) => {
 
         <PlantContent>
           <PlantInfo>
-            <PlantImage>
-              {selectedPlant ? (selectedPlant.image || '🌱') : '🌱'}
+            <PlantImage hasImage={!!(selectedPlant && selectedPlant.image)}>
+              {selectedPlant && selectedPlant.image ? (
+                <img 
+                  src={selectedPlant.image} 
+                  alt={selectedPlant.name}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: '0.5rem'
+                  }}
+                />
+              ) : null}
             </PlantImage>
             <PlantDetails>
               <PlantName>{selectedPlant ? selectedPlant.name : 'No plants yet'}</PlantName>
