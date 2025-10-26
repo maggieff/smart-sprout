@@ -20,6 +20,7 @@ const Card = styled(motion.div)`
   border: 1px solid #5a6b5d;
   cursor: pointer;
   transition: all 0.2s ease;
+  color: white;
 
   &:hover {
     transform: translateY(-2px);
@@ -60,13 +61,13 @@ const PlantName = styled.h3`
   font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.25rem;
   font-weight: normal;
-  color: #1f2937;
+  color: white;
   margin-bottom: 0.25rem;
 `;
 
 const PlantSpecies = styled.p`
   font-size: 0.875rem;
-  color: #6b7280;
+  color: white;
 `;
 
 const HealthScore = styled.div`
@@ -118,14 +119,14 @@ const SensorInfo = styled.div`
 
 const SensorLabel = styled.div`
   font-size: 0.75rem;
-  color: #6b7280;
+  color: white;
   margin-bottom: 0.125rem;
 `;
 
 const SensorValue = styled.div`
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1f2937;
+  color: white;
 `;
 
 const StatusBadge = styled.div`

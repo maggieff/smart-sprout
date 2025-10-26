@@ -121,10 +121,11 @@ const Section = styled.div`
   background: #65876a;
   border-radius: 1rem;
   padding: 2rem;
+  color: white;
 `;
 
 const SectionTitle = styled.h2`
-  color: #1F2937;
+  color: white;
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
@@ -132,7 +133,7 @@ const SectionTitle = styled.h2`
 `;
 
 const SectionContent = styled.div`
-  color: #6B7280;
+  color: white;
   line-height: 1.6;
 `;
 
@@ -154,10 +155,11 @@ const SidebarSection = styled.div`
   background: #65876a;
   border-radius: 1rem;
   padding: 1.5rem;
+  color: white;
 `;
 
 const SidebarTitle = styled.h3`
-  color: #1F2937;
+  color: white;
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 1rem 0;

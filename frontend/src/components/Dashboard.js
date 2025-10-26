@@ -57,6 +57,7 @@ const SignInCard = styled(motion.div)`
   background: #65876a;
   border-radius: 1rem;
   padding: 3rem;
+  color: white;
   width: 100%;
   max-width: 500px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
