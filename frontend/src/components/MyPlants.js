@@ -16,6 +16,8 @@ const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
+  background-color: #9CAF88;
+  min-height: 100vh;
 `;
 
 const Header = styled.div`
