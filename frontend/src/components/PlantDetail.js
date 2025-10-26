@@ -245,7 +245,7 @@ const TemperatureNumber = styled.span`
 
 const TemperatureLabel = styled.span`
   font-size: 0.9rem;
-  color: #6B7280;
+  color: #1F2937;
 `;
 
 const OtherPlants = styled.div`
@@ -477,7 +477,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
             <HealthBar>
               <HealthFill percentage={healthPercentage} />
             </HealthBar>
-            <div style={{ color: '#6B7280', fontSize: '0.9rem' }}>
+            <div style={{ color: '#1F2937', fontSize: '0.9rem' }}>
               {healthPercentage}% Healthy
             </div>
           </SidebarSection>
@@ -494,7 +494,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
                 />
               </ChartLine>
             </MoistureChart>
-            <div style={{ color: '#6B7280', fontSize: '0.9rem', textAlign: 'center', marginTop: '0.5rem' }}>
+            <div style={{ color: '#1F2937', fontSize: '0.9rem', textAlign: 'center', marginTop: '0.5rem' }}>
               {moisturePercentage}% Moisture
             </div>
           </SidebarSection>
