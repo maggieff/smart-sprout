@@ -2,6 +2,21 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
+// Helper function to get current user ID from localStorage
+const getCurrentUserId = () => {
+  try {
+    const user = localStorage.getItem('smart-sprout-user');
+    if (user) {
+      const userData = JSON.parse(user);
+      return userData.id;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return null;
+  }
+};
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
@@ -10,9 +25,13 @@ const api = axios.create({
   },
 });
 
-// Request interceptor
+// Request interceptor to add user ID header
 api.interceptors.request.use(
   (config) => {
+    const userId = getCurrentUserId();
+    if (userId) {
+      config.headers['user-id'] = userId;
+    }
     console.log(`🌱 API Request: ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
@@ -21,6 +40,7 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
 
 // Response interceptor
 api.interceptors.response.use(
@@ -86,14 +106,14 @@ export const plantService = {
     for (let i = 0; i < 24; i++) {
       const timestamp = new Date(now - (23 - i) * interval);
       const baseMoisture = 50 + Math.sin((i / 24) * Math.PI * 2) * 20;
-      const baseLight = 500 + Math.sin((i / 24) * Math.PI * 2 + Math.PI) * 200;
+      const baseLight = 15000 + Math.sin((i / 24) * Math.PI * 2 + Math.PI) * 10000; // Realistic lux values
       const baseTemp = 72 + Math.sin((i / 24) * Math.PI * 2) * 10;
       const baseHumidity = 50 + Math.sin((i / 24) * Math.PI * 2 + Math.PI/2) * 15;
       
       history.push({
         timestamp: timestamp.toISOString(),
         moisture: Math.max(0, Math.min(100, baseMoisture + (Math.random() - 0.5) * 10)),
-        light: Math.max(0, baseLight + (Math.random() - 0.5) * 100),
+        light: Math.max(0, baseLight + (Math.random() - 0.5) * 2000), // Realistic lux variation
         temperature: Math.max(50, Math.min(100, baseTemp + (Math.random() - 0.5) * 5)),
         humidity: Math.max(20, Math.min(90, baseHumidity + (Math.random() - 0.5) * 10))
       });
@@ -138,6 +158,45 @@ export const plantService = {
     } catch (error) {
       console.error('Error fetching alerts:', error);
       throw new Error('Failed to fetch alerts');
+    }
+  },
+
+  /**
+   * Create a new plant
+   */
+  async createPlant(plantData) {
+    try {
+      const response = await api.post('/plant-data', plantData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating plant:', error);
+      throw new Error('Failed to create plant');
+    }
+  },
+
+  /**
+   * Update plant information
+   */
+  async updatePlant(plantId, plantData) {
+    try {
+      const response = await api.put(`/plant-data/${plantId}`, plantData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating plant:', error);
+      throw new Error('Failed to update plant');
+    }
+  },
+
+  /**
+   * Delete a plant
+   */
+  async deletePlant(plantId) {
+    try {
+      const response = await api.delete(`/plant-data/${plantId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting plant:', error);
+      throw new Error('Failed to delete plant');
     }
   },
 

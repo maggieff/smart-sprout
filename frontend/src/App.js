@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
 
 // Components
 import Header from './components/Header';
@@ -13,7 +12,7 @@ import AddPlant from './components/AddPlant';
 import LoadingSpinner from './components/LoadingSpinner';
 
 // Context
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Services
 import { plantService } from './services/plantService';
@@ -28,33 +27,51 @@ const MainContent = styled.main`
   min-height: calc(100vh - 80px);
 `;
 
-function App() {
+function AuthenticatedApp() {
   const [loading, setLoading] = useState(true);
   const [plants, setPlants] = useState([]);
   const [selectedPlant, setSelectedPlant] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    initializeApp();
-  }, []);
+    if (user) {
+      initializeApp();
+    } else {
+      setPlants([]);
+      setSelectedPlant(null);
+      setLoading(false);
+    }
+  }, [user]);
 
   const initializeApp = async () => {
     try {
       setLoading(true);
       
-      // Load plants data
+      // Load plants data for the current user
       const plantsData = await plantService.getAllPlants();
-      setPlants(plantsData.plants || []);
+      const formattedPlants = (plantsData.plants || []).map(plant => ({
+        ...plant,
+        // Add default values for missing fields
+        healthScore: plant.healthScore || 0.8,
+        status: plant.status || 'good',
+        sensorData: plant.sensorData || {
+          moisture: Math.floor(Math.random() * 40) + 30,
+          light: Math.floor(Math.random() * 30000) + 10000, // Realistic lux values (10k-40k)
+          temperature: Math.floor(Math.random() * 20) + 65,
+          humidity: Math.floor(Math.random() * 30) + 40
+        },
+        lastWatered: plant.lastWatered ? new Date(plant.lastWatered) : new Date(),
+        careInfo: plant.careInfo || null,
+        careTips: plant.careTips || null,
+        careSummary: plant.careSummary || null
+      }));
+      setPlants(formattedPlants);
       
       // Set most recently added plant as selected
-      if (plantsData.plants && plantsData.plants.length > 0) {
+      if (formattedPlants && formattedPlants.length > 0) {
         // Sort plants by creation time (most recent first)
-        const sortedPlants = plantsData.plants.sort((a, b) => {
-          // Extract timestamp from plant ID (format: plant-timestamp-id)
-          const getTimestamp = (plantId) => {
-            const parts = plantId.split('-');
-            return parts.length >= 3 ? parseInt(parts[1]) : 0;
-          };
-          return getTimestamp(b.id) - getTimestamp(a.id);
+        const sortedPlants = formattedPlants.sort((a, b) => {
+          return new Date(b.createdAt || b.created_at) - new Date(a.createdAt || a.created_at);
         });
         setSelectedPlant(sortedPlants[0]);
       }
@@ -104,66 +121,72 @@ function App() {
   }
 
   return (
+    <AppContainer>
+      <Header 
+        plants={plants}
+        selectedPlant={selectedPlant}
+        onPlantSelect={handlePlantSelect}
+      />
+      
+      <MainContent>
+        <Routes>
+          <Route 
+            path="/" 
+            element={
+              <Dashboard 
+                plants={plants}
+                selectedPlant={selectedPlant}
+                onPlantSelect={handlePlantSelect}
+                onPlantUpdate={handlePlantUpdate}
+              />
+            } 
+          />
+          <Route 
+            path="/plant/:plantId" 
+            element={
+              <PlantDetail 
+                plants={plants}
+                onPlantUpdate={handlePlantUpdate}
+                onPlantRemove={handlePlantRemove}
+              />
+            } 
+          />
+          <Route 
+            path="/ai-chat" 
+            element={
+              <AIChat 
+                selectedPlant={selectedPlant}
+              />
+            } 
+          />
+          <Route 
+            path="/my-plants" 
+            element={
+              <MyPlants 
+                plants={plants}
+                onPlantSelect={handlePlantSelect}
+                onPlantUpdate={handlePlantUpdate}
+              />
+            } 
+          />
+          <Route 
+            path="/add-plant" 
+            element={
+              <AddPlant 
+                onPlantAdd={handlePlantAdd}
+              />
+            } 
+          />
+        </Routes>
+      </MainContent>
+    </AppContainer>
+  );
+}
+
+function App() {
+  return (
     <AuthProvider>
-      <AppContainer>
-        <Header 
-          plants={plants}
-          selectedPlant={selectedPlant}
-          onPlantSelect={handlePlantSelect}
-        />
-        
-        <MainContent>
-          <Routes>
-            <Route 
-              path="/" 
-              element={
-                <Dashboard 
-                  plants={plants}
-                  selectedPlant={selectedPlant}
-                  onPlantSelect={handlePlantSelect}
-                  onPlantUpdate={handlePlantUpdate}
-                />
-              } 
-            />
-            <Route 
-              path="/plant/:plantId" 
-              element={
-                <PlantDetail 
-                  plants={plants}
-                  onPlantUpdate={handlePlantUpdate}
-                  onPlantRemove={handlePlantRemove}
-                />
-              } 
-            />
-            <Route 
-              path="/ai-chat" 
-              element={
-                <AIChat 
-                  selectedPlant={selectedPlant}
-                />
-              } 
-            />
-            <Route 
-              path="/my-plants" 
-              element={
-                <MyPlants 
-                  plants={plants}
-                  onPlantSelect={handlePlantSelect}
-                  onPlantUpdate={handlePlantUpdate}
-                />
-              } 
-            />
-            <Route 
-              path="/add-plant" 
-              element={
-                <AddPlant 
-                  onPlantAdd={handlePlantAdd}
-                />
-              } 
-            />
-          </Routes>
-        </MainContent>
-      </AppContainer>
+      <AuthenticatedApp />
     </AuthProvider>
   );
 }

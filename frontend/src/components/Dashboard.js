@@ -476,6 +476,7 @@ const MetricLabel = styled.div`
   font-size: 1rem;
   font-weight: 500;
   color: white;
+  font-family: 'Cubano', 'Karla', sans-serif;
 `;
 
 const MetricValue = styled.div`
