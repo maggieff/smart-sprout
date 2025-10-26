@@ -6,7 +6,8 @@ import {
   FiMessageCircle, 
   FiUser,
   FiRefreshCw,
-  FiHelpCircle
+  FiHelpCircle,
+  FiCamera
 } from 'react-icons/fi';
 import { aiService } from '../services/aiService';
 import { useAuth } from '../contexts/AuthContext';
@@ -155,6 +156,56 @@ const SendButton = styled.button`
   }
 `;
 
+const CameraButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover:not(:disabled) {
+    background: #4b5563;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const HiddenFileInput = styled.input`
+  display: none;
+`;
+
+const MessageImage = styled.img`
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
+  border: 2px solid #e5e7eb;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+`;
+
+const ImageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 0.5rem;
+`;
+
 const SuggestionsContainer = styled.div`
   margin-bottom: 1rem;
 `;
@@ -205,7 +256,9 @@ const AIChat = ({ selectedPlant }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const suggestions = [
     "How often should I water my plant?",
@@ -291,6 +344,80 @@ const AIChat = ({ selectedPlant }) => {
     setInput(suggestion);
   };
 
+  const handleCameraClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+      formData.append('plantId', selectedPlant?.id || 'unknown');
+      formData.append('description', 'Plant identification request');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Add image message to chat
+        const imageMessage = {
+          id: Date.now().toString(),
+          text: `📸 I've uploaded a photo for plant identification`,
+          isUser: true,
+          timestamp: new Date().toISOString(),
+          imageUrl: result.photo.url,
+          imageAnalysis: result.photo.analysis
+        };
+
+        setMessages(prev => [...prev, imageMessage]);
+
+        // Add AI response about the plant identification
+        const aiResponse = {
+          id: (Date.now() + 1).toString(),
+          text: `Based on your photo, I can help identify this plant. ${result.photo.analysis?.species ? `This appears to be a ${result.photo.analysis.species}.` : 'I\'m analyzing the image to identify the plant species.'} Would you like to know more about its care requirements?`,
+          isUser: false,
+          timestamp: new Date().toISOString(),
+          confidence: result.photo.analysis?.confidence || 0.7
+        };
+
+        setMessages(prev => [...prev, aiResponse]);
+        toast.success('Photo uploaded successfully!');
+      } else {
+        throw new Error(result.error || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error('Failed to upload image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const formatTime = (timestamp) => {
     return new Date(timestamp).toLocaleTimeString('en-US', { 
       hour: '2-digit', 
@@ -327,6 +454,15 @@ const AIChat = ({ selectedPlant }) => {
               <div>
                 <MessageContent isUser={message.isUser}>
                   {message.text}
+                  {message.imageUrl && (
+                    <ImageContainer>
+                      <MessageImage 
+                        src={message.imageUrl} 
+                        alt="Uploaded plant photo"
+                        onClick={() => window.open(message.imageUrl, '_blank')}
+                      />
+                    </ImageContainer>
+                  )}
                 </MessageContent>
                 <MessageTime isUser={message.isUser}>
                   {formatTime(message.timestamp)}
@@ -375,23 +511,37 @@ const AIChat = ({ selectedPlant }) => {
           </SuggestionsContainer>
         )}
 
-        <InputForm onSubmit={handleSubmit}>
-          <InputField
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about your plant care..."
-            rows={1}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit(e);
-              }
-            }}
-          />
-          <SendButton type="submit" disabled={!input.trim() || loading}>
-            <FiSend />
-          </SendButton>
-        </InputForm>
+               <InputForm onSubmit={handleSubmit}>
+                 <InputField
+                   value={input}
+                   onChange={(e) => setInput(e.target.value)}
+                   placeholder="Ask about your plant care..."
+                   rows={1}
+                   onKeyDown={(e) => {
+                     if (e.key === 'Enter' && !e.shiftKey) {
+                       e.preventDefault();
+                       handleSubmit(e);
+                     }
+                   }}
+                 />
+                 <CameraButton 
+                   type="button" 
+                   onClick={handleCameraClick}
+                   disabled={uploadingImage}
+                   title="Upload plant photo for identification"
+                 >
+                   <FiCamera />
+                 </CameraButton>
+                 <SendButton type="submit" disabled={!input.trim() || loading}>
+                   <FiSend />
+                 </SendButton>
+               </InputForm>
+               <HiddenFileInput
+                 ref={fileInputRef}
+                 type="file"
+                 accept="image/*"
+                 onChange={handleImageUpload}
+               />
       </InputContainer>
     </ChatContainer>
   );
