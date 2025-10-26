@@ -12,6 +12,8 @@ import {
   FiCheck
 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import { logService } from '../services/logService';
+import { plantService } from '../services/plantService';
 
 const ActionsGrid = styled.div`
   display: grid;
@@ -33,6 +35,7 @@ const ActionButton = styled(motion.button)`
   transition: all 0.2s ease;
   font-size: 0.875rem;
   font-weight: 500;
+  font-family: 'Karla', sans-serif;
 
   &:hover {
     transform: translateY(-2px);
@@ -55,12 +58,14 @@ const ActionLabel = styled.div`
   font-size: 0.75rem;
   text-align: center;
   line-height: 1.2;
+  font-family: 'Karla', sans-serif;
 `;
 
 const ActionStatus = styled.div`
   font-size: 0.625rem;
   color: #6b7280;
   margin-top: 0.25rem;
+  font-family: 'Karla', sans-serif;
 `;
 
 const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
@@ -78,8 +83,39 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
         return;
       }
       
-      // Simulate other actions
+      // Check if plant exists
+      if (!plant || !plant.id) {
+        toast.error('Plant not found. Please refresh the page.');
+        return;
+      }
+      
+      // Set loading state
       setActions(prev => ({ ...prev, [actionType]: true }));
+      
+      console.log('Creating log for plant:', plant.id, 'action:', actionType);
+      
+      // Create log data based on action type
+      const logData = {
+        plantId: plant.id,
+        note: getLogNote(actionType),
+        type: getLogType(actionType),
+        mood: 'positive'
+      };
+      
+      console.log('Log data:', logData);
+      
+      // Create log entry
+      const logResult = await logService.createLog(logData);
+      console.log('Log creation result:', logResult);
+      
+      // For watering, also update the plant's last_watered field
+      if (actionType === 'watered') {
+        console.log('Updating plant last watered date...');
+        const updateResult = await plantService.updatePlant(plant.id, {
+          last_watered: new Date().toISOString()
+        });
+        console.log('Plant update result:', updateResult);
+      }
       
       // Show success message
       const messages = {
@@ -91,6 +127,11 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
       
       toast.success(messages[actionType]);
       
+      // Call the callback to refresh plant data
+      if (onActionComplete) {
+        onActionComplete();
+      }
+      
       // Reset after 3 seconds
       setTimeout(() => {
         setActions(prev => ({ ...prev, [actionType]: false }));
@@ -98,7 +139,21 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
       
     } catch (error) {
       console.error('Error performing action:', error);
-      toast.error('Failed to perform action');
+      console.error('Error details:', error.response?.data || error.message);
+      
+      // More specific error messages
+      if (error.response?.status === 404) {
+        toast.error('Plant not found in database. Please add plants first.');
+      } else if (error.response?.status === 401) {
+        toast.error('Please log in again.');
+      } else if (error.response?.status === 400) {
+        const errorMsg = error.response?.data?.error || 'Invalid request';
+        toast.error(`Invalid request: ${errorMsg}`);
+      } else {
+        toast.error(`Failed to ${actionType}: ${error.message}`);
+      }
+      
+      setActions(prev => ({ ...prev, [actionType]: false }));
     }
   };
 
@@ -220,6 +275,7 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
       border-radius: 0.5rem;
       font-size: 1rem;
       font-weight: 500;
+      font-family: 'Karla', sans-serif;
       cursor: pointer;
       transition: all 0.2s ease;
     `;
@@ -236,6 +292,7 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
       border-radius: 0.5rem;
       font-size: 1rem;
       font-weight: 500;
+      font-family: 'Karla', sans-serif;
       cursor: pointer;
       transition: all 0.2s ease;
     `;
@@ -251,6 +308,7 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
       border: none;
       border-radius: 50%;
       font-size: 1.5rem;
+      font-family: 'Karla', sans-serif;
       cursor: pointer;
       transition: all 0.2s ease;
       display: flex;
@@ -359,12 +417,36 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
         name: file.name || `plant-photo-${Date.now()}.jpg`
       };
       
+      // Check if plant exists
+      if (!plant || !plant.id) {
+        toast.error('Plant not found. Please refresh the page.');
+        setActions(prev => ({ ...prev, photographed: false }));
+        return;
+      }
+      
+      // Create log entry for photo
+      const logData = {
+        plantId: plant.id,
+        note: getLogNote('photographed'),
+        type: getLogType('photographed'),
+        mood: 'positive',
+        photos: [photoData.url]
+      };
+      
+      console.log('Creating photo log:', logData);
+      await logService.createLog(logData);
+      
       // You can add logic here to save the photo to your backend
       console.log('Photo captured:', photoData);
       
       // Call the callback to update the plant image
       if (onPhotoCaptured) {
         onPhotoCaptured(photoData);
+      }
+      
+      // Call the callback to refresh plant data
+      if (onActionComplete) {
+        onActionComplete();
       }
       
       toast.success('Photo captured successfully! 📸');
@@ -376,7 +458,19 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
       
     } catch (error) {
       console.error('Error processing photo:', error);
-      toast.error('Failed to process photo');
+      console.error('Photo error details:', error.response?.data || error.message);
+      
+      if (error.response?.status === 404) {
+        toast.error('Plant not found in database. Please add plants first.');
+      } else if (error.response?.status === 401) {
+        toast.error('Please log in again.');
+      } else if (error.response?.status === 400) {
+        const errorMsg = error.response?.data?.error || 'Invalid request';
+        toast.error(`Invalid request: ${errorMsg}`);
+      } else {
+        toast.error(`Failed to save photo: ${error.message}`);
+      }
+      
       setActions(prev => ({ ...prev, photographed: false }));
     }
   };
@@ -413,6 +507,36 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
       }
     };
     return configs[type];
+  };
+
+  const getLogNote = (actionType) => {
+    switch (actionType) {
+      case 'watered':
+        return 'Plant watered - soil moisture refreshed';
+      case 'fertilized':
+        return 'Fertilizer applied - nutrients added to soil';
+      case 'repotted':
+        return 'Plant repotted - moved to new container';
+      case 'photographed':
+        return 'Photo taken - plant documented';
+      default:
+        return 'Plant care activity logged';
+    }
+  };
+
+  const getLogType = (actionType) => {
+    switch (actionType) {
+      case 'watered':
+        return 'watering';
+      case 'fertilized':
+        return 'fertilizing';
+      case 'repotted':
+        return 'repotting';
+      case 'photographed':
+        return 'photography';
+      default:
+        return 'general';
+    }
   };
 
   const getStatusText = (actionType) => {

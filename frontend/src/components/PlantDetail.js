@@ -134,7 +134,7 @@ const SectionTitle = styled.h2`
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  font-family: 'Karla', sans-serif;
+  font-family: 'Cubano', 'Karla', sans-serif;
 `;
 
 const SectionContent = styled.div`
@@ -156,7 +156,7 @@ const SidebarTitle = styled.h3`
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  font-family: 'Karla', sans-serif;
+  font-family: 'Cubano', 'Karla', sans-serif;
 `;
 
 const HealthBar = styled.div`
@@ -219,7 +219,7 @@ const YAxisLabels = styled.div`
   flex-direction: column;
   justify-content: space-between;
   font-size: 0.7rem;
-  color: #6B7280;
+  color: #1F2937;
   width: 2.5rem;
 `;
 
@@ -282,7 +282,7 @@ const ChartLabels = styled.div`
   display: flex;
   justify-content: space-between;
   font-size: 0.75rem;
-  color: #6B7280;
+  color: #1F2937;
   margin-top: 0.5rem;
 `;
 
@@ -363,7 +363,7 @@ const OtherPlantCard = styled(Link)`
   border-radius: 0.75rem;
   padding: 1rem;
   text-align: center;
-  color: #6B7280;
+  color: #374151;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -373,7 +373,7 @@ const OtherPlantCard = styled(Link)`
   &:hover {
     background: #E5E7EB;
     transform: translateY(-2px);
-    color: #374151;
+    color: #1F2937;
   }
 `;
 
@@ -393,13 +393,13 @@ const PlantImage = styled.div`
 const OtherPlantName = styled.div`
   font-size: 0.875rem;
   font-weight: 600;
-  color: #374151;
+  color: #1F2937;
   margin-bottom: 0.25rem;
 `;
 
 const OtherPlantSpecies = styled.div`
   font-size: 0.75rem;
-  color: #6B7280;
+  color: #4B5563;
 `;
 
 const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
@@ -744,7 +744,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
 
           <SidebarSection>
             <SidebarTitle>Moisture Levels</SidebarTitle>
-            <div style={{ fontSize: '0.875rem', color: '#6B7280', marginBottom: '0.5rem' }}>
+            <div style={{ fontSize: '0.875rem', color: '#1F2937', marginBottom: '0.5rem' }}>
               Last 24 Hours
             </div>
             <MoistureChart>
@@ -827,13 +827,13 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1F2937' }}>
                   {plant.sensorData?.light || 400}
                 </div>
-                <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>Light (lux)</div>
+                <div style={{ fontSize: '0.8rem', color: '#1F2937' }}>Light (lux)</div>
               </div>
               <div style={{ flex: 1, textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#1F2937' }}>
                   {plant.sensorData?.humidity || 50}%
                 </div>
-                <div style={{ fontSize: '0.8rem', color: '#6B7280' }}>Humidity</div>
+                <div style={{ fontSize: '0.8rem', color: '#1F2937' }}>Humidity</div>
               </div>
             </div>
           </SidebarSection>
@@ -870,7 +870,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
               {plants.filter(p => p.id !== plantId).length === 0 && (
                 <div style={{ 
                   textAlign: 'center', 
-                  color: '#6B7280', 
+                  color: '#1F2937', 
                   fontStyle: 'italic',
                   padding: '1rem'
                 }}>
