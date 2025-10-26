@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: 'Email and password are required' };
       }
 
-      const response = await fetch('http://192.168.1.47:5001/api/auth/signin', {
+      const response = await fetch('http://10.0.2.223:5001/api/auth/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
         return { success: false, error: 'Name, email and password are required' };
       }
 
-      const response = await fetch('http://192.168.1.47:5001/api/auth/signup', {
+      const response = await fetch('http://10.0.2.223:5001/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
