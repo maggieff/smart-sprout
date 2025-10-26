@@ -49,8 +49,9 @@ const CloseButton = styled.button`
 `;
 
 const Title = styled.h2`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: normal;
   color: #1f2937;
   margin-bottom: 1rem;
   text-align: center;

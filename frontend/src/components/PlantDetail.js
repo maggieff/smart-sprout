@@ -78,8 +78,9 @@ const PlantInfo = styled.div`
 `;
 
 const PlantName = styled.h1`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: normal;
   color: #1f2937;
   margin-bottom: 0.5rem;
 `;
@@ -141,8 +142,9 @@ const CardHeader = styled.div`
 `;
 
 const CardTitle = styled.h3`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 1.25rem;
-  font-weight: 600;
+  font-weight: normal;
   color: #1f2937;
 `;
 
@@ -218,8 +220,9 @@ const CareInstructions = styled.div`
 `;
 
 const InstructionsTitle = styled.h4`
+  font-family: 'Cubano', 'Karla', sans-serif;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: normal;
   color: #065f46;
   margin-bottom: 0.75rem;
 `;
