@@ -7,11 +7,12 @@ import {
   FiMessageCircle, 
   FiMenu, 
   FiX,
-  FiDroplet,
-  FiSun,
-  FiThermometer,
-  FiGrid
+  FiGrid,
+  FiUser,
+  FiLogOut
 } from 'react-icons/fi';
+import { useAuth } from '../contexts/AuthContext';
+import AuthModal from './AuthModal';
 
 const HeaderContainer = styled.header`
   position: fixed;
@@ -84,65 +85,6 @@ const NavLink = styled(Link)`
   }
 `;
 
-const PlantSelector = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.5rem 1rem;
-  background: #f9fafb;
-  border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const PlantInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const PlantName = styled.span`
-  font-weight: 600;
-  color: #1f2937;
-`;
-
-const PlantStatus = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  color: ${props => {
-    switch (props.status) {
-      case 'excellent': return '#10B981';
-      case 'good': return '#34D399';
-      case 'fair': return '#FBBF24';
-      case 'poor': return '#F59E0B';
-      case 'critical': return '#EF4444';
-      default: return '#6b7280';
-    }
-  }};
-`;
-
-const SensorData = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-
-  @media (max-width: 768px) {
-    display: none;
-  }
-`;
-
-const SensorItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-`;
 
 const MobileMenuButton = styled.button`
   display: none;
@@ -158,32 +100,92 @@ const MobileMenuButton = styled.button`
   }
 `;
 
+const AuthSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const AuthButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: ${props => props.isAuthenticated ? '#10B981' : 'transparent'};
+  color: ${props => props.isAuthenticated ? 'white' : '#6b7280'};
+  border: ${props => props.isAuthenticated ? 'none' : '1px solid #d1d5db'};
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${props => props.isAuthenticated ? '#059669' : '#f3f4f6'};
+    color: ${props => props.isAuthenticated ? 'white' : '#374151'};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+`;
+
+const UserMenu = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-right: 0.5rem;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const UserName = styled.span`
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.875rem;
+`;
+
+const UserEmail = styled.span`
+  font-size: 0.75rem;
+  color: #6b7280;
+`;
+
+const LogoutButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #dc2626;
+  }
+`;
+
 const Header = ({ plants, selectedPlant, onPlantSelect }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const location = useLocation();
+  const { user, isAuthenticated, signOut } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const getStatusColor = (healthScore) => {
-    if (healthScore >= 0.8) return 'excellent';
-    if (healthScore >= 0.6) return 'good';
-    if (healthScore >= 0.4) return 'fair';
-    if (healthScore >= 0.2) return 'poor';
-    return 'critical';
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'excellent': return '🌟';
-      case 'good': return '😊';
-      case 'fair': return '📝';
-      case 'poor': return '🆘';
-      case 'critical': return '🚨';
-      default: return '❓';
-    }
-  };
 
   return (
     <HeaderContainer>
@@ -217,39 +219,40 @@ const Header = ({ plants, selectedPlant, onPlantSelect }) => {
             My Plants
           </NavLink>
 
-          {selectedPlant && (
-            <PlantSelector>
-              <PlantInfo>
-                <PlantName>{selectedPlant.name}</PlantName>
-                <PlantStatus status={getStatusColor(selectedPlant.healthScore)}>
-                  {getStatusIcon(getStatusColor(selectedPlant.healthScore))}
-                </PlantStatus>
-              </PlantInfo>
-              
-              {selectedPlant.sensorData && (
-                <SensorData>
-                  <SensorItem>
-                    <FiDroplet />
-                    {selectedPlant.sensorData.moisture}%
-                  </SensorItem>
-                  <SensorItem>
-                    <FiSun />
-                    {selectedPlant.sensorData.light}
-                  </SensorItem>
-                  <SensorItem>
-                    <FiThermometer />
-                    {selectedPlant.sensorData.temperature}°F
-                  </SensorItem>
-                </SensorData>
-              )}
-            </PlantSelector>
-          )}
         </Nav>
+
+        <AuthSection>
+          {isAuthenticated ? (
+            <UserMenu>
+              <UserInfo>
+                <UserName>{user.name}</UserName>
+                <UserEmail>{user.email}</UserEmail>
+              </UserInfo>
+              <LogoutButton onClick={signOut} title="Sign Out">
+                <FiLogOut size={16} />
+                <span>Sign Out</span>
+              </LogoutButton>
+            </UserMenu>
+          ) : (
+            <AuthButton 
+              onClick={() => setShowAuthModal(true)}
+              isAuthenticated={false}
+            >
+              <FiUser size={16} />
+              Sign In
+            </AuthButton>
+          )}
+        </AuthSection>
 
         <MobileMenuButton onClick={toggleMenu}>
           {isMenuOpen ? <FiX /> : <FiMenu />}
         </MobileMenuButton>
       </HeaderContent>
+
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+      />
     </HeaderContainer>
   );
 };
