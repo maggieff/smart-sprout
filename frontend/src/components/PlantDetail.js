@@ -283,14 +283,14 @@ const PlantImage = styled.div`
   font-size: 1.2rem;
 `;
 
-const PlantName = styled.div`
+const OtherPlantName = styled.div`
   font-size: 0.875rem;
   font-weight: 600;
   color: #374151;
   margin-bottom: 0.25rem;
 `;
 
-const PlantSpecies = styled.div`
+const OtherPlantSpecies = styled.div`
   font-size: 0.75rem;
   color: #6B7280;
 `;
@@ -524,8 +524,8 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
                     <PlantImage>
                       {otherPlant.image || '🌱'}
                     </PlantImage>
-                    <PlantName>{otherPlant.name}</PlantName>
-                    <PlantSpecies>{otherPlant.species}</PlantSpecies>
+                    <OtherPlantName>{otherPlant.name}</OtherPlantName>
+                    <OtherPlantSpecies>{otherPlant.species}</OtherPlantSpecies>
                   </OtherPlantCard>
                 ))}
               {plants.filter(p => p.id !== plantId).length === 0 && (
