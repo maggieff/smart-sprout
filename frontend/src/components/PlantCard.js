@@ -196,6 +196,35 @@ const ViewButton = styled(Link)`
   }
 `;
 
+const CareTips = styled.div`
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+  border-left: 3px solid #10B981;
+`;
+
+const CareTipsTitle = styled.div`
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #10B981;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+`;
+
+const CareTip = styled.div`
+  font-size: 0.7rem;
+  color: #D1D5DB;
+  margin-bottom: 0.25rem;
+  line-height: 1.3;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
 const PlantCard = ({ plant, onClick }) => {
   const getStatusEmoji = (status) => {
     switch (status) {
@@ -318,6 +347,19 @@ const PlantCard = ({ plant, onClick }) => {
             </SensorInfo>
           </SensorItem>
         </SensorGrid>
+      )}
+
+      {plant.careTips && plant.careTips.length > 0 && (
+        <CareTips>
+          <CareTipsTitle>
+            💡 Care Tips
+          </CareTipsTitle>
+          {plant.careTips.slice(0, 3).map((tip, index) => (
+            <CareTip key={index}>
+              • {tip}
+            </CareTip>
+          ))}
+        </CareTips>
       )}
 
       <CardFooter>

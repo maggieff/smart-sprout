@@ -10,6 +10,7 @@ const logsRoute = require('./routes/logs');
 const askAIRoute = require('./routes/askAI');
 const uploadRoute = require('./routes/upload');
 const authRoute = require('./routes/auth');
+const plantCareRoute = require('./routes/plantCare');
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -31,6 +32,7 @@ app.use('/api/logs', logsRoute);
 app.use('/api/ask-ai', askAIRoute);
 app.use('/api/upload', uploadRoute);
 app.use('/api/auth', authRoute);
+app.use('/api/plant-care', plantCareRoute);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

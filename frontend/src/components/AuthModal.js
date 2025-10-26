@@ -37,6 +37,7 @@ const CloseButton = styled.button`
   background: none;
   border: none;
   color: #6b7280;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 0.5rem;
@@ -108,6 +109,7 @@ const Input = styled.input`
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   font-size: 1rem;
+  font-family: 'Karla', sans-serif;
   transition: all 0.2s ease;
 
   &:focus {
@@ -153,6 +155,7 @@ const SubmitButton = styled.button`
   border: none;
   border-radius: 0.5rem;
   font-weight: 500;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   margin-top: 0.5rem;

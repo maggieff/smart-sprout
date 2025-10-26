@@ -53,6 +53,7 @@ const SearchInput = styled.input`
   border: 1px solid #d1d5db;
   border-radius: 0.5rem;
   font-size: 0.875rem;
+  font-family: 'Karla', sans-serif;
   width: 250px;
   transition: all 0.2s ease;
 
@@ -87,6 +88,7 @@ const FilterButton = styled.button`
   color: #374151;
   font-size: 0.875rem;
   font-weight: 500;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
   min-width: 120px;
@@ -147,6 +149,7 @@ const FilterCount = styled.span`
   border-radius: 0.25rem;
   font-size: 0.75rem;
   font-weight: 500;
+  font-family: 'Karla', sans-serif;
 `;
 
 const ViewToggle = styled.div`
@@ -166,6 +169,7 @@ const ViewButton = styled.button`
   border: none;
   font-size: 0.875rem;
   font-weight: 500;
+  font-family: 'Karla', sans-serif;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -185,6 +189,7 @@ const AddPlantButton = styled(Link)`
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
+  font-family: 'Karla', sans-serif;
   transition: all 0.2s ease;
 
   &:hover {
