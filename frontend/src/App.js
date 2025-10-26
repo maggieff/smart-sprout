@@ -20,7 +20,7 @@ import { plantService } from './services/plantService';
 
 const AppContainer = styled.div`
   min-height: 100vh;
-  background: #97AC83;
+  background: #9CAF88;
 `;
 
 const MainContent = styled.main`

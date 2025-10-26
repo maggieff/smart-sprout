@@ -39,14 +39,14 @@ import { plantService } from '../services/plantService';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
-  background: #97AC83;
+  background: #9CAF88;
   padding: 0;
 `;
 
 // Sign-in interface styles
 const SignInContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #97AC83 0%, #6B8E4A 100%);
+  background: linear-gradient(135deg, #9CAF88 0%, #7A8B73 100%);
   display: flex;
   align-items: center;
   justify-content: center;
