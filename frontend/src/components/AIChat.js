@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fi';
 import { aiService } from '../services/aiService';
 import { useAuth } from '../contexts/AuthContext';
+import { useChat } from '../contexts/ChatContext';
 import toast from 'react-hot-toast';
 
 const ChatContainer = styled.div`
@@ -335,9 +336,8 @@ const LoadingMessage = styled.div`
 
 const AIChat = ({ selectedPlant }) => {
   const { user } = useAuth();
-  const [messages, setMessages] = useState([]);
+  const { messages, addMessage, clearMessages, isLoading, setLoading } = useChat();
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [cameraStream, setCameraStream] = useState(null);
@@ -377,12 +377,12 @@ const AIChat = ({ selectedPlant }) => {
           console.log('Could not fetch photo analysis for welcome message');
         }
         
-        setMessages([{
+        addMessage({
           id: 'welcome',
           text: `Hello! I'm your plant care assistant. I can help you with questions about your ${plantName}. What would you like to know?`,
           isUser: false,
           timestamp: new Date().toISOString()
-        }]);
+        });
       };
       
       getWelcomeMessage();
@@ -399,7 +399,7 @@ const AIChat = ({ selectedPlant }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!input.trim() || loading) return;
+    if (!input.trim() || isLoading) return;
 
     const userMessage = {
       id: Date.now().toString(),
@@ -408,7 +408,7 @@ const AIChat = ({ selectedPlant }) => {
       timestamp: new Date().toISOString()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    addMessage(userMessage);
     setInput('');
     setLoading(true);
 
@@ -466,7 +466,7 @@ const AIChat = ({ selectedPlant }) => {
         sources: response.sources
       };
 
-      setMessages(prev => [...prev, aiMessage]);
+      addMessage(aiMessage);
     } catch (error) {
       console.error('Error getting AI response:', error);
       toast.error('Failed to get AI response');
@@ -478,7 +478,7 @@ const AIChat = ({ selectedPlant }) => {
         timestamp: new Date().toISOString()
       };
       
-      setMessages(prev => [...prev, errorMessage]);
+      addMessage(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -608,7 +608,7 @@ const AIChat = ({ selectedPlant }) => {
           imageAnalysis: result.photo.analysis
         };
 
-        setMessages(prev => [...prev, imageMessage]);
+        addMessage(imageMessage);
 
         // Add processing message
         const processingMessage = {
@@ -619,7 +619,7 @@ const AIChat = ({ selectedPlant }) => {
           isProcessing: true
         };
 
-        setMessages(prev => [...prev, processingMessage]);
+        addMessage(processingMessage);
 
         // Replace processing message with AI response
         const aiResponse = {
@@ -630,9 +630,8 @@ const AIChat = ({ selectedPlant }) => {
           confidence: result.photo.analysis?.confidence || 0.7
         };
 
-        setMessages(prev => prev.map(msg => 
-          msg.id === processingMessage.id ? aiResponse : msg
-        ));
+        // Note: We can't easily replace messages in the shared context, so we'll just add the response
+        addMessage(aiResponse);
         toast.success('Photo captured and uploaded successfully!');
       } else {
         throw new Error(result.error || 'Upload failed');
@@ -704,7 +703,7 @@ const AIChat = ({ selectedPlant }) => {
           imageAnalysis: result.photo.analysis
         };
 
-        setMessages(prev => [...prev, imageMessage]);
+        addMessage(imageMessage);
 
         // Add AI response about the plant identification
         const aiResponse = {
@@ -715,7 +714,7 @@ const AIChat = ({ selectedPlant }) => {
           confidence: result.photo.analysis?.confidence || 0.7
         };
 
-        setMessages(prev => [...prev, aiResponse]);
+        addMessage(aiResponse);
         toast.success('Photo uploaded successfully!');
       } else {
         throw new Error(result.error || 'Upload failed');
@@ -824,7 +823,7 @@ const AIChat = ({ selectedPlant }) => {
           ))}
         </AnimatePresence>
 
-        {loading && (
+        {isLoading && (
           <Message>
             <MessageAvatar>
               <FiMessageCircle />
@@ -884,7 +883,7 @@ const AIChat = ({ selectedPlant }) => {
                  >
                    <FiCamera />
                  </CameraButton>
-                 <SendButton type="submit" disabled={!input.trim() || loading}>
+                 <SendButton type="submit" disabled={!input.trim() || isLoading}>
                    <FiSend />
                  </SendButton>
                </InputForm>

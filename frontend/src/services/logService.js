@@ -29,8 +29,11 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const userId = getCurrentUserId();
+    console.log('logService: Adding user-id header:', userId);
     if (userId) {
       config.headers['user-id'] = userId;
+    } else {
+      console.warn('logService: No user ID found in localStorage');
     }
     return config;
   },
@@ -68,10 +71,13 @@ export const logService = {
    */
   async createLog(logData) {
     try {
+      console.log('logService.createLog called with:', logData);
       const response = await api.post('/logs', logData);
+      console.log('logService.createLog response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error creating log:', error);
+      console.error('Error response:', error.response?.data);
       throw new Error('Failed to create log');
     }
   },

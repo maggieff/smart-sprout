@@ -17,6 +17,7 @@ import { logService } from '../services/logService';
 import LoadingSpinner from './LoadingSpinner';
 import QuickActions from './QuickActions';
 import PlantEditModal from './PlantEditModal';
+import PlantChat from './PlantChat';
 import toast from 'react-hot-toast';
 
 const Container = styled.div`
@@ -878,6 +879,11 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
                 </div>
               )}
             </OtherPlants>
+          </SidebarSection>
+
+          {/* Plant Care Chat Assistant */}
+          <SidebarSection>
+            <PlantChat plant={plant} />
           </SidebarSection>
         </RightSidebar>
       </MainContent>

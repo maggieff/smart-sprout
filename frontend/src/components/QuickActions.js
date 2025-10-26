@@ -94,6 +94,16 @@ const QuickActions = ({ plant, onActionComplete, onPhotoCaptured }) => {
       
       console.log('Creating log for plant:', plant.id, 'action:', actionType);
       
+      // Check if user is authenticated
+      const userId = localStorage.getItem('smart-sprout-user');
+      console.log('Current user from localStorage:', userId);
+      
+      if (!userId) {
+        toast.error('Please log in to create logs');
+        setActions(prev => ({ ...prev, [actionType]: false }));
+        return;
+      }
+      
       // Create log data based on action type
       const logData = {
         plantId: plant.id,
