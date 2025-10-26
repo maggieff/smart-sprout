@@ -6,3 +6,10 @@ dist/
 .DS_Store
 backend/.env
 frontend/.env
+
+# Large data files
+backend/wcvp.zip
+backend/wcvp_data/
+backend/plants_clean.csv
+backend/chroma_fast_plant_data.json
+backend/fast_plant_care_data.json
