@@ -330,6 +330,18 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
     }
   };
 
+  const handlePhotoCaptured = (photoData) => {
+    setPlantPhoto(photoData);
+    // You can also update the plant object to include the photo
+    if (plant) {
+      const updatedPlant = { ...plant, image: photoData.url, photoData: photoData };
+      setPlant(updatedPlant);
+      if (onPlantUpdate) {
+        onPlantUpdate(updatedPlant);
+      }
+    }
+  };
+
   const handleDeletePhoto = () => {
     if (window.confirm('Are you sure you want to delete this plant\'s photo?')) {
       try {
