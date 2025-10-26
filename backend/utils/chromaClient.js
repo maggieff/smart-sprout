@@ -16,9 +16,12 @@ let userPlantsCollection = null;
  */
 async function initializeChroma() {
   try {
-    // Initialize Chroma client
+    // Initialize Chroma client (cloud instance)
     chromaClient = new ChromaClient({
-      path: `http://${process.env.CHROMA_HOST || 'localhost'}:${process.env.CHROMA_PORT || 8000}`
+      path: 'https://api.trychroma.com',
+      apiKey: 'ck-BPG2XTtPWBPa2tFsatrfHmbsBTLdJYtKsnX75g8ZccYg',
+      tenant: '36db7d89-6330-46bf-a396-2836596dbd9a',
+      database: 'plants'
     });
 
     // Create or get collections

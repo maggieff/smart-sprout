@@ -52,13 +52,6 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-<<<<<<< HEAD
-app.listen(PORT, () => {
-  console.log(`🌱 Smart Plant Tracker API running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`🤖 AI Assistant: http://localhost:${PORT}/api/ask-ai`);
-});
-=======
 // Initialize database and start server
 async function startServer() {
   try {
@@ -79,6 +72,5 @@ async function startServer() {
 }
 
 startServer();
->>>>>>> 283d1ad1dd8d100a278792085b7f53c288935696
 
 module.exports = app;
