@@ -317,40 +317,166 @@ const MyPlants = ({ plants, onPlantSelect, onPlantUpdate }) => {
   const getPlantCategory = (plant) => {
     const species = plant.species?.toLowerCase() || '';
     const name = plant.name?.toLowerCase() || '';
+    const description = plant.description?.toLowerCase() || '';
+    
+    // Handle careInfo - it might be an object or string
+    let careInfoText = '';
+    if (plant.careInfo) {
+      if (typeof plant.careInfo === 'string') {
+        careInfoText = plant.careInfo.toLowerCase();
+      } else if (typeof plant.careInfo === 'object') {
+        // If it's an object, try to extract text from common properties
+        careInfoText = Object.values(plant.careInfo)
+          .filter(value => typeof value === 'string')
+          .join(' ')
+          .toLowerCase();
+      }
+    }
+    
+    // Handle additionalCareInfo - it might be an object or string
+    let additionalCareInfoText = '';
+    if (plant.additionalCareInfo) {
+      if (typeof plant.additionalCareInfo === 'string') {
+        additionalCareInfoText = plant.additionalCareInfo.toLowerCase();
+      } else if (typeof plant.additionalCareInfo === 'object') {
+        // If it's an object, try to extract text from common properties
+        additionalCareInfoText = Object.values(plant.additionalCareInfo)
+          .filter(value => typeof value === 'string')
+          .join(' ')
+          .toLowerCase();
+      }
+    }
+    
+    // Handle careTips - it might be an array or string
+    let careTipsText = '';
+    if (plant.careTips) {
+      if (Array.isArray(plant.careTips)) {
+        careTipsText = plant.careTips.join(' ').toLowerCase();
+      } else if (typeof plant.careTips === 'string') {
+        careTipsText = plant.careTips.toLowerCase();
+      }
+    }
+    
+    // Handle careSummary - it might be an object or string
+    let careSummaryText = '';
+    if (plant.careSummary) {
+      if (typeof plant.careSummary === 'string') {
+        careSummaryText = plant.careSummary.toLowerCase();
+      } else if (typeof plant.careSummary === 'object') {
+        // If it's an object, try to extract text from common properties
+        careSummaryText = Object.values(plant.careSummary)
+          .filter(value => typeof value === 'string')
+          .join(' ')
+          .toLowerCase();
+      }
+    }
+    
+    // Combine all text for better matching
+    const allText = `${species} ${name} ${description} ${careInfoText} ${additionalCareInfoText} ${careTipsText} ${careSummaryText}`;
     
     // Cactus detection
-    if (species.includes('cactus') || species.includes('cactaceae') || name.includes('cactus')) {
+    if (allText.includes('cactus') || allText.includes('cactaceae') || allText.includes('opuntia') || 
+        allText.includes('mammillaria') || allText.includes('echinocactus') || allText.includes('ferocactus')) {
       return 'Cactus';
     }
     
     // Succulent detection
-    if (species.includes('aloe') || species.includes('crassula') || species.includes('echeveria') || 
-        species.includes('sedum') || species.includes('haworthia') || name.includes('succulent')) {
+    if (allText.includes('succulent') || allText.includes('aloe') || allText.includes('crassula') || 
+        allText.includes('echeveria') || allText.includes('sedum') || allText.includes('haworthia') ||
+        allText.includes('agave') || allText.includes('kalanchoe') || allText.includes('sempervivum') ||
+        allText.includes('jade plant') || allText.includes('snake plant') || allText.includes('sansevieria')) {
       return 'Succulent';
     }
     
     // Tree detection
-    if (species.includes('tree') || species.includes('oak') || species.includes('pine') || 
-        species.includes('maple') || species.includes('birch') || name.includes('tree')) {
+    if (allText.includes('tree') || allText.includes('oak') || allText.includes('pine') || 
+        allText.includes('maple') || allText.includes('birch') || allText.includes('elm') ||
+        allText.includes('cedar') || allText.includes('spruce') || allText.includes('fir') ||
+        allText.includes('willow') || allText.includes('poplar') || allText.includes('ash') ||
+        allText.includes('cherry tree') || allText.includes('apple tree') || allText.includes('citrus tree')) {
       return 'Tree';
     }
     
-    // Flower detection
-    if (species.includes('rose') || species.includes('tulip') || species.includes('sunflower') || 
-        species.includes('lavender') || species.includes('orchid') || species.includes('lily') ||
-        name.includes('flower') || name.includes('rose') || name.includes('tulip')) {
-      return 'Flower';
+    // Shrub detection
+    if (allText.includes('shrub') || allText.includes('bush') || allText.includes('azalea') ||
+        allText.includes('rhododendron') || allText.includes('hydrangea') || allText.includes('rose bush') ||
+        allText.includes('lilac') || allText.includes('forsythia') || allText.includes('boxwood')) {
+      return 'Shrub';
+    }
+    
+    // Grass detection
+    if (allText.includes('grass') || allText.includes('lawn') || allText.includes('turf') ||
+        allText.includes('bamboo') || allText.includes('reed') || allText.includes('sedge')) {
+      return 'Grass';
     }
     
     // Fern detection
-    if (species.includes('fern') || species.includes('pteridophyta') || name.includes('fern')) {
+    if (allText.includes('fern') || allText.includes('pteridophyta') || allText.includes('boston fern') ||
+        allText.includes('maidenhair') || allText.includes('bracken') || allText.includes('tree fern')) {
       return 'Fern';
     }
     
+    // Vine/Climber detection
+    if (allText.includes('vine') || allText.includes('climber') || allText.includes('ivy') ||
+        allText.includes('climbing') || allText.includes('trailing') || allText.includes('pothos') ||
+        allText.includes('philodendron') || allText.includes('monstera') || allText.includes('hoya')) {
+      return 'Vine / Climber';
+    }
+    
     // Herb detection
-    if (species.includes('herb') || species.includes('basil') || species.includes('mint') || 
-        species.includes('oregano') || species.includes('thyme') || name.includes('herb')) {
+    if (allText.includes('herb') || allText.includes('basil') || allText.includes('mint') || 
+        allText.includes('oregano') || allText.includes('thyme') || allText.includes('rosemary') ||
+        allText.includes('sage') || allText.includes('parsley') || allText.includes('cilantro') ||
+        allText.includes('chives') || allText.includes('dill') || allText.includes('tarragon')) {
       return 'Herb';
+    }
+    
+    // Vegetable detection
+    if (allText.includes('vegetable') || allText.includes('tomato') || allText.includes('pepper') ||
+        allText.includes('lettuce') || allText.includes('spinach') || allText.includes('carrot') ||
+        allText.includes('onion') || allText.includes('garlic') || allText.includes('cucumber') ||
+        allText.includes('squash') || allText.includes('bean') || allText.includes('pea')) {
+      return 'Vegetable';
+    }
+    
+    // Fruit plant detection
+    if (allText.includes('fruit') || allText.includes('berry') || allText.includes('apple') ||
+        allText.includes('orange') || allText.includes('lemon') || allText.includes('lime') ||
+        allText.includes('grape') || allText.includes('strawberry') || allText.includes('blueberry') ||
+        allText.includes('raspberry') || allText.includes('blackberry') || allText.includes('citrus')) {
+      return 'Fruit plant';
+    }
+    
+    // Flower detection
+    if (allText.includes('flower') || allText.includes('rose') || allText.includes('tulip') || 
+        allText.includes('sunflower') || allText.includes('lavender') || allText.includes('orchid') || 
+        allText.includes('lily') || allText.includes('daisy') || allText.includes('marigold') ||
+        allText.includes('petunia') || allText.includes('geranium') || allText.includes('begonia') ||
+        allText.includes('impatiens') || allText.includes('pansy') || allText.includes('zinnia')) {
+      return 'Flower';
+    }
+    
+    // Aquatic plant detection
+    if (allText.includes('aquatic') || allText.includes('water') || allText.includes('pond') ||
+        allText.includes('lily pad') || allText.includes('lotus') || allText.includes('water hyacinth') ||
+        allText.includes('duckweed') || allText.includes('water lettuce')) {
+      return 'Aquatic plant';
+    }
+    
+    // Moss detection
+    if (allText.includes('moss') || allText.includes('sphagnum') || allText.includes('peat moss')) {
+      return 'Moss';
+    }
+    
+    // Algae detection
+    if (allText.includes('algae') || allText.includes('seaweed') || allText.includes('kelp')) {
+      return 'Algae';
+    }
+    
+    // Mushroom/Fungus detection
+    if (allText.includes('mushroom') || allText.includes('fungus') || allText.includes('mycelium') ||
+        allText.includes('toadstool') || allText.includes('mold')) {
+      return 'Mushroom / Fungus';
     }
     
     // Default to 'Other' if no category matches

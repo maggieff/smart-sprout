@@ -140,18 +140,6 @@ const SectionContent = styled.div`
   line-height: 1.6;
 `;
 
-const SensorHistoryPlaceholder = styled.div`
-  width: 100%;
-  height: 200px;
-  background: #E5E7EB;
-  border-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6B7280;
-  font-size: 1rem;
-  font-weight: 500;
-`;
 
 // Sidebar Components
 const SidebarSection = styled.div`
@@ -750,12 +738,7 @@ const PlantDetail = ({ plants, onPlantUpdate, onPlantRemove }) => {
             />
           </Section>
 
-          <Section>
-            <SectionTitle>Sensor History</SectionTitle>
-            <SensorHistoryPlaceholder>
-              Sensor Data Chart
-            </SensorHistoryPlaceholder>
-          </Section>
+
         </LeftContent>
 
         <RightSidebar>
