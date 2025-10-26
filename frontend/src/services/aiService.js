@@ -222,6 +222,117 @@ export const aiService = {
   },
 
   /**
+   * Ask AI with enhanced plant context and log analysis
+   */
+  async askAI(question, plantData = null, plantLogs = []) {
+    try {
+      const response = await api.post('/ask-ai', {
+        question,
+        plantData,
+        plantLogs,
+        context: 'plant_care_with_logs'
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error asking AI with logs:', error);
+      return {
+        success: false,
+        error: 'Failed to get AI response',
+        response: this.getFallbackResponse(question, plantData?.species)
+      };
+    }
+  },
+
+  /**
+   * Analyze plant care patterns from logs
+   */
+  analyzeCarePatterns(plantLogs) {
+    if (!plantLogs || plantLogs.length === 0) {
+      return {
+        patterns: [],
+        insights: "No care logs available for analysis.",
+        recommendations: []
+      };
+    }
+
+    const patterns = [];
+    const insights = [];
+    const recommendations = [];
+
+    // Analyze watering frequency
+    const wateringLogs = plantLogs.filter(log => log.type === 'watering');
+    if (wateringLogs.length > 0) {
+      const daysBetweenWatering = [];
+      for (let i = 1; i < wateringLogs.length; i++) {
+        const daysDiff = Math.floor((new Date(wateringLogs[i-1].created_at) - new Date(wateringLogs[i].created_at)) / (1000 * 60 * 60 * 24));
+        daysBetweenWatering.push(Math.abs(daysDiff));
+      }
+      
+      if (daysBetweenWatering.length > 0) {
+        const avgDays = daysBetweenWatering.reduce((a, b) => a + b, 0) / daysBetweenWatering.length;
+        patterns.push(`Watering every ${Math.round(avgDays)} days on average`);
+        
+        if (avgDays < 3) {
+          insights.push("⚠️ Watering very frequently - check if plant needs this much water");
+          recommendations.push("Consider checking soil moisture before watering");
+        } else if (avgDays > 14) {
+          insights.push("💧 Long gaps between watering - plant might be thirsty");
+          recommendations.push("Consider watering more frequently");
+        }
+      }
+    }
+
+    // Analyze care activity types
+    const activityTypes = {};
+    plantLogs.forEach(log => {
+      activityTypes[log.type] = (activityTypes[log.type] || 0) + 1;
+    });
+
+    const mostCommonActivity = Object.keys(activityTypes).reduce((a, b) => 
+      activityTypes[a] > activityTypes[b] ? a : b
+    );
+
+    patterns.push(`Most common activity: ${mostCommonActivity} (${activityTypes[mostCommonActivity]} times)`);
+
+    // Check for recent activity
+    const recentLogs = plantLogs.filter(log => {
+      const logDate = new Date(log.created_at);
+      const daysAgo = (new Date() - logDate) / (1000 * 60 * 60 * 24);
+      return daysAgo <= 7;
+    });
+
+    if (recentLogs.length === 0) {
+      insights.push("📅 No recent care activity - plant might need attention");
+      recommendations.push("Consider checking on your plant and logging any care activities");
+    } else {
+      insights.push(`✅ Active care in the last week (${recentLogs.length} activities)`);
+    }
+
+    // Analyze mood patterns
+    const moodLogs = plantLogs.filter(log => log.mood);
+    if (moodLogs.length > 0) {
+      const positiveMoods = moodLogs.filter(log => log.mood === 'positive').length;
+      const totalMoods = moodLogs.length;
+      const positiveRatio = positiveMoods / totalMoods;
+      
+      if (positiveRatio > 0.8) {
+        insights.push("😊 Mostly positive care experiences");
+      } else if (positiveRatio < 0.5) {
+        insights.push("😟 Some challenges with plant care");
+        recommendations.push("Consider adjusting care routine based on what's working");
+      }
+    }
+
+    return {
+      patterns,
+      insights,
+      recommendations,
+      totalLogs: plantLogs.length,
+      recentActivity: recentLogs.length
+    };
+  },
+
+  /**
    * Get default suggestions
    */
   getDefaultSuggestions() {

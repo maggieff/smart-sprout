@@ -13,6 +13,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 
 // Context
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ChatProvider } from './contexts/ChatContext';
 
 // Services
 import { plantService } from './services/plantService';
@@ -186,7 +187,9 @@ function AuthenticatedApp() {
 function App() {
   return (
     <AuthProvider>
-      <AuthenticatedApp />
+      <ChatProvider>
+        <AuthenticatedApp />
+      </ChatProvider>
     </AuthProvider>
   );
 }

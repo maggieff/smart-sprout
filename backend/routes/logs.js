@@ -7,9 +7,13 @@ const { authenticateUser } = require('../middleware/auth');
 // POST /api/logs - Create a new plant care log
 router.post('/', authenticateUser, async (req, res) => {
   try {
+    console.log('Logs route: Received request with body:', req.body);
+    console.log('Logs route: User from auth:', req.user);
+    
     const { plantId, note, type = 'general', mood, photos } = req.body;
     
     if (!plantId || !note) {
+      console.log('Logs route: Missing required fields - plantId:', plantId, 'note:', note);
       return res.status(400).json({ 
         error: 'Plant ID and note are required' 
       });
