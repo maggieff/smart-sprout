@@ -81,8 +81,8 @@ const FilterButton = styled.button`
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: #6B8E4A;
-  border: 1px solid #5A773D;
+  background: #65876a;
+  border: 1px solid #5a6b5d;
   border-radius: 0.5rem;
   color: #374151;
   font-size: 0.875rem;
@@ -103,8 +103,8 @@ const FilterDropdown = styled.div`
   top: 100%;
   left: 0;
   right: 0;
-  background: #6B8E4A;
-  border: 1px solid #5A773D;
+  background: #65876a;
+  border: 1px solid #5a6b5d;
   border-radius: 0.5rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   z-index: 50;
@@ -201,7 +201,7 @@ const StatsContainer = styled.div`
 `;
 
 const StatCard = styled(motion.div)`
-  background: #6B8E4A;
+  background: #65876a;
   padding: 1.5rem;
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -241,7 +241,7 @@ const PlantsList = styled.div`
 const EmptyState = styled.div`
   text-align: center;
   padding: 4rem 2rem;
-  background: #6B8E4A;
+  background: #65876a;
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.05);
